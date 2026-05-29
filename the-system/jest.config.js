@@ -8,6 +8,9 @@ module.exports = {
   },
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
+    // Mock native/Expo modules that use ESM and can't run in Node
+    '^expo-sqlite$': '<rootDir>/__mocks__/expo-sqlite.js',
+    '^expo-notifications$': '<rootDir>/__mocks__/expo-notifications.js',
   },
   testMatch: ['**/__tests__/**/*.test.ts'],
 };
