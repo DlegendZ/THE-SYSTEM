@@ -34,15 +34,15 @@ describe('ICON_DATA', () => {
 
 describe('DisciplineIcon', () => {
   it('renders RISE icon', () => {
-    let tree: any;
+    let tree: renderer.ReactTestRenderer;
     renderer.act(() => {
       tree = renderer.create(<DisciplineIcon code="RISE" />);
     });
-    expect(tree.toJSON()).toBeTruthy();
+    expect(tree!.toJSON()).toBeTruthy();
   });
 
   it('renders all 8 icons without crashing', () => {
-    const codes = ['RISE', 'REST', 'NOURISH', 'SILENCE', 'FORGE', 'KNOWLEDGE', 'PRESENCE', 'RITUAL'];
+    const codes = Object.keys(ICON_DATA);
     for (const code of codes) {
       expect(() => {
         renderer.act(() => {
@@ -53,32 +53,34 @@ describe('DisciplineIcon', () => {
   });
 
   it('returns null for unknown discipline code', () => {
-    let tree: any;
+    let tree: renderer.ReactTestRenderer;
     renderer.act(() => {
       tree = renderer.create(<DisciplineIcon code="UNKNOWN" />);
     });
-    expect(tree.toJSON()).toBeNull();
+    expect(tree!.toJSON()).toBeNull();
   });
 
   it('uses default size 2', () => {
-    let tree: any;
+    let tree: renderer.ReactTestRenderer;
     renderer.act(() => {
       tree = renderer.create(<DisciplineIcon code="FORGE" />);
     });
-    const json = tree.toJSON() as any;
+    const json: renderer.ReactTestRendererJSON | null = tree!.toJSON() as renderer.ReactTestRendererJSON | null;
+    expect(json).not.toBeNull();
     // 16 cols × 2 = 32 wide
-    expect(json.props.width).toBe(32);
-    expect(json.props.height).toBe(32);
+    expect(json!.props.width).toBe(32);
+    expect(json!.props.height).toBe(32);
   });
 
   it('accepts custom size', () => {
-    let tree: any;
+    let tree: renderer.ReactTestRenderer;
     renderer.act(() => {
       tree = renderer.create(<DisciplineIcon code="FORGE" size={4} />);
     });
-    const json = tree.toJSON() as any;
+    const json: renderer.ReactTestRendererJSON | null = tree!.toJSON() as renderer.ReactTestRendererJSON | null;
+    expect(json).not.toBeNull();
     // 16 cols × 4 = 64 wide
-    expect(json.props.width).toBe(64);
-    expect(json.props.height).toBe(64);
+    expect(json!.props.width).toBe(64);
+    expect(json!.props.height).toBe(64);
   });
 });
