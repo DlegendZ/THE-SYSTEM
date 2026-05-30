@@ -7,6 +7,7 @@ import {
 } from '../db/queries';
 import { failDiscipline } from './xpEngine';
 import { format, subDays, parseISO, differenceInCalendarDays, getDay } from 'date-fns';
+import UsageStatsModule from '../native/UsageStatsModule';
 
 export async function runMidnightCheck(): Promise<void> {
   const yesterday = format(subDays(new Date(), 1), 'yyyy-MM-dd');
@@ -39,7 +40,13 @@ async function checkPresenceDiscipline(date: string): Promise<void> {
   const log = await getLog(presence.id, date);
   if (log && (log.completed || log.failed)) return;
 
-  await failDiscipline(presence.id, date);
+  // PRESENCE: auto-check via UsageStats (skip generic auto-fail)
+  const minutesToday = await UsageStatsModule.getScrollingTimeToday();
+  if (minutesToday >= 0 && minutesToday > 30) {
+    // Over 30-min limit — auto-fail
+    await failDiscipline(presence.id, date);
+  }
+  // If permission not granted (-1) or under limit, skip auto-fail
 }
 
 async function incrementSilenceStreak(date: string): Promise<void> {

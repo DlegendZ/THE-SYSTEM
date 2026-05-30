@@ -2,6 +2,7 @@ import React from 'react';
 import {
   View, Text, ScrollView, StyleSheet, TouchableOpacity, Animated, Alert,
 } from 'react-native';
+import UsageStatsModule from '../native/UsageStatsModule';
 import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import { useSystemStore } from '../store/useSystemStore';
@@ -29,6 +30,7 @@ export default function CommandHall() {
   } = useSystemStore();
 
   const floatAnim = React.useRef(new Animated.Value(0)).current;
+  const [presenceMinutes, setPresenceMinutes] = React.useState<number>(-1);
 
   React.useEffect(() => {
     if (!pendingMandate) return;
@@ -41,6 +43,16 @@ export default function CommandHall() {
     loop.start();
     return () => loop.stop();
   }, [pendingMandate, floatAnim]);
+
+  React.useEffect(() => {
+    const fetchPresence = async () => {
+      const mins = await UsageStatsModule.getScrollingTimeToday();
+      setPresenceMinutes(mins);
+    };
+    fetchPresence();
+    const interval = setInterval(fetchPresence, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   if (!hero) return null;
 
@@ -120,6 +132,17 @@ export default function CommandHall() {
         </View>
       )}
 
+      {presenceMinutes >= 0 && (
+        <View style={styles.presenceSection}>
+          <Text style={[styles.presenceTime, { color: presenceMinutes > 30 ? '#ff4444' : '#4caf50' }]}>
+            {Math.round(presenceMinutes)}m
+          </Text>
+          <Text style={[styles.presenceLabel, { color: theme.textSecondary }]}>
+            SCREEN TIME TODAY {presenceMinutes > 30 ? '⚠ OVER LIMIT' : '✓ WITHIN LIMIT'}
+          </Text>
+        </View>
+      )}
+
       <ScrollView style={styles.questLog}>
         <Text style={[styles.sectionTitle, { color: theme.text }]}>DAILY QUEST LOG</Text>
         {activeDisciplines.map((discipline) => {
@@ -172,4 +195,7 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 12, fontWeight: 'bold', paddingHorizontal: 16, marginBottom: 8 },
   shieldButton: { margin: 16, marginBottom: 8, padding: 16, borderWidth: 2, alignItems: 'center' },
   shieldButtonText: { color: '#ff4444', fontSize: 13, fontWeight: 'bold', letterSpacing: 2 },
+  presenceSection: { alignItems: 'center', marginVertical: 4 },
+  presenceTime: { fontSize: 24, fontWeight: 'bold' },
+  presenceLabel: { fontSize: 9, marginTop: 2 },
 });
