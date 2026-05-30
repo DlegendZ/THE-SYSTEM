@@ -1,15 +1,30 @@
 import React, { useEffect } from 'react';
-import { StatusBar } from 'react-native';
+import { StatusBar, View, Text, StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { useFonts } from 'expo-font';
 import AppNavigator from './src/navigation/AppNavigator';
 import { useSystemStore } from './src/store/useSystemStore';
+import { preloadSounds } from './src/audio/sounds';
 
 export default function App() {
   const initialize = useSystemStore((s) => s.initialize);
 
+  const [fontsLoaded, fontError] = useFonts({
+    'PressStart2P': require('./src/assets/fonts/PressStart2P-Regular.ttf'),
+  });
+
   useEffect(() => {
     initialize();
+    preloadSounds(); // fire and forget
   }, []);
+
+  if (!fontsLoaded && !fontError) {
+    return (
+      <View style={styles.loading}>
+        <Text style={styles.loadingText}>LOADING...</Text>
+      </View>
+    );
+  }
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -18,3 +33,8 @@ export default function App() {
     </GestureHandlerRootView>
   );
 }
+
+const styles = StyleSheet.create({
+  loading: { flex: 1, backgroundColor: '#000', justifyContent: 'center', alignItems: 'center' },
+  loadingText: { color: '#ffd700', fontSize: 14 },
+});

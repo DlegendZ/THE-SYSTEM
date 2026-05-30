@@ -10,6 +10,8 @@ import { RANK_TITLES } from '../engine/xpConstants';
 import { differenceInCalendarDays, parseISO } from 'date-fns';
 import XPBar from '../components/ui/XPBar';
 import DisciplineCard from '../components/ui/DisciplineCard';
+import PixelText from '../components/ui/PixelText';
+import { playSound } from '../audio/sounds';
 import type { Rank } from '../types';
 import type { RootStackParamList } from '../navigation/types';
 
@@ -61,18 +63,31 @@ export default function CommandHall() {
   const activeDisciplines = disciplines.filter((d) => d.is_active);
 
   const handleComplete = async (id: number) => {
+    await playSound('complete');
     const result = await completeDiscipline(id);
     if (result.levelUp) {
-      navigation.navigate('LevelUpSplash', {
-        level: result.levelUp.newLevel,
-        xpGained: result.xpGained,
-        rankChanged: result.levelUp.rankChanged,
-        newRank: result.levelUp.newRank,
-      });
+      if (result.levelUp.rankChanged && result.levelUp.newRank === 'S') {
+        await playSound('rankUp');
+        // TODO: navigate('SRankCutscene') — screen added in Task 5
+        navigation.navigate('LevelUpSplash', {
+          level: result.levelUp.newLevel,
+          xpGained: result.xpGained,
+          rankChanged: result.levelUp.rankChanged,
+          newRank: result.levelUp.newRank,
+        });
+      } else {
+        await playSound(result.levelUp.rankChanged ? 'rankUp' : 'levelUp');
+        navigation.navigate('LevelUpSplash', {
+          level: result.levelUp.newLevel,
+          xpGained: result.xpGained,
+          rankChanged: result.levelUp.rankChanged,
+          newRank: result.levelUp.newRank,
+        });
+      }
     }
   };
 
-  const handleFail = (id: number, code: string) => {
+  const handleFail = async (id: number, code: string) => {
     if (code === 'SILENCE') {
       Alert.alert(
         'SILENCE PROTOCOL BROKEN',
@@ -83,7 +98,8 @@ export default function CommandHall() {
         ]
       );
     } else {
-      failDiscipline(id);
+      await failDiscipline(id);
+      playSound('fail');
     }
   };
 
@@ -92,9 +108,9 @@ export default function CommandHall() {
       {/* Header Row */}
       <View style={styles.headerRow}>
         <View style={[styles.rankBadge, { borderColor: theme.accent }]}>
-          <Text style={[styles.rankText, { color: theme.accent }]}>{hero.rank}</Text>
+          <PixelText size={18} color={theme.accent}>{hero.rank}</PixelText>
         </View>
-        <Text style={[styles.dayText, { color: theme.text }]}>DAY {dayNumber} OF 180</Text>
+        <PixelText size={10} color={theme.text}>DAY {dayNumber} OF 180</PixelText>
         <TouchableOpacity onPress={() => navigation.navigate('Settings')} style={styles.settingsBtn}>
           <Text style={[styles.settingsIcon, { color: theme.textSecondary }]}>⚙</Text>
         </TouchableOpacity>
@@ -127,7 +143,7 @@ export default function CommandHall() {
 
       {silenceStreak && (
         <View style={styles.streakSection}>
-          <Text style={[styles.streakNumber, { color: theme.accent }]}>{silenceStreak.current_streak}</Text>
+          <PixelText size={36} color={theme.accent}>{String(silenceStreak.current_streak)}</PixelText>
           <Text style={[styles.streakLabel, { color: theme.textSecondary }]}>DAYS OF SILENCE</Text>
         </View>
       )}
@@ -144,7 +160,7 @@ export default function CommandHall() {
       )}
 
       <ScrollView style={styles.questLog}>
-        <Text style={[styles.sectionTitle, { color: theme.text }]}>DAILY QUEST LOG</Text>
+        <PixelText size={10} color={theme.text}>DAILY QUEST LOG</PixelText>
         {activeDisciplines.map((discipline) => {
           const log = todayLogs.find((l) => l.discipline_id === discipline.id);
           return (
