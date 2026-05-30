@@ -40,20 +40,29 @@ const Alert = {
   alert: () => {},
 };
 
+const mockAnimation = { start: (cb) => cb && cb({ finished: true }), stop: () => {}, reset: () => {} };
+
 const Animated = {
   Value: class {
     constructor(v) { this._value = v; }
     setValue(v) { this._value = v; }
     interpolate(config) { return config; }
   },
-  timing: () => ({ start: (cb) => cb && cb({ finished: true }) }),
-  spring: () => ({ start: (cb) => cb && cb({ finished: true }) }),
+  timing: () => mockAnimation,
+  spring: () => mockAnimation,
+  sequence: () => mockAnimation,
+  loop: () => mockAnimation,
+  parallel: () => mockAnimation,
+  delay: () => mockAnimation,
   View,
   Text,
 };
 
 const Image = ({ style, source, ...props }) =>
   React.createElement('Image', { style, source, ...props });
+
+const TextInput = ({ style, value, onChangeText, placeholder, placeholderTextColor, ...props }) =>
+  React.createElement('TextInput', { style, value, onChangeText, placeholder, ...props });
 
 module.exports = {
   View,
@@ -67,4 +76,5 @@ module.exports = {
   Alert,
   Animated,
   Image,
+  TextInput,
 };
