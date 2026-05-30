@@ -1,22 +1,50 @@
 const React = require('react');
 
-const Svg = ({ children, width, height }) =>
-  React.createElement('svg', { width, height }, children);
-const Rect = ({ x, y, width, height, fill, key }) =>
-  React.createElement('rect', { x, y, width, height, fill });
-const Circle = ({ cx, cy, r, fill }) =>
-  React.createElement('circle', { cx, cy, r, fill });
-const Text_ = ({ children }) => React.createElement('text', null, children);
-const G = ({ children }) => React.createElement('g', null, children);
-const Path = ({ d, fill }) => React.createElement('path', { d, fill });
-const Defs = ({ children }) => React.createElement('defs', null, children);
-const RadialGradient = ({ children }) => React.createElement('radialGradient', null, children);
-const LinearGradient = ({ children }) => React.createElement('linearGradient', null, children);
-const Stop = ({ offset, stopColor }) => React.createElement('stop', { offset, stopColor });
-const Line = (props) => React.createElement('line', null);
-const Polygon = (props) => React.createElement('polygon', null);
+// react-test-renderer (React 19) crashes on DOM-string host elements like 'svg', 'rect'.
+// We use custom string names that look like React host elements but are rendered
+// by react-test-renderer as opaque nodes in toJSON() output.
+// IS_REACT_ACT_ENVIRONMENT must be true (set in jest.config.js globals) and
+// renderer.act() must wrap renderer.create() calls for toJSON() to work.
+
+function Svg({ children, width, height }) {
+  return React.createElement('svg-mock', { width, height }, children);
+}
+function Rect({ x, y, width, height, fill }) {
+  return React.createElement('rect-mock', { x, y, width, height, fill });
+}
+function Circle({ cx, cy, r, fill }) {
+  return React.createElement('circle-mock', { cx, cy, r, fill });
+}
+function Text_({ children }) {
+  return React.createElement('text-mock', null, children);
+}
+function G({ children }) {
+  return React.createElement('g-mock', null, children);
+}
+function Path({ d, fill }) {
+  return React.createElement('path-mock', { d, fill });
+}
+function Defs({ children }) {
+  return React.createElement('defs-mock', null, children);
+}
+function RadialGradient({ children }) {
+  return React.createElement('radialGradient-mock', null, children);
+}
+function LinearGradient({ children }) {
+  return React.createElement('linearGradient-mock', null, children);
+}
+function Stop({ offset, stopColor }) {
+  return React.createElement('stop-mock', { offset, stopColor });
+}
+function Line(props) {
+  return React.createElement('line-mock', null);
+}
+function Polygon(props) {
+  return React.createElement('polygon-mock', null);
+}
 
 module.exports = {
+  __esModule: true,
   default: Svg,
   Svg,
   Rect,

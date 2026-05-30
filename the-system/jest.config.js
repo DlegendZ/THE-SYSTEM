@@ -20,5 +20,6 @@ module.exports = {
   testMatch: ['**/__tests__/**/*.test.ts', '**/__tests__/**/*.test.tsx'],
   globals: {
     __DEV__: true,
+    IS_REACT_ACT_ENVIRONMENT: true,
   },
 };
