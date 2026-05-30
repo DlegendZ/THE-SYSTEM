@@ -217,6 +217,73 @@ export async function getWeekCompletionRate(
   return (completed?.cnt ?? 0) / totalCount;
 }
 
+export async function getLogsForRange(
+  startDate: string,
+  endDate: string
+): Promise<DisciplineLog[]> {
+  return getDb().getAllAsync<DisciplineLog>(
+    `SELECT * FROM discipline_logs
+     WHERE log_date >= ? AND log_date <= ?
+     ORDER BY log_date, discipline_id`,
+    [startDate, endDate]
+  );
+}
+
+export async function getAllMandates(): Promise<Mandate[]> {
+  return getDb().getAllAsync<Mandate>(
+    'SELECT * FROM mandates ORDER BY granted_at DESC'
+  );
+}
+
+export async function setDisciplineActive(id: number, active: boolean): Promise<void> {
+  await getDb().runAsync(
+    'UPDATE disciplines SET is_active = ? WHERE id = ?',
+    [active ? 1 : 0, id]
+  );
+}
+
+export async function createCustomDiscipline(data: {
+  name: string;
+  description: string;
+  difficulty: string;
+  xpGain: number;
+  xpLoss: number;
+  deadlineTime: string | null;
+}): Promise<void> {
+  await getDb().runAsync(
+    `INSERT INTO disciplines (code, name, description, difficulty, xp_gain, xp_loss, deadline_time, is_active, is_custom, frequency, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, 1, 1, 'daily', ?)`,
+    [
+      `CUSTOM_${Date.now()}`,
+      data.name,
+      data.description,
+      data.difficulty,
+      data.xpGain,
+      data.xpLoss,
+      data.deadlineTime,
+      new Date().toISOString(),
+    ]
+  );
+}
+
+export async function deleteDiscipline(id: number): Promise<void> {
+  await getDb().runAsync(
+    'DELETE FROM disciplines WHERE id = ? AND is_custom = 1',
+    [id]
+  );
+  await getDb().runAsync(
+    'DELETE FROM discipline_logs WHERE discipline_id = ?',
+    [id]
+  );
+}
+
+export async function getDisciplineLogsAll(disciplineId: number): Promise<DisciplineLog[]> {
+  return getDb().getAllAsync<DisciplineLog>(
+    'SELECT * FROM discipline_logs WHERE discipline_id = ? ORDER BY log_date DESC',
+    [disciplineId]
+  );
+}
+
 export async function get180DayConsistencyRate(): Promise<number> {
   const total = await getDb().getFirstAsync<{ cnt: number }>(
     'SELECT COUNT(*) as cnt FROM discipline_logs'
