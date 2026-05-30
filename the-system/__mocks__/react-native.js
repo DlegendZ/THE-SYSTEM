@@ -67,6 +67,9 @@ const TextInput = ({ style, value, onChangeText, placeholder, placeholderTextCol
 const Modal = ({ children, visible, transparent, animationType, onRequestClose, ...props }) =>
   visible ? React.createElement('Modal', { transparent, animationType, onRequestClose, ...props }, children) : null;
 
+// NativeModules: empty object so destructuring doesn't throw; native modules return falsy
+const NativeModules = {};
+
 module.exports = {
   View,
   Text,
@@ -81,4 +84,5 @@ module.exports = {
   Image,
   TextInput,
   Modal,
+  NativeModules,
 };
