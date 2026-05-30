@@ -28,7 +28,8 @@
     "plugins": [
       "expo-sqlite",
       "expo-notifications",
-      "expo-font"
+      "expo-font",
+      "expo-sharing"
     ]
   }
 }
