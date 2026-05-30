@@ -29,7 +29,8 @@
       "expo-sqlite",
       "expo-notifications",
       "expo-font",
-      "expo-sharing"
+      "expo-sharing",
+      "expo-audio"
     ]
   }
 }

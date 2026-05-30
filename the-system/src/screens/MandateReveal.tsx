@@ -1,12 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Animated,
-  Dimensions,
+  View, Text, TouchableOpacity, StyleSheet, Animated, Dimensions,
 } from 'react-native';
+import Svg, { Polygon, Line, Rect } from 'react-native-svg';
 import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import { useSystemStore } from '../store/useSystemStore';
@@ -14,10 +10,16 @@ import type { RootStackParamList } from '../navigation/types';
 
 type Nav = StackNavigationProp<RootStackParamList>;
 
-const TIER_COLORS = {
+const TIER_COLORS: Record<string, string> = {
   BRONZE: '#b87333',
   SILVER: '#c0c0c0',
   GOLD: '#ffd700',
+};
+
+const TIER_BG: Record<string, string> = {
+  BRONZE: '#1a0d00',
+  SILVER: '#0d0d10',
+  GOLD: '#1a1400',
 };
 
 const LOOT_TYPE_LABELS: Record<string, string> = {
@@ -30,6 +32,67 @@ const LOOT_TYPE_LABELS: Record<string, string> = {
   aura_variant: 'AURA VARIANT',
 };
 
+function ChestSvg({ color, opened }: { color: string; opened: boolean }) {
+  return (
+    <Svg width={100} height={80} viewBox="0 0 100 80">
+      {/* Body */}
+      <Rect x="10" y="35" width="80" height="45" fill={color + '30'} stroke={color} strokeWidth="2" />
+      {/* Lid */}
+      <Rect
+        x="10" y={opened ? 5 : 20}
+        width="80" height="20"
+        fill={color + '50'}
+        stroke={color}
+        strokeWidth="2"
+      />
+      {/* Lock */}
+      <Rect x="43" y="48" width="14" height="14" rx="2" fill={opened ? 'transparent' : color} stroke={color} strokeWidth="1.5" />
+      {!opened && <Rect x="46" y="44" width="8" height="8" rx="4" fill="none" stroke={color} strokeWidth="1.5" />}
+      {/* Hinge detail */}
+      <Rect x="18" y="32" width="6" height="6" fill={color} />
+      <Rect x="76" y="32" width="6" height="6" fill={color} />
+      {/* Band */}
+      <Rect x="10" y="52" width="80" height="4" fill={color + '60'} />
+      {/* Corner gems */}
+      {[18, 76].map((x) => (
+        <Polygon key={x} points={`${x + 3},55 ${x + 6},58 ${x + 3},61 ${x},58`} fill={color} />
+      ))}
+    </Svg>
+  );
+}
+
+function ParticlesBurst({ color }: { color: string }) {
+  const lines = Array.from({ length: 8 }, (_, i) => {
+    const a = (i / 8) * Math.PI * 2;
+    return {
+      x1: 50 + Math.cos(a) * 10,
+      y1: 40 + Math.sin(a) * 10,
+      x2: 50 + Math.cos(a) * 40,
+      y2: 40 + Math.sin(a) * 40,
+    };
+  });
+  return (
+    <Svg width={100} height={80} viewBox="0 0 100 80" style={{ position: 'absolute' }}>
+      {lines.map((l, i) => (
+        <Line key={i} x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2}
+          stroke={color} strokeWidth="1.5" strokeOpacity="0.7" />
+      ))}
+      {Array.from({ length: 6 }, (_, i) => {
+        const a = (i / 6) * Math.PI * 2 + 0.3;
+        const r = 45;
+        return (
+          <Polygon
+            key={i}
+            points={`${50 + Math.cos(a) * r},${40 + Math.sin(a) * r - 3} ${50 + Math.cos(a) * r + 3},${40 + Math.sin(a) * r} ${50 + Math.cos(a) * r},${40 + Math.sin(a) * r + 3} ${50 + Math.cos(a) * r - 3},${40 + Math.sin(a) * r}`}
+            fill={color}
+            fillOpacity="0.8"
+          />
+        );
+      })}
+    </Svg>
+  );
+}
+
 export default function MandateReveal() {
   const navigation = useNavigation<Nav>();
   const { pendingMandate, openMandate, currentTheme: theme } = useSystemStore();
@@ -37,11 +100,13 @@ export default function MandateReveal() {
   const [opened, setOpened] = useState(false);
 
   const shakeAnim = useRef(new Animated.Value(0)).current;
-  const glowAnim = useRef(new Animated.Value(0)).current;
+  const glowAnim = useRef(new Animated.Value(0.3)).current;
   const lootAnim = useRef(new Animated.Value(0)).current;
+  const burstAnim = useRef(new Animated.Value(0)).current;
+  const chestScaleAnim = useRef(new Animated.Value(1)).current;
 
-  const tierColor =
-    pendingMandate ? TIER_COLORS[pendingMandate.tier] ?? '#b87333' : '#b87333';
+  const tierColor = pendingMandate ? TIER_COLORS[pendingMandate.tier] ?? '#b87333' : '#b87333';
+  const tierBg = pendingMandate ? TIER_BG[pendingMandate.tier] ?? '#1a0d00' : '#1a0d00';
 
   useEffect(() => {
     const pulse = Animated.loop(
@@ -57,60 +122,90 @@ export default function MandateReveal() {
   const handleTapChest = async () => {
     if (opened) return;
     Animated.sequence([
-      Animated.timing(shakeAnim, { toValue: 8, duration: 60, useNativeDriver: true }),
-      Animated.timing(shakeAnim, { toValue: -8, duration: 60, useNativeDriver: true }),
-      Animated.timing(shakeAnim, { toValue: 8, duration: 60, useNativeDriver: true }),
+      Animated.timing(shakeAnim, { toValue: 10, duration: 60, useNativeDriver: true }),
+      Animated.timing(shakeAnim, { toValue: -10, duration: 60, useNativeDriver: true }),
+      Animated.timing(shakeAnim, { toValue: 8, duration: 50, useNativeDriver: true }),
+      Animated.timing(shakeAnim, { toValue: -8, duration: 50, useNativeDriver: true }),
       Animated.timing(shakeAnim, { toValue: 0, duration: 60, useNativeDriver: true }),
     ]).start(async () => {
       const result = await openMandate();
       if (result) {
         setLoot(result);
         setOpened(true);
-        Animated.spring(lootAnim, { toValue: 1, useNativeDriver: true }).start();
+        Animated.parallel([
+          Animated.spring(lootAnim, { toValue: 1, friction: 5, useNativeDriver: true }),
+          Animated.timing(burstAnim, { toValue: 1, duration: 400, useNativeDriver: true }),
+          Animated.spring(chestScaleAnim, { toValue: 1.1, friction: 3, useNativeDriver: true }),
+        ]).start();
       }
     });
   };
 
-  const handleDismiss = () => {
-    navigation.goBack();
-  };
+  const { width } = Dimensions.get('window');
+  const panelW = Math.min(width * 0.86, 340);
 
   return (
     <View style={styles.overlay}>
-      <View style={[styles.container, { backgroundColor: theme.background }]}>
-        <Text style={[styles.title, { color: tierColor }]}>
-          {pendingMandate?.tier ?? 'BRONZE'} MANDATE
-        </Text>
+      <View style={[styles.panel, { width: panelW, backgroundColor: tierBg, borderColor: tierColor + '60' }]}>
+        {/* Corner brackets */}
+        <View style={[styles.cornerDeco, { top: 0, left: 0, borderTopWidth: 2, borderLeftWidth: 2, borderColor: tierColor }]} />
+        <View style={[styles.cornerDeco, { top: 0, right: 0, borderTopWidth: 2, borderRightWidth: 2, borderColor: tierColor }]} />
+        <View style={[styles.cornerDeco, { bottom: 0, left: 0, borderBottomWidth: 2, borderLeftWidth: 2, borderColor: tierColor }]} />
+        <View style={[styles.cornerDeco, { bottom: 0, right: 0, borderBottomWidth: 2, borderRightWidth: 2, borderColor: tierColor }]} />
 
-        {!opened ? (
+        {/* Title */}
+        <View style={styles.titleRow}>
+          <View style={[styles.titleLine, { backgroundColor: tierColor + '50' }]} />
+          <Text style={[styles.tier, { color: tierColor }]}>
+            {pendingMandate?.tier ?? 'BRONZE'}
+          </Text>
+          <Text style={[styles.mandateWord, { color: tierColor + 'aa' }]}>MANDATE</Text>
+          <View style={[styles.titleLine, { backgroundColor: tierColor + '50' }]} />
+        </View>
+
+        {/* Chest */}
+        <Animated.View
+          style={[styles.chestWrap, { transform: [{ translateX: shakeAnim }, { scale: chestScaleAnim }] }]}
+        >
+          <Animated.View style={{ opacity: opened ? burstAnim : glowAnim }}>
+            {opened && <ParticlesBurst color={tierColor} />}
+          </Animated.View>
+          <ChestSvg color={tierColor} opened={opened} />
+        </Animated.View>
+
+        {!opened && (
           <>
-            <Animated.View
-              style={[styles.chestArea, { transform: [{ translateX: shakeAnim }], opacity: glowAnim }]}
-            >
-              <View style={[styles.chestPixel, { backgroundColor: tierColor }]}>
-                <View style={[styles.chestLid, { backgroundColor: tierColor, borderBottomColor: theme.background }]} />
-                <View style={styles.chestLock} />
+            <TouchableOpacity style={styles.tapArea} onPress={handleTapChest}>
+              <View style={[styles.tapBtn, { borderColor: tierColor + '70', backgroundColor: tierColor + '15' }]}>
+                <Text style={[styles.tapText, { color: tierColor }]}>▶ OPEN MANDATE</Text>
               </View>
-            </Animated.View>
-            <Text style={[styles.tapHint, { color: theme.textSecondary }]}>TAP TO OPEN</Text>
-            <TouchableOpacity style={styles.chestTouchArea} onPress={handleTapChest} />
+            </TouchableOpacity>
           </>
-        ) : (
-          <Animated.View style={[styles.lootContainer, { opacity: lootAnim, transform: [{ scale: lootAnim }] }]}>
-            <Text style={[styles.lootCategory, { color: tierColor }]}>
-              {loot ? LOOT_TYPE_LABELS[loot.type] ?? loot.type.toUpperCase() : ''}
-            </Text>
-            <Text style={[styles.lootName, { color: theme.text }]}>{loot?.name ?? ''}</Text>
-            <View style={[styles.divider, { backgroundColor: tierColor }]} />
-            <TouchableOpacity style={[styles.dismissButton, { borderColor: tierColor }]} onPress={handleDismiss}>
-              <Text style={[styles.dismissText, { color: tierColor }]}>MANDATE RECEIVED</Text>
+        )}
+
+        {opened && loot && (
+          <Animated.View
+            style={[styles.lootBox, { opacity: lootAnim, transform: [{ scale: lootAnim }] }]}
+          >
+            <View style={[styles.lootInner, { borderColor: tierColor + '60', backgroundColor: tierColor + '10' }]}>
+              <Text style={[styles.lootCategory, { color: tierColor }]}>
+                {LOOT_TYPE_LABELS[loot.type] ?? loot.type.toUpperCase()}
+              </Text>
+              <View style={[styles.lootDivider, { backgroundColor: tierColor }]} />
+              <Text style={[styles.lootName, { color: '#ffffff' }]}>{loot.name}</Text>
+            </View>
+            <TouchableOpacity
+              style={[styles.dismissBtn, { borderColor: tierColor, backgroundColor: tierColor + '20' }]}
+              onPress={() => navigation.goBack()}
+            >
+              <Text style={[styles.dismissTxt, { color: tierColor }]}>MANDATE RECEIVED</Text>
             </TouchableOpacity>
           </Animated.View>
         )}
 
         {!opened && (
-          <TouchableOpacity style={styles.cancelButton} onPress={handleDismiss}>
-            <Text style={[styles.cancelText, { color: theme.textSecondary }]}>CLOSE</Text>
+          <TouchableOpacity style={styles.closeBtn} onPress={() => navigation.goBack()}>
+            <Text style={[styles.closeTxt, { color: theme.textSecondary }]}>CLOSE</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -118,30 +213,69 @@ export default function MandateReveal() {
   );
 }
 
-const { width } = Dimensions.get('window');
-
 const styles = StyleSheet.create({
   overlay: {
-    flex: 1, backgroundColor: 'rgba(0,0,0,0.85)',
-    justifyContent: 'center', alignItems: 'center',
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.9)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  container: {
-    width: width * 0.85, padding: 32, alignItems: 'center',
-    borderRadius: 4, borderWidth: 2, borderColor: '#333',
+  panel: {
+    padding: 28,
+    alignItems: 'center',
+    borderWidth: 1,
+    position: 'relative',
   },
-  title: { fontSize: 14, fontWeight: 'bold', letterSpacing: 2, marginBottom: 32 },
-  chestArea: { alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
-  chestPixel: { width: 80, height: 64, borderRadius: 4, alignItems: 'center', justifyContent: 'center' },
-  chestLid: { position: 'absolute', top: 0, width: 80, height: 28, borderBottomWidth: 3, borderRadius: 4 },
-  chestLock: { width: 16, height: 16, backgroundColor: '#333', borderRadius: 8, marginTop: 8 },
-  chestTouchArea: { position: 'absolute', width: 120, height: 120 },
-  tapHint: { fontSize: 10, letterSpacing: 2, marginBottom: 8 },
-  lootContainer: { alignItems: 'center', paddingVertical: 16 },
-  lootCategory: { fontSize: 10, letterSpacing: 3, marginBottom: 12 },
-  lootName: { fontSize: 18, fontWeight: 'bold', textAlign: 'center', marginBottom: 24 },
-  divider: { width: 60, height: 2, marginBottom: 24 },
-  dismissButton: { borderWidth: 2, paddingHorizontal: 24, paddingVertical: 12 },
-  dismissText: { fontSize: 11, fontWeight: 'bold', letterSpacing: 2 },
-  cancelButton: { marginTop: 24, padding: 8 },
-  cancelText: { fontSize: 10, letterSpacing: 1 },
+  cornerDeco: {
+    position: 'absolute',
+    width: 20,
+    height: 20,
+    zIndex: 1,
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 24,
+    width: '100%',
+  },
+  titleLine: { flex: 1, height: 1 },
+  tier: { fontSize: 17, fontWeight: 'bold', letterSpacing: 3 },
+  mandateWord: { fontSize: 12, letterSpacing: 2 },
+  chestWrap: {
+    width: 100,
+    height: 80,
+    position: 'relative',
+    marginBottom: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tapArea: { marginBottom: 20 },
+  tapBtn: {
+    borderWidth: 1.5,
+    paddingHorizontal: 28,
+    paddingVertical: 12,
+  },
+  tapText: { fontSize: 13, fontWeight: 'bold', letterSpacing: 2 },
+  lootBox: { width: '100%', alignItems: 'center', gap: 16 },
+  lootInner: {
+    borderWidth: 1,
+    padding: 20,
+    width: '100%',
+    alignItems: 'center',
+    gap: 10,
+  },
+  lootCategory: { fontSize: 11, fontWeight: 'bold', letterSpacing: 3 },
+  lootDivider: { width: 40, height: 1 },
+  lootName: { fontSize: 22, fontWeight: 'bold', textAlign: 'center', letterSpacing: 1 },
+  dismissBtn: {
+    borderWidth: 1.5,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    width: '100%',
+    alignItems: 'center',
+  },
+  dismissTxt: { fontSize: 13, fontWeight: 'bold', letterSpacing: 2 },
+  closeBtn: { marginTop: 8 },
+  closeTxt: { fontSize: 12, letterSpacing: 1 },
 });

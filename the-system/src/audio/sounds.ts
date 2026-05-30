@@ -1,4 +1,4 @@
-import { Audio } from 'expo-av';
+import { createAudioPlayer, setAudioModeAsync } from 'expo-audio';
 import * as FileSystem from 'expo-file-system/legacy';
 
 function writeUint32LE(view: DataView, offset: number, value: number): void {
@@ -73,7 +73,7 @@ const SOUND_DEFS = {
 
 type SoundName = keyof typeof SOUND_DEFS;
 
-let soundObjects: Partial<Record<SoundName, Audio.Sound>> = {};
+let soundFilePaths: Partial<Record<SoundName, string>> = {};
 let soundsInitialized = false;
 let soundsDir = '';
 
@@ -88,7 +88,7 @@ async function ensureSoundsDir(): Promise<void> {
 async function initSounds(): Promise<void> {
   if (soundsInitialized) return;
   await ensureSoundsDir();
-  await Audio.setAudioModeAsync({ playsInSilentModeIOS: true });
+  await setAudioModeAsync({ playsInSilentMode: true });
 
   for (const [name, def] of Object.entries(SOUND_DEFS) as [SoundName, typeof SOUND_DEFS[SoundName]][]) {
     const filePath = `${soundsDir}${name}.wav`;
@@ -100,8 +100,7 @@ async function initSounds(): Promise<void> {
         encoding: FileSystem.EncodingType.Base64,
       });
     }
-    const { sound } = await Audio.Sound.createAsync({ uri: filePath });
-    soundObjects[name] = sound;
+    soundFilePaths[name] = filePath;
   }
   soundsInitialized = true;
 }
@@ -109,8 +108,14 @@ async function initSounds(): Promise<void> {
 export async function playSound(name: SoundName): Promise<void> {
   try {
     if (!soundsInitialized) await initSounds();
-    const sound = soundObjects[name];
-    if (sound) await sound.replayAsync();
+    const filePath = soundFilePaths[name];
+    if (!filePath) return;
+    const player = createAudioPlayer({ uri: filePath });
+    player.play();
+    const cleanupMs = SOUND_DEFS[name].duration + 500;
+    setTimeout(() => {
+      try { player.remove(); } catch {}
+    }, cleanupMs);
   } catch {
     // Sound errors are non-fatal
   }

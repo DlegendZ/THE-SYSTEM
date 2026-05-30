@@ -1,29 +1,84 @@
 import React, { useEffect, useState } from 'react';
 import {
-  View, Text, ScrollView, StyleSheet, TouchableOpacity,
+  View, Text, ScrollView, StyleSheet,
 } from 'react-native';
+import Svg, { Polygon, Line, Rect, Circle } from 'react-native-svg';
 import { useSystemStore } from '../store/useSystemStore';
 import { getCosmetics } from '../db/queries';
 import { RANK_TITLES } from '../engine/xpConstants';
 import type { Cosmetic, Rank } from '../types';
 import AvatarDisplay from '../components/avatar/AvatarDisplay';
+import SectionDivider from '../components/ui/SectionDivider';
+import CornerFrame from '../components/ui/CornerFrame';
 import type { HeroClass } from '../components/avatar/avatarData';
 
 type MoodState = 'radiant' | 'steady' | 'worn' | 'broken';
 
-const STAT_DISCIPLINES: Array<{ label: string; code: string }> = [
-  { label: 'WILLPOWER', code: 'SILENCE' },
-  { label: 'STRENGTH', code: 'FORGE' },
-  { label: 'VITALITY', code: 'NOURISH' },
-  { label: 'KNOWLEDGE', code: 'KNOWLEDGE' },
+const STAT_DISCIPLINES: Array<{ label: string; code: string; icon: string }> = [
+  { label: 'WILLPOWER', code: 'SILENCE', icon: '⚡' },
+  { label: 'STRENGTH', code: 'FORGE', icon: '⚔' },
+  { label: 'VITALITY', code: 'NOURISH', icon: '♥' },
+  { label: 'KNOWLEDGE', code: 'KNOWLEDGE', icon: '◈' },
 ];
 
-function computeMood(recentCompletionRate: number): MoodState {
-  if (recentCompletionRate >= 0.9) return 'radiant';
-  if (recentCompletionRate >= 0.6) return 'steady';
-  if (recentCompletionRate >= 0.3) return 'worn';
+function computeMood(rate: number): MoodState {
+  if (rate >= 0.9) return 'radiant';
+  if (rate >= 0.6) return 'steady';
+  if (rate >= 0.3) return 'worn';
   return 'broken';
 }
+
+function StatBar({ label, icon, completed, level, color }: {
+  label: string; icon: string; completed: boolean; level: number; color: string;
+}) {
+  const val = completed ? 100 : 30;
+  return (
+    <View style={statStyles.row}>
+      <Text style={[statStyles.icon, { color }]}>{icon}</Text>
+      <Text style={[statStyles.label, { color: '#888' }]}>{label}</Text>
+      <View style={[statStyles.barBg, { backgroundColor: '#111' }]}>
+        <View style={[statStyles.barFill, { width: `${val}%`, backgroundColor: color }]} />
+        {/* Tick marks */}
+        {[25, 50, 75].map((p) => (
+          <View key={p} style={[statStyles.tick, { left: `${p}%` as `${number}%` }]} />
+        ))}
+      </View>
+      <Text style={[statStyles.lvl, { color }]}>L{level}</Text>
+    </View>
+  );
+}
+
+const statStyles = StyleSheet.create({
+  row: { flexDirection: 'row', alignItems: 'center', marginBottom: 10, gap: 8 },
+  icon: { fontSize: 16, width: 22, textAlign: 'center' },
+  label: { fontSize: 11, letterSpacing: 1, width: 90 },
+  barBg: { flex: 1, height: 12, overflow: 'hidden', position: 'relative' },
+  barFill: { height: 12, position: 'absolute', left: 0, top: 0, bottom: 0 },
+  tick: { position: 'absolute', top: 2, bottom: 2, width: 1, backgroundColor: '#000' },
+  lvl: { fontSize: 12, fontWeight: 'bold', width: 28, textAlign: 'right' },
+});
+
+function EquipSlot({ label, name, tier, color }: {
+  label: string; name: string; tier: number; color: string;
+}) {
+  return (
+    <CornerFrame color={color + '60'} size={10} thickness={1} style={equipStyles.slot}>
+      <View style={equipStyles.inner}>
+        <Text style={[equipStyles.slotLabel, { color: color + '80' }]}>{label}</Text>
+        <Text style={[equipStyles.tier, { color }]}>T{tier}</Text>
+        <Text style={[equipStyles.name, { color: '#aaa' }]} numberOfLines={2}>{name}</Text>
+      </View>
+    </CornerFrame>
+  );
+}
+
+const equipStyles = StyleSheet.create({
+  slot: { flex: 1 },
+  inner: { padding: 10, alignItems: 'center', gap: 4 },
+  slotLabel: { fontSize: 10, letterSpacing: 2 },
+  tier: { fontSize: 18, fontWeight: 'bold' },
+  name: { fontSize: 11, textAlign: 'center', lineHeight: 15 },
+});
 
 export default function Mirror() {
   const { hero, todayLogs, disciplines, currentTheme: theme } = useSystemStore();
@@ -49,99 +104,143 @@ export default function Mirror() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={styles.headerRow}>
-          <Text style={[styles.heroName, { color: theme.text }]}>{hero.name}</Text>
-          <View style={[styles.rankBadge, { borderColor: theme.accent }]}>
-            <Text style={[styles.rankText, { color: theme.accent }]}>{hero.rank}</Text>
+      {/* Header */}
+      <View style={[styles.header, { borderBottomColor: theme.accent + '30' }]}>
+        <View style={styles.nameRow}>
+          <Text style={[styles.heroName, { color: theme.text }]}>{hero.name.toUpperCase()}</Text>
+          <View style={[styles.rankPill, { borderColor: theme.accent + '80', backgroundColor: theme.accent + '15' }]}>
+            <Text style={[styles.rankLetter, { color: theme.accent }]}>{hero.rank}</Text>
           </View>
         </View>
         <Text style={[styles.rankTitle, { color: theme.textSecondary }]}>
-          {RANK_TITLES[hero.rank as Rank]}
+          {RANK_TITLES[hero.rank as Rank]} · {hero.hero_class.toUpperCase()}
         </Text>
+      </View>
 
-        <View style={styles.avatarArea}>
-          <AvatarDisplay
-            heroClass={hero.hero_class as HeroClass}
-            rank={hero.rank}
-            mood={mood}
-            weaponTier={weaponTier}
-          />
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
+        {/* Avatar with decorative frame */}
+        <View style={styles.avatarWrap}>
+          {/* Outer decorative ring */}
+          <View style={[styles.avatarRing, { borderColor: theme.accent + '30' }]}>
+            <View style={[styles.avatarRingInner, { borderColor: theme.accent + '60' }]}>
+              <AvatarDisplay
+                heroClass={hero.hero_class as HeroClass}
+                rank={hero.rank}
+                mood={mood}
+                weaponTier={weaponTier}
+                pixelSize={5}
+              />
+            </View>
+          </View>
+          {/* Mood indicator */}
+          <View style={[styles.moodBadge, { borderColor: theme.accent + '60', backgroundColor: theme.primary }]}>
+            <Text style={[styles.moodText, { color: theme.accent }]}>
+              {mood.toUpperCase()}
+            </Text>
+          </View>
         </View>
 
-        <Text style={[styles.sectionLabel, { color: theme.textSecondary }]}>EQUIPMENT</Text>
+        {/* Equipment */}
+        <SectionDivider title="EQUIPMENT" color={theme.accent} />
         <View style={styles.equipRow}>
-          {[
-            { label: 'WEAPON', item: equippedWeapon, tier: equippedWeapon?.tier ?? 1 },
-            { label: 'ARMOR', item: equippedArmor, tier: equippedArmor?.tier ?? 1 },
-            { label: 'CROWN', item: equippedCrown, tier: equippedCrown?.tier ?? 1 },
-          ].map(({ label, item, tier }) => (
-            <View key={label} style={[styles.equipSlot, { borderColor: theme.accent }]}>
-              <Text style={[styles.equipLabel, { color: theme.textSecondary }]}>{label}</Text>
-              <Text style={[styles.equipTier, { color: theme.accent }]}>T{tier}</Text>
-              <Text style={[styles.equipName, { color: theme.text }]} numberOfLines={2}>
-                {item?.name ?? 'None'}
-              </Text>
-            </View>
-          ))}
+          <EquipSlot label="WEAPON" name={equippedWeapon?.name ?? 'None'} tier={equippedWeapon?.tier ?? 1} color={theme.accent} />
+          <EquipSlot label="ARMOR" name={equippedArmor?.name ?? 'None'} tier={equippedArmor?.tier ?? 1} color={theme.accent} />
+          <EquipSlot label="CROWN" name={equippedCrown?.name ?? 'None'} tier={equippedCrown?.tier ?? 1} color={theme.accent} />
         </View>
 
-        <Text style={[styles.sectionLabel, { color: theme.textSecondary }]}>STATS</Text>
-        {STAT_DISCIPLINES.map(({ label, code }) => {
-          const discipline = disciplines.find((d) => d.code === code);
-          const log = todayLogs.find((l) => l.discipline_id === discipline?.id);
-          const completed = log?.completed === 1;
-          return (
-            <View key={code} style={styles.statRow}>
-              <Text style={[styles.statLabel, { color: theme.textSecondary }]}>{label}</Text>
-              <View style={[styles.statBarBg, { backgroundColor: '#333' }]}>
-                <View
-                  style={[styles.statBarFill, { width: completed ? '100%' : '30%', backgroundColor: theme.accent }]}
-                />
-              </View>
-              <Text style={[styles.statValue, { color: theme.accent }]}>Lv.{hero.global_level}</Text>
-            </View>
-          );
-        })}
+        {/* Stats */}
+        <SectionDivider title="ATTRIBUTES" color={theme.accent} />
+        <View style={styles.statsSection}>
+          {STAT_DISCIPLINES.map(({ label, code, icon }) => {
+            const discipline = disciplines.find((d) => d.code === code);
+            const log = todayLogs.find((l) => l.discipline_id === discipline?.id);
+            const completed = log?.completed === 1;
+            return (
+              <StatBar
+                key={code}
+                label={label}
+                icon={icon}
+                completed={completed}
+                level={hero.global_level}
+                color={theme.accent}
+              />
+            );
+          })}
+        </View>
 
+        {/* Titles */}
         {titles.length > 0 && (
           <>
-            <Text style={[styles.sectionLabel, { color: theme.textSecondary }]}>TITLES</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <SectionDivider title="TITLES" color={theme.accent} />
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.titlesRow}>
               {titles.map((t) => (
-                <View key={t.id} style={[styles.titleChip, { borderColor: theme.accent }]}>
-                  <Text style={[styles.titleText, { color: theme.accent }]}>{t.name}</Text>
+                <View key={t.id} style={[styles.titleChip, { borderColor: theme.accent + '70', backgroundColor: theme.accent + '10' }]}>
+                  <Text style={[styles.titleTxt, { color: theme.accent }]}>{t.name}</Text>
                 </View>
               ))}
             </ScrollView>
           </>
         )}
-        <View style={styles.bottomPadding} />
+
+        <View style={styles.bottomPad} />
       </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingTop: 48 },
-  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16 },
-  heroName: { fontSize: 14, fontWeight: 'bold', letterSpacing: 1 },
-  rankBadge: { borderWidth: 2, paddingHorizontal: 10, paddingVertical: 2 },
-  rankText: { fontSize: 16, fontWeight: 'bold' },
-  rankTitle: { fontSize: 10, paddingHorizontal: 16, marginTop: 2, marginBottom: 16, letterSpacing: 2 },
-  avatarArea: { alignItems: 'center', marginVertical: 24 },
-  sectionLabel: { fontSize: 10, letterSpacing: 3, fontWeight: 'bold', paddingHorizontal: 16, marginBottom: 8, marginTop: 16 },
-  equipRow: { flexDirection: 'row', paddingHorizontal: 16, gap: 8 },
-  equipSlot: { flex: 1, borderWidth: 1, padding: 8, alignItems: 'center', minHeight: 80 },
-  equipLabel: { fontSize: 9, letterSpacing: 1, marginBottom: 4 },
-  equipTier: { fontSize: 14, fontWeight: 'bold', marginBottom: 2 },
-  equipName: { fontSize: 9, textAlign: 'center' },
-  statRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, marginBottom: 8 },
-  statLabel: { fontSize: 10, width: 90 },
-  statBarBg: { height: 8, borderRadius: 1, overflow: 'hidden', flex: 1 },
-  statBarFill: { height: 8 },
-  statValue: { fontSize: 10, marginLeft: 8, width: 40 },
-  titleChip: { borderWidth: 1, paddingHorizontal: 12, paddingVertical: 4, marginLeft: 16, marginRight: 4 },
-  titleText: { fontSize: 10 },
-  bottomPadding: { height: 64 },
+  container: { flex: 1, paddingTop: 44 },
+  header: {
+    paddingHorizontal: 16,
+    paddingBottom: 14,
+    borderBottomWidth: 1,
+  },
+  nameRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  heroName: { fontSize: 18, fontWeight: 'bold', letterSpacing: 2 },
+  rankPill: {
+    borderWidth: 1.5,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+  },
+  rankLetter: { fontSize: 20, fontWeight: 'bold' },
+  rankTitle: { fontSize: 11, letterSpacing: 2, marginTop: 4 },
+
+  scroll: { paddingBottom: 24 },
+
+  avatarWrap: { alignItems: 'center', paddingVertical: 20, position: 'relative' },
+  avatarRing: {
+    borderWidth: 2,
+    borderRadius: 100,
+    padding: 8,
+  },
+  avatarRingInner: {
+    borderWidth: 1,
+    borderRadius: 100,
+    padding: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  moodBadge: {
+    position: 'absolute',
+    bottom: 14,
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 3,
+  },
+  moodText: { fontSize: 10, fontWeight: 'bold', letterSpacing: 3 },
+
+  equipRow: { flexDirection: 'row', paddingHorizontal: 14, gap: 8 },
+
+  statsSection: { paddingHorizontal: 16 },
+
+  titlesRow: { paddingLeft: 14 },
+  titleChip: {
+    borderWidth: 1,
+    paddingHorizontal: 14,
+    paddingVertical: 5,
+    marginRight: 8,
+  },
+  titleTxt: { fontSize: 12, fontWeight: 'bold', letterSpacing: 1 },
+
+  bottomPad: { height: 64 },
 });

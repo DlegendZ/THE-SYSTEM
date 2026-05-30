@@ -1,7 +1,8 @@
 import React from 'react';
 import {
-  View, Text, ScrollView, StyleSheet, TouchableOpacity, Animated, Alert,
+  View, Text, ScrollView, StyleSheet, TouchableOpacity, Animated, Alert, Dimensions,
 } from 'react-native';
+import Svg, { Polygon, Line, Rect } from 'react-native-svg';
 import UsageStatsModule from '../native/UsageStatsModule';
 import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
@@ -11,28 +12,112 @@ import { differenceInCalendarDays, parseISO } from 'date-fns';
 import XPBar from '../components/ui/XPBar';
 import DisciplineCard from '../components/ui/DisciplineCard';
 import PixelText from '../components/ui/PixelText';
+import SectionDivider from '../components/ui/SectionDivider';
+import AvatarDisplay from '../components/avatar/AvatarDisplay';
 import { playSound } from '../audio/sounds';
 import type { Rank } from '../types';
 import type { RootStackParamList } from '../navigation/types';
+import type { HeroClass } from '../components/avatar/avatarData';
 
 type Nav = StackNavigationProp<RootStackParamList>;
+
+const { width } = Dimensions.get('window');
+
+function SettingsIcon({ color }: { color: string }) {
+  return (
+    <Svg width={22} height={22} viewBox="0 0 22 22">
+      <Polygon points="11,2 13,7 18,7 14,10 16,16 11,13 6,16 8,10 4,7 9,7" fill="none" stroke={color} strokeWidth="1.5" />
+      <Polygon points="11,8 12,10.5 11,13 10,10.5" fill={color} />
+    </Svg>
+  );
+}
+
+function HexagonFrame({ color, size = 80 }: { color: string; size?: number }) {
+  const s = size;
+  const cx = s / 2;
+  const r = s / 2 - 2;
+  const pts = Array.from({ length: 6 }, (_, i) => {
+    const a = (Math.PI / 3) * i - Math.PI / 6;
+    return `${cx + r * Math.cos(a)},${(s / 2) + r * Math.sin(a)}`;
+  }).join(' ');
+  return (
+    <Svg width={s} height={s} style={{ position: 'absolute' }}>
+      <Polygon points={pts} fill="none" stroke={color} strokeWidth="1.5" />
+    </Svg>
+  );
+}
+
+function RankBadge({ rank, color }: { rank: string; color: string }) {
+  return (
+    <View style={[styles.rankBadgeOuter, { borderColor: color + '80' }]}>
+      <View style={[styles.rankBadgeInner, { backgroundColor: color + '15' }]}>
+        <PixelText size={20} color={color}>{rank}</PixelText>
+      </View>
+      {/* Corner ticks */}
+      <View style={[styles.rankCorner, { top: -1, left: -1, borderTopWidth: 2, borderLeftWidth: 2, borderColor: color }]} />
+      <View style={[styles.rankCorner, { top: -1, right: -1, borderTopWidth: 2, borderRightWidth: 2, borderColor: color }]} />
+      <View style={[styles.rankCorner, { bottom: -1, left: -1, borderBottomWidth: 2, borderLeftWidth: 2, borderColor: color }]} />
+      <View style={[styles.rankCorner, { bottom: -1, right: -1, borderBottomWidth: 2, borderRightWidth: 2, borderColor: color }]} />
+    </View>
+  );
+}
+
+function PresenceWidget({ theme }: { theme: any }) {
+  const [minutes, setMinutes] = React.useState<number>(-1);
+  React.useEffect(() => {
+    const fetch = async () => {
+      const mins = await UsageStatsModule.getScrollingTimeToday();
+      setMinutes(mins);
+    };
+    fetch();
+    const id = setInterval(fetch, 5 * 60 * 1000);
+    return () => clearInterval(id);
+  }, []);
+  if (minutes < 0) return null;
+  return <PresenceBar minutes={minutes} theme={theme} />;
+}
+
+function PresenceBar({ minutes, theme }: { minutes: number; theme: any }) {
+  const limit = 30;
+  const pct = Math.min(minutes / limit, 1);
+  const overLimit = minutes > limit;
+  const barColor = overLimit ? '#f44336' : '#4caf50';
+  return (
+    <View style={styles.presenceWrap}>
+      <View style={styles.presenceRow}>
+        <Text style={[styles.presenceLabel, { color: theme.textSecondary }]}>SCREEN TIME</Text>
+        <Text style={[styles.presenceTime, { color: barColor }]}>
+          {Math.round(minutes)}m {overLimit ? '▲ EXCEEDED' : '✓ OK'}
+        </Text>
+      </View>
+      <View style={[styles.presenceBg, { backgroundColor: '#1a1a1a' }]}>
+        <View style={[styles.presenceFill, { width: `${pct * 100}%`, backgroundColor: barColor }]} />
+        <View style={[styles.presenceLimit, { left: '100%', backgroundColor: theme.textSecondary + '40' }]} />
+      </View>
+    </View>
+  );
+}
 
 export default function CommandHall() {
   const navigation = useNavigation<Nav>();
   const {
-    hero,
-    disciplines,
-    todayLogs,
-    silenceStreak,
-    pendingMandate,
-    currentTheme: theme,
-    completeDiscipline,
-    failDiscipline,
-    triggerRelapse,
+    hero, disciplines, todayLogs, silenceStreak, pendingMandate, currentTheme: theme,
+    completeDiscipline, failDiscipline, triggerRelapse,
   } = useSystemStore();
 
   const floatAnim = React.useRef(new Animated.Value(0)).current;
-  const [presenceMinutes, setPresenceMinutes] = React.useState<number>(-1);
+  const glowAnim = React.useRef(new Animated.Value(0.4)).current;
+
+  React.useEffect(() => {
+    const glowLoop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(glowAnim, { toValue: 1, duration: 2000, useNativeDriver: true }),
+        Animated.timing(glowAnim, { toValue: 0.4, duration: 2000, useNativeDriver: true }),
+      ])
+    );
+    glowLoop.start();
+    return () => glowLoop.stop();
+  }, [glowAnim]);
 
   React.useEffect(() => {
     if (!pendingMandate) return;
@@ -46,21 +131,15 @@ export default function CommandHall() {
     return () => loop.stop();
   }, [pendingMandate, floatAnim]);
 
-  React.useEffect(() => {
-    const fetchPresence = async () => {
-      const mins = await UsageStatsModule.getScrollingTimeToday();
-      setPresenceMinutes(mins);
-    };
-    fetchPresence();
-    const interval = setInterval(fetchPresence, 5 * 60 * 1000);
-    return () => clearInterval(interval);
-  }, []);
-
   if (!hero) return null;
 
   const daysElapsed = differenceInCalendarDays(new Date(), parseISO(hero.journey_start_date));
   const dayNumber = Math.min(daysElapsed + 1, 180);
   const activeDisciplines = disciplines.filter((d) => d.is_active);
+
+  const completedToday = todayLogs.filter((l) => l.completed).length;
+  const completionRate = activeDisciplines.length > 0 ? completedToday / activeDisciplines.length : 0;
+  const mood = completionRate >= 0.9 ? 'radiant' : completionRate >= 0.6 ? 'steady' : completionRate >= 0.3 ? 'worn' : 'broken';
 
   const handleComplete = async (id: number) => {
     await playSound('complete');
@@ -68,7 +147,6 @@ export default function CommandHall() {
     if (result.levelUp) {
       if (result.levelUp.rankChanged && result.levelUp.newRank === 'S') {
         await playSound('rankUp');
-        // TODO: navigate('SRankCutscene') — screen added in Task 5
         navigation.navigate('LevelUpSplash', {
           level: result.levelUp.newLevel,
           xpGained: result.xpGained,
@@ -105,62 +183,102 @@ export default function CommandHall() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      {/* Header Row */}
-      <View style={styles.headerRow}>
-        <View style={[styles.rankBadge, { borderColor: theme.accent }]}>
-          <PixelText size={18} color={theme.accent}>{hero.rank}</PixelText>
-        </View>
-        <PixelText size={10} color={theme.text}>DAY {dayNumber} OF 180</PixelText>
-        <TouchableOpacity onPress={() => navigation.navigate('Settings')} style={styles.settingsBtn}>
-          <Text style={[styles.settingsIcon, { color: theme.textSecondary }]}>⚙</Text>
-        </TouchableOpacity>
-      </View>
+      {/* ── TOP HUD BAR ── */}
+      <View style={[styles.hudBar, { borderBottomColor: theme.accent + '30' }]}>
+        <RankBadge rank={hero.rank} color={theme.accent} />
 
-      {/* Avatar area */}
-      <View style={styles.avatarArea}>
-        <View style={styles.avatarPlaceholder}>
-          <Text style={[styles.avatarText, { color: theme.accent }]}>
-            {hero.hero_class.toUpperCase()}
-          </Text>
-          <Text style={[styles.titleText, { color: theme.textSecondary }]}>
+        <View style={styles.hudCenter}>
+          <PixelText size={10} color={theme.textSecondary}>
+            {hero.name.toUpperCase()}
+          </PixelText>
+          <View style={styles.dayRow}>
+            <View style={[styles.dayDot, { backgroundColor: theme.accent }]} />
+            <Text style={[styles.dayText, { color: theme.accent }]}>DAY {dayNumber}</Text>
+            <Text style={[styles.dayOf, { color: theme.textSecondary }]}> / 180</Text>
+          </View>
+          <Text style={[styles.rankTitle, { color: theme.textSecondary }]}>
             {RANK_TITLES[hero.rank as Rank]}
           </Text>
         </View>
 
+        <TouchableOpacity
+          onPress={() => navigation.navigate('Settings')}
+          style={styles.settingsBtn}
+          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+        >
+          <SettingsIcon color={theme.textSecondary} />
+        </TouchableOpacity>
+      </View>
+
+      {/* ── AVATAR AREA ── */}
+      <View style={styles.avatarSection}>
+        {/* Avatar frame */}
+        <View style={styles.avatarFrame}>
+          <HexagonFrame color={theme.accent + '40'} size={120} />
+          <Animated.View style={{ opacity: glowAnim }}>
+            <AvatarDisplay
+              heroClass={hero.hero_class as HeroClass}
+              rank={hero.rank}
+              mood={mood}
+              pixelSize={5}
+            />
+          </Animated.View>
+        </View>
+
+        {/* Silence streak */}
+        {silenceStreak && silenceStreak.current_streak > 0 && (
+          <View style={styles.streakBox}>
+            <PixelText size={32} color={theme.accent}>{String(silenceStreak.current_streak)}</PixelText>
+            <Text style={[styles.streakLabel, { color: theme.textSecondary }]}>DAYS CLEAN</Text>
+          </View>
+        )}
+
+        {/* Mandate chest */}
         {pendingMandate && (
           <Animated.View style={[styles.chestFloat, { transform: [{ translateY: floatAnim }] }]}>
-            <TouchableOpacity onPress={() => navigation.navigate('MandateReveal')}>
-              <View style={[styles.chestBadge, { borderColor: theme.accent, backgroundColor: theme.accent + '30' }]}>
-                <Text style={{ fontSize: 24 }}>📦</Text>
-                <Text style={[styles.chestLabel, { color: theme.accent }]}>{pendingMandate.tier}</Text>
-              </View>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('MandateReveal')}
+              style={[styles.chestBtn, { borderColor: theme.accent, backgroundColor: theme.accent + '20' }]}
+            >
+              <Text style={{ fontSize: 28 }}>📦</Text>
+              <Text style={[styles.chestTier, { color: theme.accent }]}>{pendingMandate.tier}</Text>
             </TouchableOpacity>
           </Animated.View>
         )}
       </View>
 
+      {/* ── XP BAR ── */}
       <XPBar />
 
-      {silenceStreak && (
-        <View style={styles.streakSection}>
-          <PixelText size={36} color={theme.accent}>{String(silenceStreak.current_streak)}</PixelText>
-          <Text style={[styles.streakLabel, { color: theme.textSecondary }]}>DAYS OF SILENCE</Text>
-        </View>
-      )}
+      {/* ── Presence ── */}
+      <PresenceWidget theme={theme} />
 
-      {presenceMinutes >= 0 && (
-        <View style={styles.presenceSection}>
-          <Text style={[styles.presenceTime, { color: presenceMinutes > 30 ? '#ff4444' : '#4caf50' }]}>
-            {Math.round(presenceMinutes)}m
-          </Text>
-          <Text style={[styles.presenceLabel, { color: theme.textSecondary }]}>
-            SCREEN TIME TODAY {presenceMinutes > 30 ? '⚠ OVER LIMIT' : '✓ WITHIN LIMIT'}
-          </Text>
-        </View>
-      )}
+      {/* ── QUEST LOG ── */}
+      <SectionDivider
+        title="DAILY OBJECTIVES"
+        color={theme.accent}
+        style={styles.sectionDivider}
+      />
 
-      <ScrollView style={styles.questLog}>
-        <PixelText size={10} color={theme.text}>DAILY QUEST LOG</PixelText>
+      <View style={styles.questProgress}>
+        <Text style={[styles.questCount, { color: theme.textSecondary }]}>
+          {completedToday}/{activeDisciplines.length} COMPLETE
+        </Text>
+        <View style={[styles.questProgressBar, { backgroundColor: '#1a1a1a' }]}>
+          <View
+            style={[
+              styles.questProgressFill,
+              { width: `${completionRate * 100}%`, backgroundColor: theme.accent },
+            ]}
+          />
+        </View>
+      </View>
+
+      <ScrollView
+        style={styles.scroll}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
         {activeDisciplines.map((discipline) => {
           const log = todayLogs.find((l) => l.discipline_id === discipline.id);
           return (
@@ -174,44 +292,214 @@ export default function CommandHall() {
             />
           );
         })}
-        {/* Shield Protocol Button */}
-        <TouchableOpacity
-          style={[styles.shieldButton, { backgroundColor: '#1a0000', borderColor: '#ff4444' }]}
-          onPress={() => navigation.navigate('ShieldOverlay')}
-        >
-          <Text style={styles.shieldButtonText}>🛡 SHIELD PROTOCOL</Text>
-        </TouchableOpacity>
+
+        {/* Shield Protocol */}
+        <View style={styles.shieldSection}>
+          <TouchableOpacity
+            style={styles.shieldBtn}
+            onPress={() => navigation.navigate('ShieldOverlay')}
+            activeOpacity={0.8}
+          >
+            <View style={[styles.shieldInner, { borderColor: '#ff4444', backgroundColor: '#1a0000' }]}>
+              <View style={[styles.shieldCorner, { top: 0, left: 0, borderTopWidth: 1.5, borderLeftWidth: 1.5, borderColor: '#ff4444' }]} />
+              <View style={[styles.shieldCorner, { top: 0, right: 0, borderTopWidth: 1.5, borderRightWidth: 1.5, borderColor: '#ff4444' }]} />
+              <View style={[styles.shieldCorner, { bottom: 0, left: 0, borderBottomWidth: 1.5, borderLeftWidth: 1.5, borderColor: '#ff4444' }]} />
+              <View style={[styles.shieldCorner, { bottom: 0, right: 0, borderBottomWidth: 1.5, borderRightWidth: 1.5, borderColor: '#ff4444' }]} />
+              <Text style={styles.shieldText}>🛡 SHIELD PROTOCOL</Text>
+              <Text style={styles.shieldSub}>ENGAGE DIGITAL FORTRESS</Text>
+            </View>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingTop: 48 },
-  headerRow: {
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    paddingHorizontal: 16, marginBottom: 16,
+  container: { flex: 1, paddingTop: 44 },
+
+  // HUD Bar
+  hudBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    gap: 10,
   },
-  rankBadge: { borderWidth: 2, borderRadius: 4, paddingHorizontal: 12, paddingVertical: 4 },
-  rankText: { fontSize: 18, fontWeight: 'bold' },
-  dayText: { fontSize: 12 },
-  settingsBtn: { padding: 8 },
-  settingsIcon: { fontSize: 20 },
-  avatarArea: { alignItems: 'center', paddingVertical: 16 },
-  avatarPlaceholder: { alignItems: 'center' },
-  avatarText: { fontSize: 20, fontWeight: 'bold' },
-  titleText: { fontSize: 12, marginTop: 4 },
-  chestFloat: { position: 'absolute', right: 32, top: 0 },
-  chestBadge: { borderWidth: 2, borderRadius: 8, padding: 8, alignItems: 'center' },
-  chestLabel: { fontSize: 9, fontWeight: 'bold', marginTop: 2 },
-  streakSection: { alignItems: 'center', marginVertical: 8 },
-  streakNumber: { fontSize: 36, fontWeight: 'bold' },
-  streakLabel: { fontSize: 10, marginTop: 2 },
-  questLog: { flex: 1, marginTop: 8 },
-  sectionTitle: { fontSize: 12, fontWeight: 'bold', paddingHorizontal: 16, marginBottom: 8 },
-  shieldButton: { margin: 16, marginBottom: 8, padding: 16, borderWidth: 2, alignItems: 'center' },
-  shieldButtonText: { color: '#ff4444', fontSize: 13, fontWeight: 'bold', letterSpacing: 2 },
-  presenceSection: { alignItems: 'center', marginVertical: 4 },
-  presenceTime: { fontSize: 24, fontWeight: 'bold' },
-  presenceLabel: { fontSize: 9, marginTop: 2 },
+  rankBadgeOuter: {
+    borderWidth: 1,
+    padding: 2,
+    position: 'relative',
+  },
+  rankBadgeInner: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    alignItems: 'center',
+  },
+  rankCorner: {
+    position: 'absolute',
+    width: 7,
+    height: 7,
+  },
+  hudCenter: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  dayRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 2,
+  },
+  dayDot: {
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
+  },
+  dayText: {
+    fontSize: 17,
+    fontWeight: 'bold',
+    letterSpacing: 1,
+  },
+  dayOf: {
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  rankTitle: {
+    fontSize: 10,
+    letterSpacing: 2,
+    marginTop: 2,
+  },
+  settingsBtn: { padding: 4 },
+
+  // Avatar
+  avatarSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    gap: 16,
+  },
+  avatarFrame: {
+    width: 120,
+    height: 120,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  streakBox: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  streakLabel: {
+    fontSize: 10,
+    letterSpacing: 2,
+    marginTop: 2,
+  },
+  chestFloat: {
+    alignItems: 'center',
+  },
+  chestBtn: {
+    borderWidth: 1.5,
+    borderRadius: 4,
+    padding: 8,
+    alignItems: 'center',
+  },
+  chestTier: {
+    fontSize: 8,
+    fontWeight: 'bold',
+    marginTop: 2,
+    letterSpacing: 1,
+  },
+
+  // Presence
+  presenceWrap: {
+    paddingHorizontal: 14,
+    marginBottom: 4,
+  },
+  presenceRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 3,
+  },
+  presenceLabel: {
+    fontSize: 10,
+    letterSpacing: 2,
+  },
+  presenceTime: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    letterSpacing: 1,
+  },
+  presenceBg: {
+    height: 3,
+    overflow: 'hidden',
+  },
+  presenceFill: {
+    height: 3,
+    position: 'absolute',
+    left: 0,
+    top: 0,
+  },
+  presenceLimit: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    width: 1,
+  },
+
+  // Section
+  sectionDivider: { marginTop: 4 },
+  questProgress: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    marginBottom: 8,
+    gap: 10,
+  },
+  questCount: {
+    fontSize: 11,
+    letterSpacing: 1,
+    minWidth: 110,
+  },
+  questProgressBar: {
+    flex: 1,
+    height: 3,
+    overflow: 'hidden',
+  },
+  questProgressFill: {
+    height: 3,
+  },
+
+  // Scroll
+  scroll: { flex: 1 },
+  scrollContent: { paddingBottom: 24 },
+
+  // Shield
+  shieldSection: { margin: 14, marginTop: 16 },
+  shieldBtn: { overflow: 'hidden' },
+  shieldInner: {
+    borderWidth: 1,
+    padding: 16,
+    alignItems: 'center',
+    position: 'relative',
+  },
+  shieldCorner: {
+    position: 'absolute',
+    width: 10,
+    height: 10,
+  },
+  shieldText: {
+    color: '#ff4444',
+    fontSize: 15,
+    fontWeight: 'bold',
+    letterSpacing: 2,
+  },
+  shieldSub: {
+    color: '#ff444488',
+    fontSize: 10,
+    letterSpacing: 2,
+    marginTop: 4,
+  },
 });

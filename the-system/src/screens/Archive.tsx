@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
 } from 'react-native';
+import Svg, { Polygon } from 'react-native-svg';
 import { useSystemStore } from '../store/useSystemStore';
 import {
   getLogsForRange, getAllMandates, getDisciplineLogsAll, getSilenceStreak,
@@ -9,49 +10,66 @@ import {
 import { differenceInCalendarDays, parseISO, format, subDays } from 'date-fns';
 import type { DisciplineLog, Discipline, Mandate, Rank } from '../types';
 import { RANK_TITLES } from '../engine/xpConstants';
+import SectionDivider from '../components/ui/SectionDivider';
+import CornerFrame from '../components/ui/CornerFrame';
 
 type Tab = 'overview' | 'disciplines' | 'streaks' | 'history';
 
+const TAB_LABELS: Record<Tab, string> = {
+  overview: 'OVERVIEW',
+  disciplines: 'MISSIONS',
+  streaks: 'STREAKS',
+  history: 'HISTORY',
+};
+
+function HeatCell({ completed, failed }: { completed: boolean; failed: boolean }) {
+  return (
+    <View style={[
+      heatStyles.cell,
+      {
+        backgroundColor: completed ? '#1a4a1a' : failed ? '#4a1a1a' : '#1a1a1a',
+        borderColor: completed ? '#4caf50' : failed ? '#f44336' : '#2a2a2a',
+      },
+    ]} />
+  );
+}
+
+const heatStyles = StyleSheet.create({
+  cell: { width: 11, height: 11, borderRadius: 1, borderWidth: 1 },
+});
+
 function HeatmapRow({ discipline, logs }: { discipline: Discipline; logs: DisciplineLog[] }) {
   const today = new Date();
-  const days: Array<{ date: string; completed: boolean; failed: boolean }> = [];
-  for (let i = 27; i >= 0; i--) {
-    const d = subDays(today, i);
+  const days = Array.from({ length: 28 }, (_, i) => {
+    const d = subDays(today, 27 - i);
     const dateStr = format(d, 'yyyy-MM-dd');
     const log = logs.find((l) => l.log_date === dateStr);
-    days.push({ date: dateStr, completed: !!log?.completed, failed: !!log?.failed });
-  }
+    return { completed: !!log?.completed, failed: !!log?.failed };
+  });
   return (
-    <View style={styles.heatRow}>
-      <View style={styles.heatGrid}>
-        {days.map((day, i) => (
-          <View
-            key={i}
-            style={[
-              styles.heatCell,
-              { backgroundColor: day.completed ? '#4caf50' : day.failed ? '#f44336' : '#2a2a2a' },
-            ]}
-          />
-        ))}
-      </View>
+    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 2 }}>
+      {days.map((d, i) => <HeatCell key={i} completed={d.completed} failed={d.failed} />)}
     </View>
   );
 }
 
-function SilenceStreakPanel({ theme }: { theme: { accent: string; text: string; textSecondary: string } }) {
-  const [streak, setStreak] = useState<{ current_streak: number; longest_streak: number; total_relapses: number } | null>(null);
-  useEffect(() => { getSilenceStreak().then(setStreak); }, []);
-  if (!streak) return null;
+function BigStat({ value, label, color }: { value: string; label: string; color: string }) {
   return (
-    <View style={styles.silencePanel}>
-      <Text style={[styles.sectionLabel, { color: theme.textSecondary }]}>SILENCE PROTOCOL</Text>
-      <Text style={[styles.bigStat, { color: theme.accent }]}>{streak.current_streak} days</Text>
-      <Text style={[styles.subStat, { color: theme.textSecondary }]}>
-        Best: {streak.longest_streak} | Relapses: {streak.total_relapses}
-      </Text>
-    </View>
+    <CornerFrame color={color + '40'} size={8} thickness={1} style={bigStatStyles.wrap}>
+      <View style={bigStatStyles.inner}>
+        <Text style={[bigStatStyles.value, { color }]}>{value}</Text>
+        <Text style={[bigStatStyles.label, { color: '#666' }]}>{label}</Text>
+      </View>
+    </CornerFrame>
   );
 }
+
+const bigStatStyles = StyleSheet.create({
+  wrap: { flex: 1 },
+  inner: { padding: 14, alignItems: 'center', gap: 4 },
+  value: { fontSize: 32, fontWeight: 'bold' },
+  label: { fontSize: 10, letterSpacing: 2, textAlign: 'center' },
+});
 
 export default function Archive() {
   const { hero, disciplines, currentTheme: theme } = useSystemStore();
@@ -59,17 +77,21 @@ export default function Archive() {
   const [mandates, setMandates] = useState<Mandate[]>([]);
   const [disciplineLogs, setDisciplineLogs] = useState<Record<number, DisciplineLog[]>>({});
   const [recentLogs, setRecentLogs] = useState<DisciplineLog[]>([]);
+  const [silenceData, setSilenceData] = useState<{
+    current_streak: number; longest_streak: number; total_relapses: number;
+  } | null>(null);
 
   useEffect(() => {
     if (!hero) return;
     getAllMandates().then(setMandates);
+    getSilenceStreak().then(setSilenceData);
     const today = format(new Date(), 'yyyy-MM-dd');
     const start = format(subDays(new Date(), 28), 'yyyy-MM-dd');
     getLogsForRange(start, today).then(setRecentLogs);
   }, [hero]);
 
   useEffect(() => {
-    if (activeTab !== 'disciplines') return;
+    if (activeTab !== 'disciplines' && activeTab !== 'streaks') return;
     (async () => {
       const result: Record<number, DisciplineLog[]> = {};
       for (const d of disciplines) {
@@ -87,42 +109,76 @@ export default function Archive() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <View style={styles.header}>
+      {/* Header */}
+      <View style={[styles.header, { borderBottomColor: theme.accent + '30' }]}>
         <Text style={[styles.title, { color: theme.text }]}>THE ARCHIVE</Text>
+        <Text style={[styles.subtitle, { color: theme.textSecondary }]}>RECORD OF BECOMING</Text>
       </View>
 
-      <View style={[styles.tabBar, { borderBottomColor: theme.accent }]}>
+      {/* Tab bar */}
+      <View style={[styles.tabBar, { borderBottomColor: theme.accent + '20' }]}>
         {TABS.map((tab) => (
           <TouchableOpacity
             key={tab}
-            style={[styles.tabBtn, activeTab === tab && { borderBottomWidth: 2, borderBottomColor: theme.accent }]}
+            style={[
+              styles.tabBtn,
+              activeTab === tab && [styles.tabBtnActive, { borderBottomColor: theme.accent }],
+            ]}
             onPress={() => setActiveTab(tab)}
           >
-            <Text style={[styles.tabText, { color: activeTab === tab ? theme.accent : theme.textSecondary }]}>
-              {tab.toUpperCase()}
+            {activeTab === tab && (
+              <Svg width={6} height={6} style={styles.tabGem}>
+                <Polygon points="3,0 6,3 3,6 0,3" fill={theme.accent} />
+              </Svg>
+            )}
+            <Text style={[
+              styles.tabTxt,
+              { color: activeTab === tab ? theme.accent : theme.textSecondary },
+            ]}>
+              {TAB_LABELS[tab]}
             </Text>
           </TouchableOpacity>
         ))}
       </View>
 
       <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
+        {/* ── OVERVIEW ── */}
         {activeTab === 'overview' && (
           <View style={styles.section}>
-            <Text style={[styles.sectionLabel, { color: theme.textSecondary }]}>JOURNEY PROGRESS</Text>
-            <View style={[styles.progressBg, { backgroundColor: '#333333' }]}>
-              <View style={[styles.progressFill, { width: `${progressPct * 100}%`, backgroundColor: theme.accent }]} />
+            <SectionDivider title="JOURNEY" color={theme.accent} style={styles.firstDivider} />
+
+            {/* Progress bar */}
+            <CornerFrame color={theme.accent + '50'} size={8} thickness={1} style={styles.journeyWrap}>
+              <View style={styles.journeyInner}>
+                <View style={styles.journeyTopRow}>
+                  <Text style={[styles.journeyDay, { color: theme.accent }]}>DAY {daysElapsed}</Text>
+                  <Text style={[styles.journeyOf, { color: theme.textSecondary }]}>OF 180</Text>
+                </View>
+                <View style={[styles.journeyBg, { backgroundColor: '#111' }]}>
+                  <View style={[styles.journeyFill, { width: `${progressPct * 100}%`, backgroundColor: theme.accent }]} />
+                  {[25, 50, 75].map((p) => (
+                    <View key={p} style={[styles.journeyTick, { left: `${p}%` as `${number}%` }]} />
+                  ))}
+                </View>
+                <Text style={[styles.journeyPct, { color: theme.textSecondary }]}>
+                  {Math.round(progressPct * 100)}% COMPLETE
+                </Text>
+              </View>
+            </CornerFrame>
+
+            <SectionDivider title="STATISTICS" color={theme.accent} />
+            <View style={styles.statsGrid}>
+              <BigStat value={hero.rank + '-RANK'} label="CURRENT RANK" color={theme.accent} />
+              <BigStat value={RANK_TITLES[hero.rank as Rank].split(' ')[0]} label="TITLE" color={theme.accent} />
             </View>
-            <Text style={[styles.progressText, { color: theme.text }]}>Day {daysElapsed} of 180</Text>
-            <Text style={[styles.sectionLabel, { color: theme.textSecondary }]}>RANK</Text>
-            <Text style={[styles.bigStat, { color: theme.accent }]}>{hero.rank}-Rank</Text>
-            <Text style={[styles.subStat, { color: theme.textSecondary }]}>{RANK_TITLES[hero.rank as Rank]}</Text>
-            <Text style={[styles.sectionLabel, { color: theme.textSecondary }]}>TOTAL XP</Text>
-            <Text style={[styles.bigStat, { color: theme.accent }]}>{hero.global_xp.toLocaleString()}</Text>
-            <Text style={[styles.sectionLabel, { color: theme.textSecondary }]}>MANDATES RECEIVED</Text>
-            <Text style={[styles.bigStat, { color: theme.accent }]}>{mandates.length}</Text>
+            <View style={styles.statsGrid}>
+              <BigStat value={hero.global_xp.toLocaleString()} label="TOTAL XP" color={theme.accent} />
+              <BigStat value={String(mandates.length)} label="MANDATES" color={theme.accent} />
+            </View>
           </View>
         )}
 
+        {/* ── DISCIPLINES ── */}
         {activeTab === 'disciplines' && (
           <View style={styles.section}>
             {disciplines.map((d) => {
@@ -130,14 +186,20 @@ export default function Archive() {
               const completed = logs.filter((l) => l.completed).length;
               const failed = logs.filter((l) => l.failed).length;
               const recentForThis = recentLogs.filter((l) => l.discipline_id === d.id);
+              const rate = logs.length > 0 ? completed / logs.length : 0;
               return (
-                <View key={d.id} style={[styles.disciplineCard, { borderColor: theme.accent + '40' }]}>
-                  <Text style={[styles.disciplineName, { color: theme.text }]}>{d.name}</Text>
+                <View key={d.id} style={[styles.disciplineCard, { borderColor: theme.accent + '30', backgroundColor: theme.primary }]}>
+                  <View style={styles.disciplineTop}>
+                    <Text style={[styles.disciplineName, { color: theme.text }]}>{d.name}</Text>
+                    <Text style={[styles.disciplineRate, { color: Math.round(rate * 100) >= 70 ? '#4caf50' : '#888' }]}>
+                      {Math.round(rate * 100)}%
+                    </Text>
+                  </View>
                   <HeatmapRow discipline={d} logs={recentForThis} />
-                  <View style={styles.statsRow}>
-                    <Text style={[styles.statChip, { color: '#4caf50' }]}>✓ {completed}</Text>
-                    <Text style={[styles.statChip, { color: '#f44336' }]}>✗ {failed}</Text>
-                    <Text style={[styles.statChip, { color: theme.textSecondary }]}>Total: {logs.length}</Text>
+                  <View style={styles.disciplineStats}>
+                    <Text style={[styles.dStat, { color: '#4caf50' }]}>✓ {completed}</Text>
+                    <Text style={[styles.dStat, { color: '#f44336' }]}>✗ {failed}</Text>
+                    <Text style={[styles.dStat, { color: '#666' }]}>{logs.length} TOTAL</Text>
                   </View>
                 </View>
               );
@@ -145,74 +207,137 @@ export default function Archive() {
           </View>
         )}
 
+        {/* ── STREAKS ── */}
         {activeTab === 'streaks' && (
           <View style={styles.section}>
-            <SilenceStreakPanel theme={theme} />
-            <Text style={[styles.sectionLabel, { color: theme.textSecondary }]}>ALL DISCIPLINES</Text>
+            {silenceData && (
+              <>
+                <SectionDivider title="SILENCE PROTOCOL" color={theme.accent} style={styles.firstDivider} />
+                <View style={styles.silenceGrid}>
+                  <BigStat value={String(silenceData.current_streak)} label="CURRENT STREAK" color={theme.accent} />
+                  <BigStat value={String(silenceData.longest_streak)} label="BEST STREAK" color={theme.accent} />
+                  <BigStat value={String(silenceData.total_relapses)} label="RELAPSES" color="#f44336" />
+                </View>
+              </>
+            )}
+            <SectionDivider title="ALL DISCIPLINES" color={theme.accent} />
             {disciplines.map((d) => {
               const logs = disciplineLogs[d.id] ?? [];
+              const total = logs.filter((l) => l.completed).length;
+              const pct = logs.length > 0 ? total / logs.length : 0;
               return (
-                <View key={d.id} style={styles.streakRow}>
+                <View key={d.id} style={[styles.streakRow, { borderBottomColor: '#1e1e1e' }]}>
                   <Text style={[styles.streakName, { color: theme.text }]}>{d.name}</Text>
-                  <Text style={[styles.streakVal, { color: theme.accent }]}>{logs.filter((l) => l.completed).length} completed</Text>
+                  <View style={styles.streakRight}>
+                    <View style={[styles.streakBarBg, { backgroundColor: '#111' }]}>
+                      <View style={[styles.streakBarFill, { width: `${pct * 100}%`, backgroundColor: theme.accent }]} />
+                    </View>
+                    <Text style={[styles.streakCount, { color: theme.accent }]}>{total}</Text>
+                  </View>
                 </View>
               );
             })}
           </View>
         )}
 
+        {/* ── HISTORY ── */}
         {activeTab === 'history' && (
           <View style={styles.section}>
-            <Text style={[styles.sectionLabel, { color: theme.textSecondary }]}>LAST 28 DAYS</Text>
+            <SectionDivider title="LAST 28 DAYS" color={theme.accent} style={styles.firstDivider} />
             {[...new Set(recentLogs.map((l) => l.log_date))].sort().reverse().map((date) => {
               const dayLogs = recentLogs.filter((l) => l.log_date === date);
-              const completedCount = dayLogs.filter((l) => l.completed).length;
-              const xpEarned = dayLogs.reduce((sum, l) => sum + (l.xp_delta > 0 ? l.xp_delta : 0), 0);
+              const comp = dayLogs.filter((l) => l.completed).length;
+              const xp = dayLogs.reduce((s, l) => s + (l.xp_delta > 0 ? l.xp_delta : 0), 0);
+              const pct = disciplines.length > 0 ? comp / disciplines.length : 0;
               return (
-                <View key={date} style={[styles.historyRow, { borderBottomColor: '#333333' }]}>
-                  <Text style={[styles.historyDate, { color: theme.textSecondary }]}>{date}</Text>
-                  <Text style={[styles.historyCompleted, { color: '#4caf50' }]}>{completedCount}/{disciplines.length}</Text>
-                  <Text style={[styles.historyXP, { color: theme.accent }]}>+{xpEarned} XP</Text>
+                <View key={date} style={[styles.histRow, { borderBottomColor: '#1a1a1a' }]}>
+                  <View style={styles.histLeft}>
+                    <Text style={[styles.histDate, { color: theme.textSecondary }]}>{date}</Text>
+                    <View style={[styles.histBarBg, { backgroundColor: '#111' }]}>
+                      <View style={[styles.histBarFill, { width: `${pct * 100}%`, backgroundColor: theme.accent + 'aa' }]} />
+                    </View>
+                  </View>
+                  <Text style={[styles.histComp, { color: comp > 0 ? '#4caf50' : '#444' }]}>
+                    {comp}/{disciplines.length}
+                  </Text>
+                  <Text style={[styles.histXP, { color: theme.accent }]}>+{xp}</Text>
                 </View>
               );
             })}
           </View>
         )}
-        <View style={styles.bottomPadding} />
+
+        <View style={{ height: 64 }} />
       </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  header: { paddingTop: 48, paddingHorizontal: 16, paddingBottom: 12 },
-  title: { fontSize: 14, fontWeight: 'bold', letterSpacing: 3 },
+  container: { flex: 1, paddingTop: 44 },
+  header: { paddingHorizontal: 16, paddingBottom: 12, borderBottomWidth: 1 },
+  title: { fontSize: 17, fontWeight: 'bold', letterSpacing: 4 },
+  subtitle: { fontSize: 10, letterSpacing: 3, marginTop: 3 },
+
   tabBar: { flexDirection: 'row', borderBottomWidth: 1 },
-  tabBtn: { flex: 1, paddingVertical: 10, alignItems: 'center' },
-  tabText: { fontSize: 9, fontWeight: 'bold', letterSpacing: 1 },
+  tabBtn: { flex: 1, paddingVertical: 10, alignItems: 'center', position: 'relative' },
+  tabBtnActive: { borderBottomWidth: 2 },
+  tabGem: { position: 'absolute', top: 4 },
+  tabTxt: { fontSize: 9, fontWeight: 'bold', letterSpacing: 1 },
+
   scroll: { flex: 1 },
-  section: { padding: 16 },
-  sectionLabel: { fontSize: 9, letterSpacing: 3, fontWeight: 'bold', marginTop: 20, marginBottom: 8 },
-  progressBg: { height: 8, borderRadius: 2, overflow: 'hidden', marginBottom: 4 },
-  progressFill: { height: 8 },
-  progressText: { fontSize: 11, marginBottom: 16 },
-  bigStat: { fontSize: 28, fontWeight: 'bold' },
-  subStat: { fontSize: 10, marginBottom: 16 },
-  disciplineCard: { borderWidth: 1, padding: 12, marginBottom: 12, borderRadius: 2 },
-  disciplineName: { fontSize: 12, fontWeight: 'bold', marginBottom: 8 },
-  heatRow: { marginBottom: 8 },
-  heatGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 2 },
-  heatCell: { width: 10, height: 10, borderRadius: 1 },
-  statsRow: { flexDirection: 'row', gap: 12 },
-  statChip: { fontSize: 11 },
-  streakRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#222222' },
-  streakName: { fontSize: 12 },
-  streakVal: { fontSize: 12 },
-  silencePanel: { marginBottom: 16 },
-  historyRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, borderBottomWidth: 1 },
-  historyDate: { fontSize: 11 },
-  historyCompleted: { fontSize: 11 },
-  historyXP: { fontSize: 11 },
-  bottomPadding: { height: 64 },
+  section: { padding: 14 },
+  firstDivider: { marginTop: 4 },
+
+  journeyWrap: { marginBottom: 8 },
+  journeyInner: { padding: 16, gap: 8 },
+  journeyTopRow: { flexDirection: 'row', alignItems: 'baseline', gap: 6 },
+  journeyDay: { fontSize: 30, fontWeight: 'bold' },
+  journeyOf: { fontSize: 13 },
+  journeyBg: { height: 8, overflow: 'hidden', position: 'relative' },
+  journeyFill: { height: 8, position: 'absolute', left: 0, top: 0, bottom: 0 },
+  journeyTick: { position: 'absolute', top: 1, bottom: 1, width: 1, backgroundColor: '#000' },
+  journeyPct: { fontSize: 11, letterSpacing: 2 },
+
+  statsGrid: { flexDirection: 'row', gap: 8, marginBottom: 8 },
+  silenceGrid: { flexDirection: 'row', gap: 8, marginBottom: 8 },
+
+  disciplineCard: {
+    borderWidth: 1,
+    padding: 12,
+    marginBottom: 10,
+    gap: 8,
+  },
+  disciplineTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  disciplineName: { fontSize: 14, fontWeight: 'bold' },
+  disciplineRate: { fontSize: 16, fontWeight: 'bold' },
+  disciplineStats: { flexDirection: 'row', gap: 16 },
+  dStat: { fontSize: 13 },
+
+  streakRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    gap: 12,
+  },
+  streakName: { fontSize: 13, flex: 1 },
+  streakRight: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  streakBarBg: { width: 80, height: 6, overflow: 'hidden' },
+  streakBarFill: { height: 6, position: 'absolute', left: 0, top: 0 },
+  streakCount: { fontSize: 14, fontWeight: 'bold', minWidth: 28, textAlign: 'right' },
+
+  histRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    gap: 10,
+  },
+  histLeft: { flex: 1, gap: 3 },
+  histDate: { fontSize: 12 },
+  histBarBg: { height: 3, overflow: 'hidden' },
+  histBarFill: { height: 3, position: 'absolute', left: 0, top: 0 },
+  histComp: { fontSize: 13, fontWeight: 'bold', minWidth: 40, textAlign: 'center' },
+  histXP: { fontSize: 13, fontWeight: 'bold', minWidth: 50, textAlign: 'right' },
 });

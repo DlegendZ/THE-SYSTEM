@@ -1,63 +1,101 @@
 import React, { useEffect, useState, useRef } from 'react';
 import {
-  View, Text, ScrollView, StyleSheet, TouchableOpacity, Animated, Modal,
+  View, Text, ScrollView, StyleSheet, TouchableOpacity, Animated, Modal, Dimensions,
 } from 'react-native';
+import Svg, { Polygon, Line, Circle, Path } from 'react-native-svg';
 import { useSystemStore } from '../store/useSystemStore';
 import { getWeekCompletionRate } from '../db/queries';
 import { differenceInCalendarDays, parseISO } from 'date-fns';
+import CornerFrame from '../components/ui/CornerFrame';
 
 const TOTAL_NODES = 24;
 
 const ZONE_LABELS = [
-  'UNDERGROUND CAVERN', 'RUINED KINGDOM', 'IRON MOUNTAINS',
-  'CASTLE IN THE CLOUDS', 'STAR FIELDS', 'DIVINE APPROACH',
+  'THE ABYSS', 'RUINED KINGDOM', 'IRON CITADEL',
+  'CELESTIAL GATE', 'VOID EXPANSE', 'THE THRONE',
 ];
 
-const ZONE_COLORS = ['#1a1a1a', '#1a0f00', '#0d0900', '#080610', '#050310', '#000000'];
+const ZONE_COLORS = ['#050508', '#0d0800', '#080808', '#060410', '#030208', '#000000'];
 
 const LORE: string[] = [
   'Week 1: The descent begins. You carry nothing but will.',
-  'Week 2: The cavern walls press close. You press back.',
+  'Week 2: The abyss walls press close. You press back.',
   'Week 3: Light fades. You become the light.',
   'Week 4: The surface. You have earned the sun.',
   'Week 5: Ruins stretch before you. Others fell here.',
   'Week 6: You walk where kingdoms died.',
   'Week 7: Bronze ashes. Your path is different.',
   'Week 8: The forge still burns. You step in.',
-  'Week 9: Mountains. The kind that break men.',
-  'Week 10: Storm. The kind that reveals character.',
-  'Week 11: Iron sky. Iron will. One remains.',
-  'Week 12: The peak. From here, everything looks small.',
-  'Week 13: The clouds part. You were always above this.',
-  'Week 14: Castle walls. They built them to keep you out.',
-  'Week 15: The gates open. You were expected.',
-  'Week 16: The throne room. It has been waiting.',
-  'Week 17: Stars. The System reveals its full scope.',
+  'Week 9: Iron sky. Iron will. One remains.',
+  'Week 10: Storm reveals character. Storm passes.',
+  'Week 11: The citadel walls. You built them.',
+  'Week 12: The peak. Everything looks small from here.',
+  'Week 13: The clouds part. You were above this.',
+  'Week 14: Gates of the celestial plane open.',
+  'Week 15: You were expected.',
+  'Week 16: The throne room has been waiting.',
+  'Week 17: Stars. The System reveals its scope.',
   'Week 18: Constellations form in your name.',
   'Week 19: The void between stars. You cross it.',
   'Week 20: Light bends around you now.',
   'Week 21: The final path. Each step is legend.',
-  'Week 22: The System marks your progress.',
-  'Week 23: One more. The last wall.',
-  'Week 24: The divine throne. You have arrived.',
+  'Week 22: The System marks your approach.',
+  'Week 23: One wall remains. The last.',
+  'Week 24: THE DIVINE THRONE. You have arrived.',
 ];
 
-interface NodeTheme {
-  accent: string;
-  text: string;
-  textSecondary: string;
-  primary: string;
+const { width } = Dimensions.get('window');
+
+function NodeSvg({ num, pct, isCurrent, isLocked, isComplete, color }: {
+  num: number; pct: number; isCurrent: boolean; isLocked: boolean; isComplete: boolean; color: string;
+}) {
+  const size = 68;
+  const cx = size / 2;
+  const r = 28;
+  const pts = Array.from({ length: 6 }, (_, i) => {
+    const a = (Math.PI / 3) * i - Math.PI / 6;
+    return `${cx + r * Math.cos(a)},${cx + r * Math.sin(a)}`;
+  }).join(' ');
+
+  const fillColor = isComplete ? color + '30' : isCurrent ? color + '20' : isLocked ? '#111' : '#0a0a0a';
+  const strokeColor = isLocked ? '#333' : color;
+  const strokeW = isCurrent ? 2 : isComplete ? 1.5 : 1;
+
+  return (
+    <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+      <Polygon points={pts} fill={fillColor} stroke={strokeColor} strokeWidth={strokeW} strokeOpacity={isLocked ? 0.4 : 1} />
+      {isCurrent && (
+        <Circle cx={cx} cy={cx} r={4} fill={color} />
+      )}
+      {isComplete && !isCurrent && (
+        <Polygon
+          points={`${cx},${cx - 8} ${cx + 7},${cx + 4} ${cx - 7},${cx + 4}`}
+          fill={color}
+          fillOpacity="0.8"
+        />
+      )}
+    </Svg>
+  );
 }
 
-function NodeRow({
-  nodeNum, completionRate, isCurrent, isLocked, onPress, theme,
-}: {
-  nodeNum: number;
-  completionRate: number;
-  isCurrent: boolean;
-  isLocked: boolean;
-  onPress: () => void;
-  theme: NodeTheme;
+function PathConnector({ isUnlocked, color, isLeft }: { isUnlocked: boolean; color: string; isLeft: boolean }) {
+  return (
+    <View style={[connStyles.line, { backgroundColor: isUnlocked ? color + '50' : '#2a2a2a' }]}>
+      {isUnlocked && (
+        <View style={[connStyles.dot, { backgroundColor: color, right: isLeft ? 0 : undefined, left: isLeft ? undefined : 0 }]} />
+      )}
+    </View>
+  );
+}
+
+const connStyles = StyleSheet.create({
+  line: { flex: 1, height: 1.5, position: 'relative' },
+  dot: { position: 'absolute', top: -2, width: 5, height: 5, borderRadius: 2.5 },
+});
+
+function NodeRow({ nodeNum, completionRate, isCurrent, isLocked, onPress, theme }: {
+  nodeNum: number; completionRate: number; isCurrent: boolean; isLocked: boolean;
+  onPress: () => void; theme: { accent: string; textSecondary: string; text: string };
 }) {
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
@@ -65,8 +103,8 @@ function NodeRow({
     if (!isCurrent) return;
     const loop = Animated.loop(
       Animated.sequence([
-        Animated.timing(pulseAnim, { toValue: 1.2, duration: 800, useNativeDriver: true }),
-        Animated.timing(pulseAnim, { toValue: 1, duration: 800, useNativeDriver: true }),
+        Animated.timing(pulseAnim, { toValue: 1.12, duration: 900, useNativeDriver: true }),
+        Animated.timing(pulseAnim, { toValue: 1, duration: 900, useNativeDriver: true }),
       ])
     );
     loop.start();
@@ -74,28 +112,36 @@ function NodeRow({
   }, [isCurrent, pulseAnim]);
 
   const isLeft = nodeNum % 2 === 1;
+  const isComplete = !isCurrent && !isLocked && completionRate >= 0.5;
   const pct = Math.round(completionRate * 100);
 
   return (
     <View style={[styles.nodeRow, { justifyContent: isLeft ? 'flex-start' : 'flex-end' }]}>
-      <TouchableOpacity onPress={onPress} disabled={isLocked}>
-        <Animated.View
-          style={[
-            styles.nodeCircle,
-            {
-              borderColor: isLocked ? '#444444' : isCurrent ? theme.accent : theme.accent + '80',
-              backgroundColor: isLocked ? '#222222' : isCurrent ? theme.accent + '30' : completionRate >= 0.7 ? theme.accent + '20' : 'transparent',
-              transform: [{ scale: isCurrent ? pulseAnim : 1 }],
-            },
-          ]}
-        >
-          <Text style={[styles.nodeNum, { color: isLocked ? '#444444' : theme.accent }]}>{nodeNum}</Text>
-          {!isLocked && <Text style={[styles.nodePct, { color: theme.textSecondary }]}>{pct}%</Text>}
-          {isLocked && <Text style={[styles.nodeLock, { color: '#444444' }]}>🔒</Text>}
-          {isCurrent && <View style={[styles.currentDot, { backgroundColor: theme.accent }]} />}
+      {!isLeft && <PathConnector isUnlocked={!isLocked} color={theme.accent} isLeft={false} />}
+
+      <TouchableOpacity onPress={onPress} disabled={isLocked} activeOpacity={0.7}>
+        <Animated.View style={{ transform: [{ scale: isCurrent ? pulseAnim : 1 }] }}>
+          <View style={styles.nodeWrap}>
+            <NodeSvg
+              num={nodeNum}
+              pct={pct}
+              isCurrent={isCurrent}
+              isLocked={isLocked}
+              isComplete={isComplete}
+              color={theme.accent}
+            />
+            <Text style={[styles.nodeNum, { color: isLocked ? '#444' : theme.accent }]}>{nodeNum}</Text>
+            {!isLocked && (
+              <Text style={[styles.nodePct, { color: isLocked ? '#333' : theme.textSecondary }]}>
+                {pct}%
+              </Text>
+            )}
+            {isLocked && <Text style={styles.nodeLock}>🔒</Text>}
+          </View>
         </Animated.View>
       </TouchableOpacity>
-      <View style={[styles.pathLine, { backgroundColor: isLocked ? '#333333' : theme.accent + '40' }]} />
+
+      {isLeft && <PathConnector isUnlocked={!isLocked} color={theme.accent} isLeft={true} />}
     </View>
   );
 }
@@ -121,19 +167,44 @@ export default function AscensionPath() {
 
   const daysElapsed = differenceInCalendarDays(new Date(), parseISO(hero.journey_start_date));
   const currentWeek = Math.min(Math.floor(daysElapsed / 7) + 1, TOTAL_NODES);
+  const overallRate = completionRates.slice(0, currentWeek).reduce((s, r) => s + r, 0) / Math.max(currentWeek, 1);
+
+  const selectedRate = selectedNode ? (completionRates[selectedNode - 1] ?? 0) : 0;
+  const zoneIdx = selectedNode ? Math.floor((selectedNode - 1) / 4) : 0;
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <View style={styles.header}>
-        <Text style={[styles.title, { color: theme.text }]}>ASCENSION PATH</Text>
-        <Text style={[styles.subtitle, { color: theme.textSecondary }]}>WEEK {currentWeek} OF {TOTAL_NODES}</Text>
+      {/* Header */}
+      <View style={[styles.header, { borderBottomColor: theme.accent + '30' }]}>
+        <View style={styles.headerTop}>
+          <Text style={[styles.title, { color: theme.text }]}>ASCENSION PATH</Text>
+          <View style={[styles.weekBadge, { borderColor: theme.accent + '70', backgroundColor: theme.accent + '10' }]}>
+            <Text style={[styles.weekNum, { color: theme.accent }]}>{currentWeek}</Text>
+            <Text style={[styles.weekOf, { color: theme.textSecondary }]}>/{TOTAL_NODES}</Text>
+          </View>
+        </View>
+        <View style={styles.headerBar}>
+          <View style={[styles.headerBarBg, { backgroundColor: '#111' }]}>
+            <View style={[styles.headerBarFill, {
+              width: `${(currentWeek / TOTAL_NODES) * 100}%`,
+              backgroundColor: theme.accent,
+            }]} />
+          </View>
+          <Text style={[styles.headerPct, { color: theme.textSecondary }]}>
+            {Math.round(overallRate * 100)}% AVG
+          </Text>
+        </View>
       </View>
 
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.pathContainer} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.pathWrap}
+        showsVerticalScrollIndicator={false}
+      >
         {Array.from({ length: TOTAL_NODES }, (_, i) => {
           const nodeNum = TOTAL_NODES - i;
-          const zoneIdx = Math.floor((nodeNum - 1) / 4);
-          const zoneColor = ZONE_COLORS[zoneIdx] ?? '#000000';
+          const zoneI = Math.floor((nodeNum - 1) / 4);
+          const zoneColor = ZONE_COLORS[zoneI] ?? '#000';
           const isCurrent = nodeNum === currentWeek;
           const isLocked = nodeNum > currentWeek;
           const rate = completionRates[nodeNum - 1] ?? 0;
@@ -141,9 +212,13 @@ export default function AscensionPath() {
           return (
             <View key={nodeNum} style={[styles.zoneSection, { backgroundColor: zoneColor }]}>
               {nodeNum % 4 === 1 && (
-                <Text style={[styles.zoneLabel, { color: '#555555' }]}>
-                  {ZONE_LABELS[zoneIdx] ?? ''}
-                </Text>
+                <View style={styles.zoneLabelWrap}>
+                  <View style={[styles.zoneLabelLine, { backgroundColor: theme.accent + '20' }]} />
+                  <Text style={[styles.zoneLabel, { color: theme.accent + '50' }]}>
+                    {ZONE_LABELS[zoneI] ?? ''}
+                  </Text>
+                  <View style={[styles.zoneLabelLine, { backgroundColor: theme.accent + '20' }]} />
+                </View>
               )}
               <NodeRow
                 nodeNum={nodeNum}
@@ -156,30 +231,67 @@ export default function AscensionPath() {
             </View>
           );
         })}
+        <View style={{ height: 32 }} />
       </ScrollView>
 
+      {/* Node detail modal */}
       <Modal
         visible={selectedNode !== null}
         transparent
         animationType="fade"
         onRequestClose={() => setSelectedNode(null)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalBox, { backgroundColor: theme.background, borderColor: theme.accent }]}>
-            <Text style={[styles.modalTitle, { color: theme.accent }]}>WEEK {selectedNode}</Text>
-            <Text style={[styles.modalLore, { color: theme.text }]}>
-              {selectedNode ? LORE[selectedNode - 1] : ''}
-            </Text>
-            {selectedNode && (
-              <Text style={[styles.modalPct, { color: theme.textSecondary }]}>
-                Completion: {Math.round((completionRates[selectedNode - 1] ?? 0) * 100)}%
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setSelectedNode(null)}
+        >
+          <CornerFrame
+            color={theme.accent}
+            size={16}
+            thickness={2}
+            style={[styles.modalBox, { backgroundColor: '#050505' }]}
+          >
+            <TouchableOpacity activeOpacity={1} style={styles.modalInner}>
+              <View style={styles.modalTopRow}>
+                <Text style={[styles.modalWeek, { color: theme.accent }]}>
+                  WEEK {selectedNode}
+                </Text>
+                <Text style={[styles.modalZone, { color: theme.textSecondary }]}>
+                  {ZONE_LABELS[zoneIdx] ?? ''}
+                </Text>
+              </View>
+
+              <View style={[styles.modalDivider, { backgroundColor: theme.accent + '40' }]} />
+
+              <Text style={[styles.modalLore, { color: theme.text }]}>
+                {selectedNode ? LORE[selectedNode - 1] : ''}
               </Text>
-            )}
-            <TouchableOpacity style={[styles.modalClose, { borderColor: theme.accent }]} onPress={() => setSelectedNode(null)}>
-              <Text style={[styles.modalCloseText, { color: theme.accent }]}>CLOSE</Text>
+
+              <View style={styles.modalStats}>
+                <View style={[styles.modalStatBox, { borderColor: theme.accent + '50' }]}>
+                  <Text style={[styles.modalStatVal, { color: theme.accent }]}>
+                    {Math.round(selectedRate * 100)}%
+                  </Text>
+                  <Text style={[styles.modalStatLabel, { color: theme.textSecondary }]}>COMPLETION</Text>
+                </View>
+                <View style={[styles.modalStatBox, { borderColor: theme.accent + '50' }]}>
+                  <Text style={[styles.modalStatVal, { color: selectedNode === currentWeek ? theme.accent : theme.textSecondary }]}>
+                    {selectedNode === currentWeek ? 'NOW' : selectedNode !== null && selectedNode > currentWeek ? 'LOCKED' : 'DONE'}
+                  </Text>
+                  <Text style={[styles.modalStatLabel, { color: theme.textSecondary }]}>STATUS</Text>
+                </View>
+              </View>
+
+              <TouchableOpacity
+                style={[styles.modalClose, { borderColor: theme.accent + '70' }]}
+                onPress={() => setSelectedNode(null)}
+              >
+                <Text style={[styles.modalCloseTxt, { color: theme.accent }]}>CLOSE</Text>
+              </TouchableOpacity>
             </TouchableOpacity>
-          </View>
-        </View>
+          </CornerFrame>
+        </TouchableOpacity>
       </Modal>
     </View>
   );
@@ -187,25 +299,104 @@ export default function AscensionPath() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: { paddingTop: 48, paddingHorizontal: 16, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: '#333333' },
-  title: { fontSize: 14, fontWeight: 'bold', letterSpacing: 3 },
-  subtitle: { fontSize: 10, marginTop: 2, letterSpacing: 2 },
+
+  header: {
+    paddingTop: 44,
+    paddingHorizontal: 16,
+    paddingBottom: 14,
+    borderBottomWidth: 1,
+    gap: 10,
+  },
+  headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  title: { fontSize: 16, fontWeight: 'bold', letterSpacing: 4 },
+  weekBadge: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    borderWidth: 1,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    gap: 2,
+  },
+  weekNum: { fontSize: 22, fontWeight: 'bold' },
+  weekOf: { fontSize: 13 },
+  headerBar: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  headerBarBg: { flex: 1, height: 4, overflow: 'hidden' },
+  headerBarFill: { height: 4 },
+  headerPct: { fontSize: 11, letterSpacing: 1 },
+
   scroll: { flex: 1 },
-  pathContainer: { paddingBottom: 32 },
-  zoneSection: { paddingVertical: 4 },
-  zoneLabel: { fontSize: 9, letterSpacing: 3, paddingHorizontal: 16, paddingVertical: 4, textAlign: 'center' },
-  nodeRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 32, marginVertical: 8 },
-  nodeCircle: { width: 72, height: 72, borderRadius: 36, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
-  nodeNum: { fontSize: 18, fontWeight: 'bold' },
-  nodePct: { fontSize: 9 },
-  nodeLock: { fontSize: 14 },
-  currentDot: { position: 'absolute', bottom: 6, width: 8, height: 8, borderRadius: 4 },
-  pathLine: { flex: 1, height: 2, marginHorizontal: 8 },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'center', alignItems: 'center' },
-  modalBox: { width: 300, padding: 24, borderWidth: 2 },
-  modalTitle: { fontSize: 14, fontWeight: 'bold', letterSpacing: 2, marginBottom: 12 },
-  modalLore: { fontSize: 12, lineHeight: 20, marginBottom: 12 },
-  modalPct: { fontSize: 10, marginBottom: 16 },
-  modalClose: { borderWidth: 1, padding: 10, alignItems: 'center' },
-  modalCloseText: { fontSize: 11, fontWeight: 'bold', letterSpacing: 2 },
+  pathWrap: { paddingBottom: 16 },
+
+  zoneSection: { paddingVertical: 2 },
+  zoneLabelWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+    gap: 8,
+  },
+  zoneLabelLine: { flex: 1, height: 1 },
+  zoneLabel: { fontSize: 9, letterSpacing: 3, fontWeight: 'bold' },
+
+  nodeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    marginVertical: 6,
+  },
+  nodeWrap: {
+    width: 68,
+    height: 68,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  nodeNum: {
+    position: 'absolute',
+    fontSize: 18,
+    fontWeight: 'bold',
+    top: 14,
+  },
+  nodePct: {
+    position: 'absolute',
+    fontSize: 10,
+    bottom: 12,
+  },
+  nodeLock: {
+    position: 'absolute',
+    fontSize: 14,
+    bottom: 12,
+  },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.88)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalBox: {
+    width: Math.min(width * 0.85, 320),
+  },
+  modalInner: { padding: 24, gap: 14 },
+  modalTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' },
+  modalWeek: { fontSize: 22, fontWeight: 'bold', letterSpacing: 2 },
+  modalZone: { fontSize: 10, letterSpacing: 2 },
+  modalDivider: { height: 1 },
+  modalLore: { fontSize: 14, lineHeight: 22, letterSpacing: 0.3 },
+  modalStats: { flexDirection: 'row', gap: 10 },
+  modalStatBox: {
+    flex: 1,
+    borderWidth: 1,
+    padding: 12,
+    alignItems: 'center',
+    gap: 4,
+  },
+  modalStatVal: { fontSize: 20, fontWeight: 'bold' },
+  modalStatLabel: { fontSize: 10, letterSpacing: 1 },
+  modalClose: {
+    borderWidth: 1,
+    padding: 12,
+    alignItems: 'center',
+  },
+  modalCloseTxt: { fontSize: 12, fontWeight: 'bold', letterSpacing: 2 },
 });

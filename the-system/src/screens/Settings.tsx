@@ -86,7 +86,7 @@ export default function Settings() {
   };
 
   const handleResetJourney = async () => {
-    if (resetConfirm !== 'I ACCEPT THE RESET') {
+    if (resetConfirm.trim() !== 'I ACCEPT THE RESET') {
       Alert.alert('TYPE THE PHRASE', 'Type exactly: I ACCEPT THE RESET');
       return;
     }
@@ -99,15 +99,20 @@ export default function Settings() {
           text: 'RESET',
           style: 'destructive',
           onPress: async () => {
-            const { getDb } = await import('../db/database');
-            const db = getDb();
-            await db.runAsync('DELETE FROM hero');
-            await db.runAsync('DELETE FROM discipline_logs');
-            await db.runAsync('DELETE FROM silence_streak');
-            await db.runAsync('DELETE FROM cosmetics');
-            await db.runAsync('DELETE FROM mandates');
-            await db.runAsync("DELETE FROM system_state WHERE key != 'notification_interval'");
-            await initialize();
+            try {
+              const { getDb } = await import('../db/database');
+              const db = getDb();
+              await db.runAsync('DELETE FROM hero');
+              await db.runAsync('DELETE FROM discipline_logs');
+              await db.runAsync('DELETE FROM silence_streak');
+              await db.runAsync('DELETE FROM cosmetics');
+              await db.runAsync('DELETE FROM mandates');
+              await db.runAsync("DELETE FROM system_state WHERE key != 'notification_interval'");
+              setResetConfirm('');
+              await initialize();
+            } catch (err) {
+              Alert.alert('RESET ERROR', String(err));
+            }
           },
         },
       ]
@@ -204,19 +209,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     padding: 16, paddingTop: 48, borderBottomWidth: 1, borderBottomColor: '#333',
   },
-  title: { fontSize: 14, fontWeight: 'bold', letterSpacing: 3 },
-  closeBtn: { fontSize: 18, padding: 4 },
+  title: { fontSize: 17, fontWeight: 'bold', letterSpacing: 3 },
+  closeBtn: { fontSize: 20, padding: 4 },
   scroll: { flex: 1, padding: 16 },
-  sectionHeader: { fontSize: 10, fontWeight: 'bold', letterSpacing: 3, marginTop: 24, marginBottom: 12 },
-  label: { fontSize: 11, marginBottom: 8 },
+  sectionHeader: { fontSize: 12, fontWeight: 'bold', letterSpacing: 3, marginTop: 24, marginBottom: 12 },
+  label: { fontSize: 13, marginBottom: 8 },
   intervalRow: { flexDirection: 'row', gap: 8, marginBottom: 16 },
-  intervalBtn: { borderWidth: 1, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 2 },
-  intervalText: { fontSize: 11, fontWeight: 'bold' },
-  infoText: { fontSize: 12, marginBottom: 6 },
-  input: { borderWidth: 1, borderRadius: 2, padding: 8, marginBottom: 12, fontSize: 12 },
+  intervalBtn: { borderWidth: 1, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 2 },
+  intervalText: { fontSize: 13, fontWeight: 'bold' },
+  infoText: { fontSize: 14, marginBottom: 6 },
+  input: { borderWidth: 1, borderRadius: 2, padding: 10, marginBottom: 12, fontSize: 14 },
   resetButton: { padding: 14, alignItems: 'center', borderRadius: 2, marginBottom: 16 },
-  resetText: { color: '#fff', fontSize: 12, fontWeight: 'bold', letterSpacing: 2 },
+  resetText: { color: '#fff', fontSize: 14, fontWeight: 'bold', letterSpacing: 2 },
   bottomPadding: { height: 64 },
-  exportButton: { borderWidth: 1, padding: 12, alignItems: 'center', marginBottom: 8 },
-  exportText: { fontSize: 11, fontWeight: 'bold', letterSpacing: 2 },
+  exportButton: { borderWidth: 1, padding: 14, alignItems: 'center', marginBottom: 8 },
+  exportText: { fontSize: 13, fontWeight: 'bold', letterSpacing: 2 },
 });
