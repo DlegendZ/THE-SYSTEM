@@ -24,7 +24,7 @@ describe('avatarData', () => {
   });
 
   it('getPalette returns palette with required keys for all classes and tiers', () => {
-    const requiredKeys = ['S', 'F', 'H', 'A', 'L', 'B', 'D'];
+    const requiredKeys = ['S', 'F', 'H', 'A', 'V', 'L', 'B', 'D', 'G'];
     for (const cls of CLASSES) {
       for (const tier of TIERS) {
         const palette = getPalette(cls, tier);

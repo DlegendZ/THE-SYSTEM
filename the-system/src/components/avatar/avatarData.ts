@@ -316,7 +316,10 @@ export function getPalette(heroClass: HeroClass, tier: ArmorTier): Record<string
   return roguePalette(tier);
 }
 
-export function getWeaponOverlay(heroClass: HeroClass, weaponTier: ArmorTier) {
+export function getWeaponOverlay(
+  heroClass: HeroClass,
+  weaponTier: ArmorTier
+): { pixels: OverlayRow[]; colors: Record<string, string> } {
   if (heroClass === 'Warrior') return WARRIOR_WEAPON_OVERLAYS[weaponTier];
   if (heroClass === 'Mage') return MAGE_WEAPON_OVERLAYS[weaponTier];
   return ROGUE_WEAPON_OVERLAYS[weaponTier];
