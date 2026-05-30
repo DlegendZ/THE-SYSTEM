@@ -135,6 +135,13 @@ export default function CommandHall() {
             />
           );
         })}
+        {/* Shield Protocol Button */}
+        <TouchableOpacity
+          style={[styles.shieldButton, { backgroundColor: '#1a0000', borderColor: '#ff4444' }]}
+          onPress={() => navigation.navigate('ShieldOverlay')}
+        >
+          <Text style={styles.shieldButtonText}>🛡 SHIELD PROTOCOL</Text>
+        </TouchableOpacity>
       </ScrollView>
     </View>
   );
@@ -163,4 +170,6 @@ const styles = StyleSheet.create({
   streakLabel: { fontSize: 10, marginTop: 2 },
   questLog: { flex: 1, marginTop: 8 },
   sectionTitle: { fontSize: 12, fontWeight: 'bold', paddingHorizontal: 16, marginBottom: 8 },
+  shieldButton: { margin: 16, marginBottom: 8, padding: 16, borderWidth: 2, alignItems: 'center' },
+  shieldButtonText: { color: '#ff4444', fontSize: 13, fontWeight: 'bold', letterSpacing: 2 },
 });

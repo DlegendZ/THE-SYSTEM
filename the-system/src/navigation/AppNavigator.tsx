@@ -15,6 +15,7 @@ import Awakening from '../screens/Awakening';
 import MandateReveal from '../screens/MandateReveal';
 import LevelUpSplash from '../screens/LevelUpSplash';
 import Settings from '../screens/Settings';
+import ShieldOverlay from '../screens/ShieldOverlay';
 
 const Stack = createStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator();
@@ -121,6 +122,11 @@ export default function AppNavigator() {
               name="Settings"
               component={Settings}
               options={{ presentation: 'modal' }}
+            />
+            <Stack.Screen
+              name="ShieldOverlay"
+              component={ShieldOverlay}
+              options={{ presentation: 'transparentModal', cardStyle: { backgroundColor: 'transparent' } }}
             />
           </>
         )}

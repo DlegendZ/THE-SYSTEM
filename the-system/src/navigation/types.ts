@@ -9,4 +9,5 @@ export type RootStackParamList = {
     newRank: string;
   };
   Settings: undefined;
+  ShieldOverlay: undefined;
 };
