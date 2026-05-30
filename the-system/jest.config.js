@@ -13,6 +13,7 @@ module.exports = {
     '^expo-sqlite$': '<rootDir>/__mocks__/expo-sqlite.js',
     '^expo-notifications$': '<rootDir>/__mocks__/expo-notifications.js',
     '^react-native-svg$': '<rootDir>/__mocks__/react-native-svg.js',
+    '^react-native$': '<rootDir>/__mocks__/react-native.js',
   },
   transformIgnorePatterns: [
     'node_modules/(?!(react-native|@react-native|react-native-svg|expo.*|@expo.*)/)',
