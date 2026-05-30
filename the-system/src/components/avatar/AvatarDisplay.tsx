@@ -79,7 +79,11 @@ export default function AvatarDisplay({
 
 function blendColor(base: string, target: string, ratio: number): string {
   const parse = (hex: string) => {
-    const h = hex.replace('#', '');
+    const raw = hex.replace('#', '');
+    // Expand 3-char shorthand: 'abc' → 'aabbcc'
+    const h = raw.length === 3
+      ? raw[0] + raw[0] + raw[1] + raw[1] + raw[2] + raw[2]
+      : raw;
     return [
       parseInt(h.slice(0, 2), 16),
       parseInt(h.slice(2, 4), 16),

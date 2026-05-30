@@ -68,6 +68,18 @@ describe('AvatarDisplay', () => {
     );
   });
 
+  it('applies no opacity change for radiant mood', () => {
+    let tree: renderer.ReactTestRenderer;
+    renderer.act(() => {
+      tree = renderer.create(<AvatarDisplay heroClass="Warrior" rank="S" mood="radiant" />);
+    });
+    const json = tree!.toJSON() as renderer.ReactTestRendererJSON;
+    expect(json).not.toBeNull();
+    expect(json.props.style).toEqual(
+      expect.arrayContaining([expect.objectContaining({ opacity: 1.0 })])
+    );
+  });
+
   it('accepts custom pixelSize', () => {
     let tree: renderer.ReactTestRenderer;
     renderer.act(() => {
