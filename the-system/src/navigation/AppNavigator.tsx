@@ -16,6 +16,7 @@ import MandateReveal from '../screens/MandateReveal';
 import LevelUpSplash from '../screens/LevelUpSplash';
 import Settings from '../screens/Settings';
 import ShieldOverlay from '../screens/ShieldOverlay';
+import SRankCutscene from '../screens/SRankCutscene';
 
 const Stack = createStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator();
@@ -127,6 +128,11 @@ export default function AppNavigator() {
               name="ShieldOverlay"
               component={ShieldOverlay}
               options={{ presentation: 'transparentModal', cardStyle: { backgroundColor: 'transparent' } }}
+            />
+            <Stack.Screen
+              name="SRankCutscene"
+              component={SRankCutscene}
+              options={{ presentation: 'transparentModal', cardStyle: { backgroundColor: '#000000' } }}
             />
           </>
         )}

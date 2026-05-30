@@ -5,6 +5,11 @@ jest.mock('@react-navigation/native', () => ({
   useNavigation: () => ({ navigate: jest.fn() }),
 }));
 
+jest.mock('../../src/audio/sounds', () => ({
+  playSound: jest.fn().mockResolvedValue(undefined),
+  preloadSounds: jest.fn().mockResolvedValue(undefined),
+}));
+
 jest.mock('../../src/store/useSystemStore', () => ({
   useSystemStore: () => ({
     hero: {
