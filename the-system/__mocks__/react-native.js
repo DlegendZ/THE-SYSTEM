@@ -64,6 +64,9 @@ const Image = ({ style, source, ...props }) =>
 const TextInput = ({ style, value, onChangeText, placeholder, placeholderTextColor, ...props }) =>
   React.createElement('TextInput', { style, value, onChangeText, placeholder, ...props });
 
+const Modal = ({ children, visible, transparent, animationType, onRequestClose, ...props }) =>
+  visible ? React.createElement('Modal', { transparent, animationType, onRequestClose, ...props }, children) : null;
+
 module.exports = {
   View,
   Text,
@@ -77,4 +80,5 @@ module.exports = {
   Animated,
   Image,
   TextInput,
+  Modal,
 };
