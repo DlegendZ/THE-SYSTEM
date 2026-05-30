@@ -22,19 +22,24 @@ export default function MandateChest({ tier, onPress, size = 48 }: Props): React
   const c = TIER_COLORS[tier];
 
   useEffect(() => {
-    Animated.loop(
+    const glowLoop = Animated.loop(
       Animated.sequence([
         Animated.timing(glowAnim, { toValue: 1, duration: 800, useNativeDriver: true }),
         Animated.timing(glowAnim, { toValue: 0, duration: 800, useNativeDriver: true }),
       ])
-    ).start();
-
-    Animated.loop(
+    );
+    const bounceLoop = Animated.loop(
       Animated.sequence([
         Animated.timing(bounceAnim, { toValue: -4, duration: 600, useNativeDriver: true }),
         Animated.timing(bounceAnim, { toValue: 0, duration: 600, useNativeDriver: true }),
       ])
-    ).start();
+    );
+    glowLoop.start();
+    bounceLoop.start();
+    return () => {
+      glowLoop.stop();
+      bounceLoop.stop();
+    };
   }, []);
 
   const glowOpacity = glowAnim.interpolate({ inputRange: [0, 1], outputRange: [0.3, 1.0] });

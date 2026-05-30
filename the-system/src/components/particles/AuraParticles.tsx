@@ -32,11 +32,11 @@ function createParticle(color: string, w: number, h: number, i: number): Particl
   };
 }
 
-function animateParticle(p: Particle, type: string, w: number, h: number): void {
+function animateParticle(p: Particle, type: string, w: number, h: number): Animated.CompositeAnimation {
   const duration = 2000 + Math.random() * 3000;
 
   if (type === 'dust') {
-    Animated.loop(
+    return Animated.loop(
       Animated.sequence([
         Animated.parallel([
           Animated.timing(p.opacity, { toValue: 0.4, duration: duration * 0.3, useNativeDriver: true }),
@@ -48,9 +48,9 @@ function animateParticle(p: Particle, type: string, w: number, h: number): void 
         ]),
         Animated.timing(p.opacity, { toValue: 0, duration: duration * 0.3, useNativeDriver: true }),
       ])
-    ).start();
+    );
   } else if (type === 'embers') {
-    Animated.loop(
+    return Animated.loop(
       Animated.sequence([
         Animated.delay(p.delay),
         Animated.parallel([
@@ -68,9 +68,9 @@ function animateParticle(p: Particle, type: string, w: number, h: number): void 
         ]),
         Animated.timing(p.opacity, { toValue: 0, duration: 300, useNativeDriver: true }),
       ])
-    ).start();
+    );
   } else if (type === 'gold_sparks' || type === 'gold_streaks') {
-    Animated.loop(
+    return Animated.loop(
       Animated.sequence([
         Animated.delay(p.delay),
         Animated.parallel([
@@ -83,15 +83,15 @@ function animateParticle(p: Particle, type: string, w: number, h: number): void 
         ]),
         Animated.timing(p.opacity, { toValue: 0, duration: 400, useNativeDriver: true }),
       ])
-    ).start();
+    );
   } else {
-    Animated.loop(
+    return Animated.loop(
       Animated.sequence([
         Animated.delay(p.delay),
         Animated.timing(p.opacity, { toValue: 0.6, duration: 1000, useNativeDriver: true }),
         Animated.timing(p.opacity, { toValue: 0, duration: 1000, useNativeDriver: true }),
       ])
-    ).start();
+    );
   }
 }
 
@@ -109,7 +109,14 @@ export default function AuraParticles({
     particlesRef.current = Array.from({ length: particleCount }, (_, i) =>
       createParticle(color, width, height, i)
     );
-    particlesRef.current.forEach((p) => animateParticle(p, particleType, width, height));
+    const anims = particlesRef.current.map((p) => {
+      const anim = animateParticle(p, particleType, width, height);
+      anim.start();
+      return anim;
+    });
+    return () => {
+      anims.forEach((a) => a.stop());
+    };
   }, [particleType, particleCount, color, width, height]);
 
   return (

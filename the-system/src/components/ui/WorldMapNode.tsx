@@ -16,13 +16,16 @@ export default function WorldMapNode({ weekNumber, status, completionPct = 0, on
 
   useEffect(() => {
     if (status === 'current') {
-      Animated.loop(
+      const anim = Animated.loop(
         Animated.sequence([
           Animated.timing(pulseAnim, { toValue: 1, duration: 1000, useNativeDriver: true }),
           Animated.timing(pulseAnim, { toValue: 0, duration: 1000, useNativeDriver: true }),
         ])
-      ).start();
+      );
+      anim.start();
+      return () => anim.stop();
     }
+    return undefined;
   }, [status]);
 
   const pulseOpacity = pulseAnim.interpolate({ inputRange: [0, 1], outputRange: [0.3, 0.8] });

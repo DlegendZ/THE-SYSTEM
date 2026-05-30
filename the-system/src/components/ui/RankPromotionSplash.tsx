@@ -37,12 +37,16 @@ export default function RankPromotionSplash({ rank, title, onDismiss }: Props): 
       ]),
     ]).start();
 
-    Animated.loop(
+    const rayLoop = Animated.loop(
       Animated.timing(rayRotate, { toValue: 1, duration: 8000, useNativeDriver: true })
-    ).start();
+    );
+    rayLoop.start();
 
     const timer = setTimeout(onDismiss, 4000);
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      rayLoop.stop();
+    };
   }, []);
 
   const spin = rayRotate.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] });
