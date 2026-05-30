@@ -6,6 +6,10 @@ import { useNavigation } from '@react-navigation/native';
 import { useSystemStore } from '../store/useSystemStore';
 import { getSystemState, setSystemState } from '../db/queries';
 import { differenceInCalendarDays, parseISO } from 'date-fns';
+// expo-file-system v18+ moved legacy APIs to expo-file-system/legacy
+import * as FileSystem from 'expo-file-system/legacy';
+import * as Sharing from 'expo-sharing';
+import { getDb } from '../db/database';
 
 type Nav = { goBack: () => void };
 
@@ -34,6 +38,51 @@ export default function Settings() {
   const saveInterval = async (v: number) => {
     setNotifInterval(v);
     await setSystemState('notification_interval', String(v));
+  };
+
+  const handleExport = async () => {
+    try {
+      const db = getDb();
+      const hero = await db.getAllAsync('SELECT * FROM hero');
+      const disciplines = await db.getAllAsync('SELECT * FROM disciplines');
+      const logs = await db.getAllAsync('SELECT * FROM discipline_logs ORDER BY log_date DESC LIMIT 1000');
+      const silenceStreak = await db.getAllAsync('SELECT * FROM silence_streak');
+      const mandates = await db.getAllAsync('SELECT * FROM mandates');
+      const cosmetics = await db.getAllAsync('SELECT * FROM cosmetics');
+      const systemState = await db.getAllAsync('SELECT * FROM system_state');
+
+      const exportData = {
+        exportedAt: new Date().toISOString(),
+        version: 1,
+        hero,
+        disciplines,
+        logs,
+        silenceStreak,
+        mandates,
+        cosmetics,
+        systemState,
+      };
+
+      const json = JSON.stringify(exportData, null, 2);
+      const fileName = `the-system-export-${new Date().toISOString().slice(0, 10)}.json`;
+      const filePath = `${FileSystem.documentDirectory}${fileName}`;
+
+      await FileSystem.writeAsStringAsync(filePath, json, {
+        encoding: FileSystem.EncodingType.UTF8,
+      });
+
+      const canShare = await Sharing.isAvailableAsync();
+      if (canShare) {
+        await Sharing.shareAsync(filePath, {
+          mimeType: 'application/json',
+          dialogTitle: 'Export THE SYSTEM Data',
+        });
+      } else {
+        Alert.alert('EXPORTED', `Saved to: ${filePath}`);
+      }
+    } catch (err) {
+      Alert.alert('EXPORT ERROR', String(err));
+    }
   };
 
   const handleResetJourney = async () => {
@@ -110,6 +159,20 @@ export default function Settings() {
         <Text style={[styles.infoText, { color: theme.text }]}>Journey start: {hero?.journey_start_date ?? '—'}</Text>
         <Text style={[styles.infoText, { color: theme.text }]}>Day {journeyDays} of 180</Text>
 
+        {/* Data */}
+        <Text style={[styles.sectionHeader, { color: theme.accent }]}>DATA</Text>
+        <TouchableOpacity
+          style={[styles.exportButton, { borderColor: theme.accent }]}
+          onPress={handleExport}
+        >
+          <Text style={[styles.exportText, { color: theme.accent }]}>
+            EXPORT DATA (JSON)
+          </Text>
+        </TouchableOpacity>
+        <Text style={[styles.label, { color: theme.textSecondary }]}>
+          Exports all progress to a JSON file for manual backup.
+        </Text>
+
         <Text style={[styles.sectionHeader, { color: '#ff4444' }]}>DANGER ZONE</Text>
         <Text style={[styles.label, { color: theme.textSecondary }]}>
           Type "I ACCEPT THE RESET" to enable reset:
@@ -154,4 +217,6 @@ const styles = StyleSheet.create({
   resetButton: { padding: 14, alignItems: 'center', borderRadius: 2, marginBottom: 16 },
   resetText: { color: '#fff', fontSize: 12, fontWeight: 'bold', letterSpacing: 2 },
   bottomPadding: { height: 64 },
+  exportButton: { borderWidth: 1, padding: 12, alignItems: 'center', marginBottom: 8 },
+  exportText: { fontSize: 11, fontWeight: 'bold', letterSpacing: 2 },
 });

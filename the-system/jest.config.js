@@ -12,6 +12,9 @@ module.exports = {
     // Mock native/Expo modules that use ESM and can't run in Node
     '^expo-sqlite$': '<rootDir>/__mocks__/expo-sqlite.js',
     '^expo-notifications$': '<rootDir>/__mocks__/expo-notifications.js',
+    '^expo-file-system/legacy$': '<rootDir>/__mocks__/expo-file-system.js',
+    '^expo-file-system$': '<rootDir>/__mocks__/expo-file-system.js',
+    '^expo-sharing$': '<rootDir>/__mocks__/expo-sharing.js',
     '^react-native-svg$': '<rootDir>/__mocks__/react-native-svg.js',
     '^react-native$': '<rootDir>/__mocks__/react-native.js',
   },
