@@ -4,6 +4,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { View, Text, StyleSheet } from 'react-native';
 import { useSystemStore } from '../store/useSystemStore';
+import type { RootStackParamList } from './types';
 
 import CommandHall from '../screens/CommandHall';
 import AscensionPath from '../screens/AscensionPath';
@@ -11,8 +12,11 @@ import Mirror from '../screens/Mirror';
 import Codex from '../screens/Codex';
 import Archive from '../screens/Archive';
 import Awakening from '../screens/Awakening';
+import MandateReveal from '../screens/MandateReveal';
+import LevelUpSplash from '../screens/LevelUpSplash';
+import Settings from '../screens/Settings';
 
-const Stack = createStackNavigator();
+const Stack = createStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator();
 
 function TabIcon({ label, focused, color }: { label: string; focused: boolean; color: string }) {
@@ -101,7 +105,24 @@ export default function AppNavigator() {
         {!onboardingComplete ? (
           <Stack.Screen name="Awakening" component={Awakening} />
         ) : (
-          <Stack.Screen name="Main" component={MainTabs} />
+          <>
+            <Stack.Screen name="Main" component={MainTabs} />
+            <Stack.Screen
+              name="MandateReveal"
+              component={MandateReveal}
+              options={{ presentation: 'transparentModal', cardStyle: { backgroundColor: 'transparent' } }}
+            />
+            <Stack.Screen
+              name="LevelUpSplash"
+              component={LevelUpSplash}
+              options={{ presentation: 'transparentModal', cardStyle: { backgroundColor: 'transparent' } }}
+            />
+            <Stack.Screen
+              name="Settings"
+              component={Settings}
+              options={{ presentation: 'modal' }}
+            />
+          </>
         )}
       </Stack.Navigator>
     </NavigationContainer>
