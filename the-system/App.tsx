@@ -3,6 +3,7 @@ import { StatusBar, StyleSheet, LogBox, Animated, Image, View } from 'react-nati
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import * as SplashScreen from 'expo-splash-screen';
+import './src/theme/applyGlobalFont';
 import Particles from './src/components/fx/Particles';
 import Scanlines from './src/components/fx/Scanlines';
 
@@ -27,6 +28,7 @@ export default function App() {
 
   const [fontsLoaded, fontError] = useFonts({
     'PressStart2P': require('./src/assets/fonts/PressStart2P-Regular.ttf'),
+    'Cinzel': require('./src/assets/fonts/Cinzel.ttf'),
   });
 
   const [splashDone, setSplashDone] = useState(false);
