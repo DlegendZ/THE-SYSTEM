@@ -161,6 +161,7 @@ export const useSystemStore = create<SystemState>((set, get) => ({
       streak,
       level: hero.global_level,
       rank: hero.rank as Rank,
+      heroClass: hero.hero_class,
     });
   },
 

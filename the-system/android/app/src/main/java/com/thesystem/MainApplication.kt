@@ -25,6 +25,7 @@ class MainApplication : Application(), ReactApplication {
           // add(MyReactNativePackage())
           add(ShieldPackage())
           add(UsageStatsPackage())
+          add(RichNotificationPackage())
         }
     )
   }

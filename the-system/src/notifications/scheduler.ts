@@ -1,6 +1,7 @@
 import * as Notifications from 'expo-notifications';
 import { CHANNEL_ID, CATEGORY_ID } from './setup';
-import type { Rank } from '../types';
+import RichNotification from '../native/RichNotification';
+import type { Rank, HeroClass } from '../types';
 
 const NOTIFICATION_POOL: Record<string, string[]> = {
   SILENCE: [
@@ -45,6 +46,13 @@ interface NotificationContext {
   streak?: number;
   level?: number;
   rank?: Rank;
+  heroClass?: HeroClass;
+}
+
+/** Drawable name of the pre-rendered avatar banner for this class+rank. */
+function avatarBanner(ctx: NotificationContext): string | undefined {
+  if (!ctx.heroClass) return undefined;
+  return `notif_${ctx.heroClass.toLowerCase()}_${(ctx.rank ?? 'E').toLowerCase()}`;
 }
 
 function pickRandom<T>(arr: T[]): T {
@@ -70,12 +78,14 @@ export async function scheduleNotifications(
   ctx: NotificationContext
 ): Promise<void> {
   await Notifications.cancelAllScheduledNotificationsAsync();
+  await RichNotification.cancelAll();
 
   const now = new Date();
   const hoursToSchedule = 48;
   const slots: Date[] = [];
 
-  for (let h = 0; h < hoursToSchedule; h += intervalHours) {
+  // Start at the first whole interval in the future (skip h=0 = now).
+  for (let h = intervalHours; h < hoursToSchedule; h += intervalHours) {
     const slot = new Date(now.getTime() + h * 60 * 60 * 1000);
     const hour = slot.getHours();
     if (hour >= quietStart && hour < quietEnd && quietStart < quietEnd) continue;
@@ -83,26 +93,33 @@ export async function scheduleNotifications(
     slots.push(slot);
   }
 
+  const banner = avatarBanner(ctx);
+  let id = 1;
+
   for (const slot of slots) {
     const category = pickCategory();
     const pool = NOTIFICATION_POOL[category];
-    const message = fillTemplate(pickRandom(pool), ctx);
+    const message = fillTemplate(pickRandom(pool), ctx).toUpperCase();
 
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: 'THE SYSTEM',
-        // Long body auto-expands to BigTextStyle on Android (full text on pull-down).
-        body: message.toUpperCase(),
-        color: '#3bc9ff',
-        categoryIdentifier: CATEGORY_ID,
-        data: { type: category },
-      },
-      trigger: {
-        type: Notifications.SchedulableTriggerInputTypes.DATE,
-        date: slot,
-        channelId: CHANNEL_ID,
-      },
-    });
+    if (RichNotification.available) {
+      // Native: large app icon + avatar BigPicture banner + action buttons.
+      await RichNotification.schedule(id++, 'THE SYSTEM', message, slot.getTime(), banner);
+    } else {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: 'THE SYSTEM',
+          body: message,
+          color: '#3bc9ff',
+          categoryIdentifier: CATEGORY_ID,
+          data: { type: category },
+        },
+        trigger: {
+          type: Notifications.SchedulableTriggerInputTypes.DATE,
+          date: slot,
+          channelId: CHANNEL_ID,
+        },
+      });
+    }
   }
 }
 

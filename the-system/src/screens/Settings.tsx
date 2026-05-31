@@ -12,6 +12,7 @@ import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import { getDb } from '../db/database';
 import SystemBackground from '../components/fx/SystemBackground';
+import RichNotification from '../native/RichNotification';
 
 type Nav = { goBack: () => void };
 
@@ -174,6 +175,21 @@ export default function Settings() {
         <Text style={[styles.label, { color: theme.textSecondary }]}>
           Exports all progress to a JSON file for manual backup.
         </Text>
+
+        <TouchableOpacity
+          style={[styles.exportButton, { borderColor: theme.accent, marginTop: 8 }]}
+          onPress={async () => {
+            const banner = hero ? `notif_${hero.hero_class.toLowerCase()}_${hero.rank.toLowerCase()}` : undefined;
+            const ok = await RichNotification.presentNow(
+              'THE SYSTEM',
+              'THE SYSTEM TESTS YOUR RESOLVE. ANSWER THE CALL.',
+              banner
+            );
+            if (!ok) Alert.alert('NOTIFICATION', 'Rich notifications need the latest native build. Rebuild the app.');
+          }}
+        >
+          <Text style={[styles.exportText, { color: theme.accent }]}>TEST NOTIFICATION</Text>
+        </TouchableOpacity>
 
         <Text style={[styles.sectionHeader, { color: '#ff4444' }]}>DANGER ZONE</Text>
         <Text style={[styles.label, { color: theme.textSecondary }]}>
