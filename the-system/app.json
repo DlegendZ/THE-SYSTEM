@@ -26,7 +26,13 @@
     },
     "plugins": [
       "expo-sqlite",
-      "expo-notifications",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#3bc9ff"
+        }
+      ],
       "expo-font",
       "expo-sharing",
       "expo-audio",

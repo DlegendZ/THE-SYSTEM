@@ -1,4 +1,5 @@
 import * as Notifications from 'expo-notifications';
+import { CHANNEL_ID, CATEGORY_ID } from './setup';
 import type { Rank } from '../types';
 
 const NOTIFICATION_POOL: Record<string, string[]> = {
@@ -90,11 +91,16 @@ export async function scheduleNotifications(
     await Notifications.scheduleNotificationAsync({
       content: {
         title: 'THE SYSTEM',
+        // Long body auto-expands to BigTextStyle on Android (full text on pull-down).
         body: message.toUpperCase(),
+        color: '#3bc9ff',
+        categoryIdentifier: CATEGORY_ID,
+        data: { type: category },
       },
       trigger: {
         type: Notifications.SchedulableTriggerInputTypes.DATE,
         date: slot,
+        channelId: CHANNEL_ID,
       },
     });
   }

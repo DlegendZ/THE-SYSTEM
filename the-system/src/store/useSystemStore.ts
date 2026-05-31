@@ -17,6 +17,8 @@ import {
 } from '../engine/xpEngine';
 import { openCurrentMandate, requestManualMandate } from '../engine/mandateEngine';
 import { getThemeForRank } from '../theme/rankThemes';
+import { initNotifications } from '../notifications/setup';
+import { scheduleNotifications } from '../notifications/scheduler';
 import { format } from 'date-fns';
 import type {
   Hero,
@@ -51,6 +53,7 @@ interface SystemState {
   requestMandate: () => Promise<boolean>;
   completeOnboarding: () => Promise<void>;
   resetJourney: () => Promise<void>;
+  syncNotifications: () => Promise<void>;
 }
 
 const today = () => format(new Date(), 'yyyy-MM-dd');
@@ -81,6 +84,9 @@ export const useSystemStore = create<SystemState>((set, get) => ({
     if (hero) {
       await get().refresh();
     }
+
+    await initNotifications();
+    if (hero) await get().syncNotifications();
   },
 
   refresh: async () => {
@@ -105,6 +111,7 @@ export const useSystemStore = create<SystemState>((set, get) => ({
     // for users east of UTC late at night.
     await createHero(name, heroClass, today());
     await get().refresh();
+    await get().syncNotifications();
   },
 
   completeDiscipline: async (id: number) => {
@@ -138,6 +145,23 @@ export const useSystemStore = create<SystemState>((set, get) => ({
   completeOnboarding: async () => {
     await setSystemState('onboarding_complete', '1');
     set({ onboardingComplete: true });
+  },
+
+  syncNotifications: async () => {
+    const hero = get().hero;
+    if (!hero) return;
+    const intervalStr = await getSystemState('notification_interval');
+    const qs = await getSystemState('quiet_start');
+    const qe = await getSystemState('quiet_end');
+    const interval = intervalStr ? parseInt(intervalStr, 10) : 3;
+    const quietStart = qs ? parseInt(qs.split(':')[0], 10) : 0;
+    const quietEnd = qe ? parseInt(qe.split(':')[0], 10) : 7;
+    const streak = get().silenceStreak?.current_streak ?? 0;
+    await scheduleNotifications(interval, quietStart, quietEnd, {
+      streak,
+      level: hero.global_level,
+      rank: hero.rank as Rank,
+    });
   },
 
   resetJourney: async () => {

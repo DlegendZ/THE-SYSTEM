@@ -20,7 +20,7 @@ const INTERVALS = [1, 2, 3, 4, 6];
 export default function Settings() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<Nav>();
-  const { hero, currentTheme: theme, resetJourney } = useSystemStore();
+  const { hero, currentTheme: theme, resetJourney, syncNotifications } = useSystemStore();
 
   const [notifInterval, setNotifInterval] = useState(3);
   const [quietStart, setQuietStart] = useState('00:00');
@@ -41,6 +41,7 @@ export default function Settings() {
   const saveInterval = async (v: number) => {
     setNotifInterval(v);
     await setSystemState('notification_interval', String(v));
+    await syncNotifications();
   };
 
   const handleExport = async () => {
