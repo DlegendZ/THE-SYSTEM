@@ -15,7 +15,10 @@ import DisciplineCard from '../components/ui/DisciplineCard';
 import PixelText from '../components/ui/PixelText';
 import SectionDivider from '../components/ui/SectionDivider';
 import AvatarDisplay from '../components/avatar/AvatarDisplay';
+import AvatarOrbit from '../components/avatar/AvatarOrbit';
 import SystemBackground from '../components/fx/SystemBackground';
+
+const ORBIT_BY_RANK: Record<string, number> = { E: 0, D: 2, C: 3, B: 5, A: 7, S: 10 };
 import { playSound } from '../audio/sounds';
 import type { Rank } from '../types';
 import type { RootStackParamList } from '../navigation/types';
@@ -245,6 +248,11 @@ export default function CommandHall() {
                 }),
               },
             ]}
+          />
+          <AvatarOrbit
+            color={theme.auraColor ?? theme.accent}
+            count={ORBIT_BY_RANK[hero.rank] ?? 0}
+            radius={54}
           />
           <HexagonFrame color={theme.accent + '55'} size={132} />
           <Animated.View
