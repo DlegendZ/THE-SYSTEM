@@ -1,7 +1,7 @@
 import {
   BASE_PIXELS,
   getPalette,
-  getWeaponOverlay,
+  getRegalia,
   applyOverlay,
   rankToArmorTier,
   type HeroClass,
@@ -13,18 +13,18 @@ const TIERS: ArmorTier[] = [1, 2, 3, 4, 5];
 const RANKS = ['E', 'D', 'C', 'B', 'A', 'S'];
 
 describe('avatarData', () => {
-  it('all base pixel grids are 24 rows of 16 chars', () => {
+  it('all base pixel grids are 18 rows of 16 chars', () => {
     for (const cls of CLASSES) {
       const pixels = BASE_PIXELS[cls];
-      expect(pixels).toHaveLength(24);
-      pixels.forEach((row, i) => {
+      expect(pixels).toHaveLength(18);
+      pixels.forEach((row) => {
         expect(row).toHaveLength(16);
       });
     }
   });
 
   it('getPalette returns palette with required keys for all classes and tiers', () => {
-    const requiredKeys = ['S', 'F', 'H', 'A', 'V', 'L', 'B', 'D', 'G'];
+    const requiredKeys = ['S', 'F', 'H', 'A', 'V', 'L', 'B', 'D', 'W', 'G'];
     for (const cls of CLASSES) {
       for (const tier of TIERS) {
         const palette = getPalette(cls, tier);
@@ -35,22 +35,18 @@ describe('avatarData', () => {
     }
   });
 
-  it('getWeaponOverlay returns overlay for all classes and tiers', () => {
-    for (const cls of CLASSES) {
-      for (const tier of TIERS) {
-        const overlay = getWeaponOverlay(cls, tier);
-        expect(overlay).toHaveProperty('pixels');
-        expect(overlay).toHaveProperty('colors');
-        expect(Array.isArray(overlay.pixels)).toBe(true);
-      }
+  it('getRegalia returns pixels + color for every rank', () => {
+    for (const rank of RANKS) {
+      const regalia = getRegalia(rank);
+      expect(regalia).toHaveProperty('pixels');
+      expect(regalia).toHaveProperty('color');
+      expect(Array.isArray(regalia.pixels)).toBe(true);
     }
   });
 
   it('applyOverlay does not change row count or row length', () => {
     const base = BASE_PIXELS['Warrior'];
-    const overlay = getWeaponOverlay('Warrior', 1);
-    const palette = getPalette('Warrior', 1);
-    const result = applyOverlay(base, overlay.pixels, palette);
+    const result = applyOverlay(base, getRegalia('S').pixels);
     expect(result).toHaveLength(base.length);
     result.forEach((row, i) => {
       expect(row).toHaveLength(base[i].length);
@@ -67,14 +63,11 @@ describe('avatarData', () => {
     expect(rankToArmorTier('X')).toBe(1); // unknown defaults to 1
   });
 
-  it('applyOverlay col indices stay in bounds', () => {
+  it('applyOverlay stays in bounds for every rank regalia', () => {
     for (const cls of CLASSES) {
-      for (const tier of TIERS) {
+      for (const rank of RANKS) {
         const base = BASE_PIXELS[cls];
-        const overlay = getWeaponOverlay(cls, tier);
-        const palette = getPalette(cls, tier);
-        // Should not throw
-        expect(() => applyOverlay(base, overlay.pixels, palette)).not.toThrow();
+        expect(() => applyOverlay(base, getRegalia(rank).pixels)).not.toThrow();
       }
     }
   });

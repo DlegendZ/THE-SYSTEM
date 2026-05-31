@@ -1,302 +1,152 @@
-// 16 wide × 24 tall pixel art, scale 4 = 64×96 display
-// Each string = one row, 16 chars
-// '.' = transparent
+// Chibi pixel avatars — 16 wide × 18 tall. Big head, big eyes, tiny body.
+// Each string = one row of exactly 16 chars. '.' = transparent.
+//
+// Palette keys:
+//   S skin   F eye   H hair/helmet/hood   A armor   V belt/secondary
+//   L legs   B boots W weapon   D dark/shadow   G gold/glow accent
+//   C crystal/gem (mage)   R regalia (crown/halo/wings, rank-based)
 
 export interface AvatarFrame {
   pixels: string[];
   palette: Record<string, string>;
 }
 
-// ─── Color palette keys ──────────────────────────────────────────────────────
-// S = skin
-// H = helmet/headgear
-// F = face detail (eyes)
-// A = armor (changes by tier)
-// V = secondary armor
-// L = legs
-// B = boots
-// W = weapon color (changes by tier)
-// D = dark detail / shadow
-// G = gold/accent (D-rank+)
-// . = transparent
+const SKIN = '#f2c79a';
+const EYE = '#1b2740';
 
-const SKIN = '#d4a96a';
-const EYE  = '#2c1810';
-
-// ─── Warrior ─────────────────────────────────────────────────────────────────
+// ─── Chibi base sprites (weapon baked in) ─────────────────────────────────────
 
 const WARRIOR_BASE_PIXELS: string[] = [
-  '....HHHHHHHH....',  // 0  helmet
-  '....HHHHHHHH....',  // 1
-  '...HHSSSSSSHHH..',  // 2  face
-  '...HHSFSSFSHHH..',  // 3  eyes (F=eye detail) 16 chars
-  '...HHSSSSSSHHH..',  // 4
-  '....HHHHHHHH....',  // 5  helmet bottom
-  '..DAAAAAAAAAAD..',  // 6  shoulders
-  '..AAAAAAAAAAAAAA',  // 7
-  'DAAAAAAAAAAAAAAD',  // 8
-  'DAAAAAAAAAAAAAAD',  // 9
-  'DAAAAAAAAAAAAAAD',  // 10
-  'DAAAAAAAAAAAAAAD',  // 11
-  '..AAAAAAAAAAAAAD',  // 12
-  '...VVVVVVVVVVVV.',  // 13 belt
-  '...LLLLL.LLLLLL.',  // 14
-  '...LLLLL.LLLLLL.',  // 15
-  '..LLLLLL.LLLLL..',  // 16
-  '..LLLLLL.LLLLL..',  // 17
-  '..LLLLLL.LLLLL..',  // 18
-  '..BBBBB...BBBBB.',  // 19 boots
-  '..BBBBB...BBBBB.',  // 20
-  '.BBBBBB...BBBBBB',  // 21
-  '.BBBBBB...BBBBBB',  // 22
-  '..BBBBB...BBBBB.',  // 23
+  '......HHHH......', // 0  helmet crest
+  '....HHHHHHHH....', // 1  helmet
+  '...HHHHHHHHHH...', // 2  helmet
+  '..HHHHHHHHHHHH..', // 3  helmet brow
+  '..HHSSSSSSSSHH..', // 4  forehead
+  '..HSSSSSSSSSSH..', // 5  face
+  '..HSSFFSSFFSSH..', // 6  big eyes
+  '..HSSFFSSFFSSH..', // 7  big eyes
+  '..HSSSSSSSSSSH..', // 8  cheeks
+  '..HSSSDDDDSSSH..', // 9  mouth
+  '...HSSSSSSSSH...', // 10 chin
+  '....DSSSSD..W...', // 11 neck + weapon hilt
+  '...AAAAAAAA.WW..', // 12 shoulders + blade
+  '..DAAAAAAAAD W..', // 13 arms + blade
+  '...VVVVVVVV.W...', // 14 belt + blade
+  '...LLL..LLL.W...', // 15 legs + blade tip
+  '...LLL..LLL.....', // 16 legs
+  '...BB....BB.....', // 17 boots
 ];
-
-// ─── Palette by rank tier (armor changes color) ──────────────────────────────
-
-function warriorPalette(armorTier: 1|2|3|4|5): Record<string,string> {
-  const ARMOR_COLORS: Record<number, { A: string; H: string; V: string; L: string; B: string }> = {
-    1: { A: '#3a3535', H: '#5a5a5a', V: '#2a2020', L: '#2a2535', B: '#1a1010' },
-    2: { A: '#6b4a14', H: '#7a5a1e', V: '#5a3a0e', L: '#3a2a10', B: '#2a1a08' },
-    3: { A: '#707070', H: '#808080', V: '#505050', L: '#505060', B: '#303030' },
-    4: { A: '#1a1a1a', H: '#2a2a2a', V: '#ffd700', L: '#1a1a2a', B: '#0a0a0a' },
-    5: { A: '#c8a820', H: '#ffd700', V: '#ffffff', L: '#b8982a', B: '#c8a820' },
-  };
-  const c = ARMOR_COLORS[armorTier];
-  return {
-    S: SKIN,
-    F: EYE,
-    H: c.H,
-    A: c.A,
-    V: c.V,
-    L: c.L,
-    B: c.B,
-    D: '#111111',
-    G: '#ffd700',
-  };
-}
-
-// Weapon overlays — extra pixels drawn on top of base
-// Format: [row, colStart, colEnd, char] — fills colStart..colEnd inclusive
-export type OverlayRow = [number, number, number, string];
-
-const WARRIOR_WEAPON_OVERLAYS: Record<1|2|3|4|5, { pixels: OverlayRow[]; colors: Record<string,string> }> = {
-  1: { // Stick
-    pixels: [
-      [2, 14, 14, 'W'], [3, 14, 14, 'W'], [4, 14, 14, 'W'],
-      [5, 14, 14, 'W'], [6, 14, 14, 'W'], [7, 14, 14, 'W'],
-      [8, 14, 14, 'W'], [9, 14, 14, 'W'], [10, 14, 14, 'W'],
-      [11, 14, 14, 'W'], [12, 14, 14, 'W'], [13, 14, 14, 'W'],
-      [14, 14, 14, 'W'], [15, 14, 14, 'W'],
-    ],
-    colors: { W: '#8b6914' },
-  },
-  2: { // Iron Sword
-    pixels: [
-      [1, 14, 15, 'P'],
-      [2, 14, 14, 'W'], [3, 14, 14, 'W'], [4, 14, 14, 'W'],
-      [5, 14, 14, 'W'], [6, 14, 14, 'W'], [7, 14, 14, 'W'],
-      [8, 14, 14, 'W'], [9, 14, 14, 'W'], [10, 14, 14, 'W'],
-      [11, 14, 14, 'W'], [12, 14, 14, 'W'], [13, 14, 14, 'W'],
-      [14, 14, 14, 'W'], [15, 14, 14, 'P'],
-    ],
-    colors: { W: '#aaaaaa', P: '#888888' },
-  },
-  3: { // Steel Sword
-    pixels: [
-      [1, 13, 15, 'P'],
-      [2, 14, 14, 'W'], [3, 14, 14, 'W'], [4, 14, 14, 'W'],
-      [5, 14, 14, 'W'], [6, 14, 14, 'W'], [7, 14, 14, 'W'],
-      [8, 14, 14, 'W'], [9, 14, 14, 'W'], [10, 14, 14, 'W'],
-      [11, 14, 14, 'W'], [12, 14, 14, 'W'], [13, 14, 14, 'W'],
-      [14, 14, 14, 'W'], [15, 14, 14, 'P'], [16, 14, 14, 'P'],
-    ],
-    colors: { W: '#c8c8d4', P: '#a0a0b0' },
-  },
-  4: { // Gold-Trimmed Blade
-    pixels: [
-      [1, 13, 15, 'G'],
-      [2, 14, 14, 'W'], [3, 14, 14, 'W'], [4, 14, 14, 'W'],
-      [5, 14, 14, 'W'], [6, 14, 14, 'W'], [7, 13, 15, 'G'],
-      [8, 14, 14, 'W'], [9, 14, 14, 'W'], [10, 14, 14, 'W'],
-      [11, 14, 14, 'W'], [12, 14, 14, 'W'], [13, 14, 14, 'W'],
-      [14, 13, 15, 'G'], [15, 14, 14, 'P'], [16, 14, 14, 'P'],
-    ],
-    colors: { W: '#dddddd', P: '#aaaaaa', G: '#ffd700' },
-  },
-  5: { // Divine Sword
-    pixels: [
-      [0, 13, 15, 'G'],
-      [1, 13, 15, 'G'],
-      [2, 14, 14, 'W'], [2, 13, 13, 'G'], [2, 15, 15, 'G'],
-      [3, 14, 14, 'W'], [4, 14, 14, 'W'], [4, 13, 13, 'G'],
-      [5, 14, 14, 'W'], [6, 14, 14, 'W'], [6, 13, 13, 'G'], [6, 15, 15, 'G'],
-      [7, 14, 14, 'W'], [8, 14, 14, 'W'], [8, 13, 13, 'G'],
-      [9, 14, 14, 'W'], [10, 14, 14, 'W'], [10, 13, 13, 'G'], [10, 15, 15, 'G'],
-      [11, 14, 14, 'W'], [12, 14, 14, 'W'],
-      [13, 14, 14, 'W'], [14, 13, 15, 'G'], [15, 14, 14, 'P'],
-    ],
-    colors: { W: '#f0f0ff', P: '#e0e0ff', G: '#ffd700' },
-  },
-};
-
-// ─── Mage ─────────────────────────────────────────────────────────────────────
 
 const MAGE_BASE_PIXELS: string[] = [
-  '....HHHHHHHH....',  // 0  hat brim
-  '......HHHH......',  // 1  hat point base
-  '.......HH.......',  // 2  hat tip
-  '...SSSSSSSSSS...',  // 3  face
-  '...SSFSSSFSSS...',  // 4  eyes
-  '...SSSSSSSSSS...',  // 5
-  '...SSSSSSSSSS...',  // 6  chin
-  '....AAAAAAAAA...',  // 7  robe shoulders
-  '...AAAAAAAAAA...',  // 8
-  '..AAAAAAAAAAA...',  // 9
-  'WAAAAAAAAAAAAWW.',  // 10
-  'WAAAAAAAAAAAAWW.',  // 11
-  'WAAAAAAAAAAAAWW.',  // 12
-  '..AAAAAAAAAAAAA.',  // 13
-  '..AAAAAAAAAAAAA.',  // 14
-  '...AAAAAAAAAAAA.',  // 15
-  '....AAAAAAAAAAA.',  // 16
-  '.....AAAAAAAAA..',  // 17
-  '......AAAAAAA...',  // 18
-  '......AAAAAAA...',  // 19
-  '.....BBBBBBB....',  // 20
-  '....BBBBBBB.....',  // 21
-  '....BBBBBBB.....',  // 22
-  '....BBBBBBB.....',  // 23
+  '.......HH.......', // 0  hat tip
+  '......HHHH......', // 1  hat
+  '.....HHHHHH.....', // 2  hat
+  '....HHHHHHHH....', // 3  hat
+  '..HHHHHHHHHHHH..', // 4  hat brim
+  '...SSSSSSSSSS...', // 5  forehead
+  '...SSFFSSFFSS...', // 6  big eyes
+  '...SSFFSSFFSS...', // 7  big eyes
+  '...SSSSSSSSSS...', // 8  cheeks
+  '...SSSDDDDSSS...', // 9  mouth
+  '....SSSSSSSS....', // 10 chin
+  '.W..DSSSSD......', // 11 neck + staff
+  'WC.AAAAAAAA.....', // 12 robe + staff gem
+  '.W.AAAAAAAAAA...', // 13 robe
+  '.W..AAAAAAAA....', // 14 robe
+  '.W...AAAAAA.....', // 15 robe hem
+  '.....BBBBBB.....', // 16 robe base
+  '.....BBBBBB.....', // 17 robe base
 ];
-
-function magePalette(tier: 1|2|3|4|5): Record<string,string> {
-  const COLORS: Record<number, { A: string; H: string; B: string }> = {
-    1: { A: '#4a3060', H: '#5a3a70', B: '#2a1a40' },
-    2: { A: '#5a4070', H: '#6a4a80', B: '#3a2a50' },
-    3: { A: '#6b5090', H: '#8060a8', B: '#4a3a70' },
-    4: { A: '#1a0a2a', H: '#9060c0', B: '#0a0a1a' },
-    5: { A: '#c8a820', H: '#ffd700', B: '#b8982a' },
-  };
-  const c = COLORS[tier];
-  return { S: SKIN, F: EYE, H: c.H, A: c.A, V: c.A, L: c.A, B: c.B, D: '#111111', W: '#5a4070', G: '#ffd700' };
-}
-
-const MAGE_WEAPON_OVERLAYS: Record<1|2|3|4|5, { pixels: OverlayRow[]; colors: Record<string,string> }> = {
-  1: { // Broken Wand
-    pixels: [
-      [2, 0, 0, 'W'], [3, 0, 0, 'W'], [4, 1, 1, 'W'], [5, 1, 1, 'W'],
-      [6, 1, 1, 'W'], [7, 0, 1, 'W'], [8, 0, 0, 'W'], [9, 0, 0, 'W'],
-      [10, 1, 1, 'W'], [11, 1, 1, 'W'], [12, 2, 2, 'W'], [13, 2, 2, 'W'],
-    ],
-    colors: { W: '#8b6914' },
-  },
-  2: { // Wooden Staff
-    pixels: Array.from({ length: 18 }, (_, i) => [i + 2, 0, 0, 'W'] as OverlayRow),
-    colors: { W: '#8b6914' },
-  },
-  3: { // Crystal Staff
-    pixels: [
-      [0, 0, 0, 'C'], [1, 0, 1, 'C'],
-      ...Array.from({ length: 18 }, (_, i) => [i + 2, 0, 0, 'W'] as OverlayRow),
-    ],
-    colors: { W: '#8b6914', C: '#88ccff' },
-  },
-  4: { // Enchanted Staff
-    pixels: [
-      [0, 0, 1, 'C'], [1, 0, 1, 'C'],
-      [0, 0, 0, 'G'], [1, 1, 1, 'G'],
-      ...Array.from({ length: 20 }, (_, i) => [i + 2, 0, 0, 'W'] as OverlayRow),
-    ],
-    colors: { W: '#6b4a90', C: '#cc88ff', G: '#ffd700' },
-  },
-  5: { // God Staff
-    pixels: [
-      [0, 0, 2, 'G'], [1, 0, 2, 'G'],
-      ...Array.from({ length: 20 }, (_, i) => [i + 2, 0, 0, 'W'] as OverlayRow),
-      ...Array.from({ length: 10 }, (_, i) => [i * 2 + 2, 1, 1, 'G'] as OverlayRow),
-    ],
-    colors: { W: '#ffd700', G: '#ffffff' },
-  },
-};
-
-// ─── Rogue ────────────────────────────────────────────────────────────────────
 
 const ROGUE_BASE_PIXELS: string[] = [
-  '................',  // 0
-  '....HHHHHHHH....',  // 1  hood
-  '...HHSSSSSSHHH..',  // 2  face
-  '...HHSFSSFSHHH..',  // 3  eyes
-  '...HHSSSSSSHHH..',  // 4
-  '....HHHHHHHH....',  // 5  hood bottom
-  '...AAAAAAAAAA...',  // 6  shoulders
-  '..AAAAAAAAAAAAA.',  // 7
-  '.DAAAAAAAAAAAAD.',  // 8
-  '.DAAAAAAAAAAAAD.',  // 9
-  '.DAAAAAAAAAAAAD.',  // 10
-  '..AAAAAAAAAAAAA.',  // 11
-  '...AAAAAAAAAAAA.',  // 12
-  '....LLLLLLLLLL..',  // 13
-  '....LLLL.LLLL...',  // 14
-  '....LLLL.LLLL...',  // 15
-  '...LLLLL.LLLLL..',  // 16
-  '...LLLLL.LLLLL..',  // 17
-  '...LLLLL.LLLLL..',  // 18
-  '...BBBBB.BBBBB..',  // 19 boots
-  '...BBBBB.BBBBB..',  // 20
-  '..BBBBBB.BBBBBB.',  // 21
-  '..BBBBBB.BBBBBB.',  // 22
-  '...BBBBB.BBBBB..',  // 23
+  '....HHHHHHHH....', // 0  hood
+  '...HHHHHHHHHH...', // 1  hood
+  '..HHHHHHHHHHHH..', // 2  hood
+  '..HHHHHHHHHHHH..', // 3  hood
+  '..HHSSSSSSSSHH..', // 4  forehead
+  '..HSSSSSSSSSSH..', // 5  face
+  '..HSSFFSSFFSSH..', // 6  big eyes
+  '..HSSFFSSFFSSH..', // 7  big eyes
+  '..HHSSSSSSSSHH..', // 8  hood cheeks
+  '...HSSDDDDSSH...', // 9  mouth (masked)
+  '....SSSSSSSS....', // 10 chin
+  'W...DSSSSD...W..', // 11 neck + twin daggers
+  'W..AAAAAAAA..W..', // 12 shoulders + blades
+  '..DAAAAAAAAD....', // 13 arms
+  '...VVVVVVVV.....', // 14 belt
+  '...LLL..LLL.....', // 15 legs
+  '...LLL..LLL.....', // 16 legs
+  '...BB....BB.....', // 17 boots
 ];
 
-function roguePalette(tier: 1|2|3|4|5): Record<string,string> {
-  const COLORS: Record<number, { A: string; H: string; L: string; B: string }> = {
-    1: { A: '#2a3035', H: '#1a2025', L: '#202530', B: '#151515' },
-    2: { A: '#3a2a1a', H: '#2a1a0a', L: '#2a201a', B: '#1a0a0a' },
-    3: { A: '#1a2535', H: '#1a1525', L: '#151a25', B: '#101015' },
-    4: { A: '#0a0a1a', H: '#0a0a0a', L: '#050510', B: '#050505' },
-    5: { A: '#0a0a0a', H: '#111111', L: '#0a0a0a', B: '#0a0a0a' },
+// ─── Per-tier palettes (armor + weapon evolve with rank) ──────────────────────
+
+function warriorPalette(t: 1 | 2 | 3 | 4 | 5): Record<string, string> {
+  const C: Record<number, { A: string; H: string; V: string; L: string; B: string; W: string; G: string }> = {
+    1: { A: '#46484f', H: '#6a6e78', V: '#33363d', L: '#2f3340', B: '#1c1f26', W: '#9aa0aa', G: '#7fd4ff' },
+    2: { A: '#4a6c8f', H: '#6f93b8', V: '#33506e', L: '#2c4258', B: '#1c2c3c', W: '#bfe3ff', G: '#9fe6ff' },
+    3: { A: '#2f86c8', H: '#5cb4ef', V: '#1f5e92', L: '#214e74', B: '#143350', W: '#d8f2ff', G: '#bff0ff' },
+    4: { A: '#1f6fff', H: '#6aa8ff', V: '#1850c0', L: '#173f9a', B: '#0f2766', W: '#eaf6ff', G: '#aef2ff' },
+    5: { A: '#9fb8ff', H: '#dfe9ff', V: '#7d8fe0', L: '#6f7fd0', B: '#aef2ff', W: '#ffffff', G: '#ffffff' },
   };
-  const c = COLORS[tier];
-  return { S: SKIN, F: EYE, H: c.H, A: c.A, V: c.A, L: c.L, B: c.B, D: '#0a0a0a', W: '#888888', G: '#ffd700' };
+  const c = C[t];
+  return { S: SKIN, F: EYE, D: '#10131a', ...c };
 }
 
-const ROGUE_WEAPON_OVERLAYS: Record<1|2|3|4|5, { pixels: OverlayRow[]; colors: Record<string,string> }> = {
-  1: { // Rusty Dagger
-    pixels: [
-      [7, 15, 15, 'W'], [8, 15, 15, 'W'], [9, 15, 15, 'W'],
-      [10, 14, 15, 'W'], [11, 15, 15, 'W'], [12, 15, 15, 'W'],
-    ],
-    colors: { W: '#8b6914' },
-  },
-  2: { // Iron Blade
-    pixels: [
-      [6, 15, 15, 'P'], [7, 14, 15, 'W'], [8, 15, 15, 'W'],
-      [9, 15, 15, 'W'], [10, 14, 15, 'W'], [11, 15, 15, 'W'],
-      [12, 15, 15, 'W'], [13, 15, 15, 'P'],
-    ],
-    colors: { W: '#aaaaaa', P: '#888888' },
-  },
-  3: { // Twin Daggers
-    pixels: [
-      [6, 0, 0, 'W'], [7, 0, 1, 'W'], [8, 0, 0, 'W'], [9, 0, 0, 'W'], [10, 0, 0, 'W'],
-      [6, 15, 15, 'W'], [7, 14, 15, 'W'], [8, 15, 15, 'W'], [9, 15, 15, 'W'], [10, 15, 15, 'W'],
-    ],
-    colors: { W: '#c8c8d4' },
-  },
-  4: { // Shadow Blades
-    pixels: [
-      [6, 0, 0, 'W'], [7, 0, 1, 'W'], [8, 0, 0, 'W'], [9, 0, 0, 'G'], [10, 0, 0, 'W'],
-      [6, 15, 15, 'W'], [7, 14, 15, 'W'], [8, 15, 15, 'W'], [9, 15, 15, 'G'], [10, 15, 15, 'W'],
-    ],
-    colors: { W: '#1a1a2a', G: '#ffd700' },
-  },
-  5: { // Void Blades
-    pixels: [
-      [5, 0, 0, 'G'], [6, 0, 1, 'W'], [7, 0, 1, 'W'], [8, 0, 0, 'W'], [9, 0, 0, 'G'], [10, 0, 1, 'W'], [11, 0, 0, 'G'],
-      [5, 15, 15, 'G'], [6, 14, 15, 'W'], [7, 14, 15, 'W'], [8, 15, 15, 'W'], [9, 15, 15, 'G'], [10, 14, 15, 'W'], [11, 15, 15, 'G'],
-    ],
-    colors: { W: '#0a0a1a', G: '#ffd700' },
-  },
+function magePalette(t: 1 | 2 | 3 | 4 | 5): Record<string, string> {
+  const C: Record<number, { A: string; H: string; B: string; W: string; C: string; G: string }> = {
+    1: { A: '#3a4a72', H: '#4a5c88', B: '#28324f', W: '#8a6a3a', C: '#7fd4ff', G: '#7fd4ff' },
+    2: { A: '#3f5f9a', H: '#4f72b2', B: '#2c4068', W: '#8a6a3a', C: '#9fe6ff', G: '#9fe6ff' },
+    3: { A: '#3a6fc0', H: '#5a92e0', B: '#274a86', W: '#9a7a4a', C: '#bff0ff', G: '#bff0ff' },
+    4: { A: '#2f5fd8', H: '#6a90ff', B: '#1f3f9a', W: '#b89a5a', C: '#cde6ff', G: '#aef2ff' },
+    5: { A: '#b0a8ff', H: '#e6ddff', B: '#8f8fe0', W: '#ffffff', C: '#ffffff', G: '#ffffff' },
+  };
+  const c = C[t];
+  return { S: SKIN, F: EYE, D: '#10131a', V: c.A, L: c.A, ...c };
+}
+
+function roguePalette(t: 1 | 2 | 3 | 4 | 5): Record<string, string> {
+  const C: Record<number, { A: string; H: string; V: string; L: string; B: string; W: string; G: string }> = {
+    1: { A: '#2b3340', H: '#1d2530', V: '#222a36', L: '#202833', B: '#141820', W: '#aab0ba', G: '#7fd4ff' },
+    2: { A: '#26384a', H: '#1a2632', V: '#203040', L: '#1d2c3a', B: '#121c26', W: '#bfe3ff', G: '#9fe6ff' },
+    3: { A: '#21405c', H: '#172a3e', V: '#1b3550', L: '#193048', B: '#0f2236', W: '#d8f2ff', G: '#bff0ff' },
+    4: { A: '#1a3a6e', H: '#122a52', V: '#163060', L: '#132a55', B: '#0c1d40', W: '#eaf6ff', G: '#aef2ff' },
+    5: { A: '#7d8fe0', H: '#3a3f66', V: '#6f7fd0', L: '#6470c0', B: '#aef2ff', W: '#ffffff', G: '#ffffff' },
+  };
+  const c = C[t];
+  return { S: SKIN, F: EYE, D: '#0c0f16', ...c };
+}
+
+// ─── Rank regalia overlays (crown / halo / wings) ─────────────────────────────
+// Drawn on top of the base for higher ranks. Format: [row, colStart, colEnd, char].
+
+export type OverlayRow = [number, number, number, string];
+
+const REGALIA: Record<string, OverlayRow[]> = {
+  // B-rank: small crown above the head
+  B: [
+    [0, 5, 5, 'R'], [0, 8, 8, 'R'], [0, 10, 10, 'R'],
+    [1, 5, 10, 'R'],
+  ],
+  // A-rank: halo ring above the head
+  A: [
+    [0, 4, 11, 'R'],
+    [1, 4, 4, 'R'], [1, 11, 11, 'R'],
+  ],
+  // S-rank: crown + energy wings flanking the body
+  S: [
+    [0, 5, 5, 'R'], [0, 8, 8, 'R'], [0, 10, 10, 'R'],
+    [1, 5, 10, 'R'],
+    [11, 0, 1, 'R'], [12, 0, 0, 'R'], [10, 1, 2, 'R'],
+    [11, 14, 15, 'R'], [12, 15, 15, 'R'], [10, 13, 14, 'R'],
+    [13, 1, 1, 'R'], [13, 14, 14, 'R'],
+  ],
+};
+
+const REGALIA_COLOR: Record<string, string> = {
+  B: '#bff0ff',
+  A: '#e6f6ff',
+  S: '#ffffff',
 };
 
 // ─── Public exports ───────────────────────────────────────────────────────────
@@ -316,30 +166,24 @@ export function getPalette(heroClass: HeroClass, tier: ArmorTier): Record<string
   return roguePalette(tier);
 }
 
-export function getWeaponOverlay(
-  heroClass: HeroClass,
-  weaponTier: ArmorTier
-): { pixels: OverlayRow[]; colors: Record<string, string> } {
-  if (heroClass === 'Warrior') return WARRIOR_WEAPON_OVERLAYS[weaponTier];
-  if (heroClass === 'Mage') return MAGE_WEAPON_OVERLAYS[weaponTier];
-  return ROGUE_WEAPON_OVERLAYS[weaponTier];
+/** Regalia overlay + its color for a given rank (empty for E/D/C). */
+export function getRegalia(rank: string): { pixels: OverlayRow[]; color: string } {
+  return { pixels: REGALIA[rank] ?? [], color: REGALIA_COLOR[rank] ?? '#ffffff' };
 }
 
-/** Apply overlay rows on top of base pixels (mutates a copy) */
-export function applyOverlay(base: string[], overlay: OverlayRow[], palette: Record<string, string>): string[] {
+/** Apply overlay rows on top of base pixels (returns a copy). */
+export function applyOverlay(base: string[], overlay: OverlayRow[]): string[] {
   const result = [...base];
   for (const [row, colStart, colEnd, char] of overlay) {
-    if (row >= result.length) continue;
-    const rowChars = result[row].split('');
-    for (let c = colStart; c <= colEnd && c < rowChars.length; c++) {
-      rowChars[c] = char;
-    }
-    result[row] = rowChars.join('');
+    if (row < 0 || row >= result.length) continue;
+    const chars = result[row].split('');
+    for (let c = colStart; c <= colEnd && c < chars.length; c++) chars[c] = char;
+    result[row] = chars.join('');
   }
   return result;
 }
 
-/** Map rank to armor tier */
+/** Map rank to armor/weapon tier. */
 export function rankToArmorTier(rank: string): ArmorTier {
   const map: Record<string, ArmorTier> = { E: 1, D: 2, C: 3, B: 4, A: 5, S: 5 };
   return map[rank] ?? 1;

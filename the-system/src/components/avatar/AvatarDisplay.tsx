@@ -4,7 +4,7 @@ import Svg, { Rect } from 'react-native-svg';
 import {
   BASE_PIXELS,
   getPalette,
-  getWeaponOverlay,
+  getRegalia,
   applyOverlay,
   rankToArmorTier,
   type HeroClass,
@@ -27,13 +27,12 @@ export default function AvatarDisplay({
   pixelSize = 4,
 }: Props) {
   const armorTier = rankToArmorTier(rank);
-  const effectiveWeaponTier = weaponTier ?? armorTier;
 
   const basePalette = getPalette(heroClass, armorTier);
-  const weaponOverlay = getWeaponOverlay(heroClass, effectiveWeaponTier);
+  const regalia = getRegalia(rank);
 
-  const palette = { ...basePalette, ...weaponOverlay.colors };
-  const pixels = applyOverlay(BASE_PIXELS[heroClass], weaponOverlay.pixels, palette);
+  const palette: Record<string, string> = { ...basePalette, R: regalia.color };
+  const pixels = applyOverlay(BASE_PIXELS[heroClass], regalia.pixels);
 
   const moodOpacity: Record<string, number> = {
     radiant: 1.0,
