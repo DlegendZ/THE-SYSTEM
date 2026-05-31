@@ -220,7 +220,7 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   loadingTitle: {
-    color: '#ffd700',
+    color: '#3bc9ff',
     fontSize: 28,
     fontWeight: 'bold',
     letterSpacing: 6,
@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
   loadingFill: {
     width: '60%',
     height: 2,
-    backgroundColor: '#ffd700',
+    backgroundColor: '#3bc9ff',
   },
   loadingSub: {
     color: '#444',

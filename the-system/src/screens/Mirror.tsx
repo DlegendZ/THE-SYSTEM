@@ -10,6 +10,7 @@ import { RANK_TITLES } from '../engine/xpConstants';
 import type { Cosmetic, Rank } from '../types';
 import AvatarDisplay from '../components/avatar/AvatarDisplay';
 import SectionDivider from '../components/ui/SectionDivider';
+import SystemBackground from '../components/fx/SystemBackground';
 import CornerFrame from '../components/ui/CornerFrame';
 import type { HeroClass } from '../components/avatar/avatarData';
 
@@ -106,6 +107,7 @@ export default function Mirror() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background, paddingTop: insets.top }]}>
+      <SystemBackground color={theme.accent} background={theme.background} />
       {/* Header */}
       <View style={[styles.header, { borderBottomColor: theme.accent + '30' }]}>
         <View style={styles.nameRow}>

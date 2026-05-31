@@ -16,42 +16,45 @@ export interface RankTheme {
   borderAnimated?: boolean;
 }
 
+// Solo Leveling "System" palette: deep navy-black backgrounds with glowing
+// blue/cyan accents that intensify with rank, shifting toward violet-white at
+// the top. Shared cool-white text keeps every screen on-brand.
 export const RANK_THEMES: Record<Rank, RankTheme> = {
   E: {
-    background: '#141414', primary: '#242424', accent: '#909090',
-    text: '#d0d0d0', textSecondary: '#999999', borderStyle: 'cracked_stone',
-    auraColor: null, particleType: 'dust', particleCount: 8,
-    avatarFloat: false, screenGlow: false,
+    background: '#070b12', primary: '#0d1726', accent: '#4aa3e0',
+    text: '#cfe4ff', textSecondary: '#6d87a8', borderStyle: 'system_panel',
+    auraColor: '#4aa3e0', particleType: 'motes', particleCount: 12,
+    avatarFloat: false, screenGlow: true, screenGlowColor: '#4aa3e018',
   },
   D: {
-    background: '#160c00', primary: '#1e1000', accent: '#d4874a',
-    text: '#e8c080', textSecondary: '#b07848', borderStyle: 'worn_iron',
-    auraColor: '#d4874a', particleType: 'embers', particleCount: 12,
-    avatarFloat: false, screenGlow: false,
+    background: '#060a12', primary: '#0d1828', accent: '#2f93ff',
+    text: '#d2e6ff', textSecondary: '#6f8ab0', borderStyle: 'system_panel',
+    auraColor: '#2f93ff', particleType: 'motes', particleCount: 16,
+    avatarFloat: false, screenGlow: true, screenGlowColor: '#2f93ff22',
   },
   C: {
-    background: '#0e0a00', primary: '#140e00', accent: '#ffb800',
-    text: '#ffd95a', textSecondary: '#d4a028', borderStyle: 'engraved_gold',
-    auraColor: '#ffb800', particleType: 'gold_sparks', particleCount: 16,
-    avatarFloat: false, screenGlow: true, screenGlowColor: '#ffb80018',
+    background: '#050912', primary: '#0c1a2c', accent: '#18b4ff',
+    text: '#d6ecff', textSecondary: '#6f93b8', borderStyle: 'system_panel',
+    auraColor: '#18b4ff', particleType: 'sparks', particleCount: 20,
+    avatarFloat: false, screenGlow: true, screenGlowColor: '#18b4ff2a',
   },
   B: {
-    background: '#0a0700', primary: '#0e0a00', accent: '#ffdd00',
-    text: '#fff8c8', textSecondary: '#ddbb00', borderStyle: 'gilded_ornate',
-    auraColor: '#ffdd00', particleType: 'gold_streaks', particleCount: 24,
-    avatarFloat: false, screenGlow: true, screenGlowColor: '#ffdd0035',
+    background: '#04080f', primary: '#0a1828', accent: '#1fd4ff',
+    text: '#ddf4ff', textSecondary: '#72a0c4', borderStyle: 'system_panel',
+    auraColor: '#1fd4ff', particleType: 'sparks', particleCount: 26,
+    avatarFloat: false, screenGlow: true, screenGlowColor: '#1fd4ff33',
   },
   A: {
-    background: '#060408', primary: '#0a0610', accent: '#e880ff',
-    text: '#f0d0ff', textSecondary: '#b855d4', borderStyle: 'celestial_rune',
-    auraColor: '#e880ff', particleType: 'light_pillars', particleCount: 32,
-    avatarFloat: false, screenGlow: true, screenGlowColor: '#e880ff35',
+    background: '#060611', primary: '#0c1226', accent: '#8f9bff',
+    text: '#e6ddff', textSecondary: '#8b8fc4', borderStyle: 'arcane_panel',
+    auraColor: '#8f9bff', particleType: 'pillars', particleCount: 32,
+    avatarFloat: false, screenGlow: true, screenGlowColor: '#8f9bff33',
   },
   S: {
-    background: '#000000', primary: '#050505', accent: '#ffffff',
-    text: '#ffffff', textSecondary: '#dddddd', borderStyle: 'divine_mandala',
-    auraColor: '#ffffff', particleType: 'god_rays', particleCount: 48,
-    avatarFloat: true, screenGlow: true, screenGlowColor: '#ffffff28',
+    background: '#02040a', primary: '#060e1c', accent: '#aef2ff',
+    text: '#ffffff', textSecondary: '#bfe6ff', borderStyle: 'monarch_panel',
+    auraColor: '#aef2ff', particleType: 'god_rays', particleCount: 44,
+    avatarFloat: true, screenGlow: true, screenGlowColor: '#aef2ff2a',
     borderAnimated: true,
   },
 };

@@ -10,6 +10,7 @@ import {
 } from '../db/queries';
 import { differenceInCalendarDays, parseISO, format, subDays } from 'date-fns';
 import type { DisciplineLog, Discipline, Mandate, Rank } from '../types';
+import SystemBackground from '../components/fx/SystemBackground';
 import { RANK_TITLES } from '../engine/xpConstants';
 import SectionDivider from '../components/ui/SectionDivider';
 import CornerFrame from '../components/ui/CornerFrame';
@@ -111,6 +112,7 @@ export default function Archive() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background, paddingTop: insets.top }]}>
+      <SystemBackground color={theme.accent} background={theme.background} />
       {/* Header */}
       <View style={[styles.header, { borderBottomColor: theme.accent + '30' }]}>
         <Text style={[styles.title, { color: theme.text }]}>THE ARCHIVE</Text>

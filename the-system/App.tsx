@@ -1,8 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { StatusBar, StyleSheet, LogBox, Animated, Image } from 'react-native';
+import { StatusBar, StyleSheet, LogBox, Animated, Image, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import * as SplashScreen from 'expo-splash-screen';
+import Particles from './src/components/fx/Particles';
+import Scanlines from './src/components/fx/Scanlines';
 
 LogBox.ignoreLogs([
   'Text strings must be rendered within a <Text> component',
@@ -35,6 +37,7 @@ export default function App() {
     preloadSounds(); // fire and forget
   }, []);
 
+  const theme = useSystemStore((s) => s.currentTheme);
   const ready = fontsLoaded || !!fontError;
 
   useEffect(() => {
@@ -56,6 +59,15 @@ export default function App() {
       <GestureHandlerRootView style={{ flex: 1 }}>
         <StatusBar barStyle="light-content" backgroundColor="#000000" />
         {ready && <AppNavigator />}
+        {ready && (
+          <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+            <Particles
+              color={theme.auraColor ?? theme.accent}
+              count={Math.min(theme.particleCount, 20)}
+            />
+            <Scanlines color={theme.accent} />
+          </View>
+        )}
         {!splashDone && (
           <Animated.View
             style={[StyleSheet.absoluteFill, styles.splash, { opacity: fade }]}

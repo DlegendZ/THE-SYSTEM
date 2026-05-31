@@ -11,6 +11,7 @@ import {
 import { useSystemStore } from '../store/useSystemStore';
 import { requestNotificationPermissions } from '../notifications/scheduler';
 import { format } from 'date-fns';
+import SystemBackground from '../components/fx/SystemBackground';
 import type { HeroClass } from '../types';
 
 const { width } = Dimensions.get('window');
@@ -59,6 +60,7 @@ export default function Awakening() {
 
   return (
     <View style={styles.container}>
+      <SystemBackground color="#3bc9ff" background="#04080f" />
       {step === 'intro' && (
         <TouchableOpacity style={styles.fullScreen} onPress={() => setStep('name')}>
           <Animated.View style={{ opacity }}>
@@ -78,7 +80,7 @@ export default function Awakening() {
             value={name}
             onChangeText={setName}
             placeholderTextColor="#666"
-            selectionColor="#ffd700"
+            selectionColor="#3bc9ff"
           />
           <TouchableOpacity
             style={styles.goldBtn}
@@ -158,12 +160,12 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#000' },
   fullScreen: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 32 },
   section: { flex: 1, justifyContent: 'center', padding: 32 },
-  introText: { color: '#ffd700', fontSize: 20, textAlign: 'center', fontWeight: 'bold' },
+  introText: { color: '#3bc9ff', fontSize: 20, textAlign: 'center', fontWeight: 'bold' },
   tapHint: { color: '#666', fontSize: 10, textAlign: 'center', marginTop: 32 },
-  prompt: { color: '#ffd700', fontSize: 16, textAlign: 'center', marginBottom: 24, fontWeight: 'bold' },
+  prompt: { color: '#3bc9ff', fontSize: 16, textAlign: 'center', marginBottom: 24, fontWeight: 'bold' },
   input: {
     borderWidth: 1,
-    borderColor: '#ffd700',
+    borderColor: '#3bc9ff',
     color: '#fff',
     padding: 12,
     fontSize: 16,
@@ -171,7 +173,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   goldBtn: {
-    backgroundColor: '#ffd700',
+    backgroundColor: '#3bc9ff',
     padding: 14,
     alignItems: 'center',
     borderRadius: 4,
@@ -184,8 +186,8 @@ const styles = StyleSheet.create({
     marginVertical: 6,
     borderRadius: 4,
   },
-  classCardSelected: { borderColor: '#ffd700', backgroundColor: '#1a1500' },
-  className: { color: '#ffd700', fontSize: 14, fontWeight: 'bold' },
+  classCardSelected: { borderColor: '#3bc9ff', backgroundColor: '#06151f' },
+  className: { color: '#3bc9ff', fontSize: 14, fontWeight: 'bold' },
   classDesc: { color: '#999', fontSize: 11, marginTop: 4 },
   permBtn: {
     borderWidth: 1,
@@ -194,7 +196,7 @@ const styles = StyleSheet.create({
     marginVertical: 6,
     borderRadius: 4,
   },
-  permBtnText: { color: '#ffd700', fontSize: 12, fontWeight: 'bold' },
+  permBtnText: { color: '#3bc9ff', fontSize: 12, fontWeight: 'bold' },
   permDesc: { color: '#666', fontSize: 10, marginTop: 4 },
-  dateText: { color: '#ffd700', fontSize: 24, textAlign: 'center', marginBottom: 24, fontWeight: 'bold' },
+  dateText: { color: '#3bc9ff', fontSize: 24, textAlign: 'center', marginBottom: 24, fontWeight: 'bold' },
 });

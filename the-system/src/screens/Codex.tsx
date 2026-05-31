@@ -8,6 +8,7 @@ import {
   setDisciplineActive, createCustomDiscipline, deleteDiscipline,
 } from '../db/queries';
 import type { Discipline } from '../types';
+import SystemBackground from '../components/fx/SystemBackground';
 
 const DIFFICULTY_OPTIONS = ['EASY', 'NORMAL', 'HARD', 'LEGENDARY'] as const;
 type Difficulty = typeof DIFFICULTY_OPTIONS[number];
@@ -87,6 +88,7 @@ export default function Codex() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <SystemBackground color={theme.accent} background={theme.background} />
       <View style={[styles.header, { paddingTop: insets.top + 14 }]}>
         <Text style={[styles.title, { color: theme.text }]}>THE CODEX</Text>
         <TouchableOpacity style={[styles.addBtn, { borderColor: theme.accent }]} onPress={() => setShowAdd(true)}>

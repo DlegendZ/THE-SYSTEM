@@ -15,6 +15,7 @@ import DisciplineCard from '../components/ui/DisciplineCard';
 import PixelText from '../components/ui/PixelText';
 import SectionDivider from '../components/ui/SectionDivider';
 import AvatarDisplay from '../components/avatar/AvatarDisplay';
+import SystemBackground from '../components/fx/SystemBackground';
 import { playSound } from '../audio/sounds';
 import type { Rank } from '../types';
 import type { RootStackParamList } from '../navigation/types';
@@ -185,6 +186,8 @@ export default function CommandHall() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background, paddingTop: insets.top }]}>
+      <SystemBackground color={theme.accent} background={theme.background} />
+
       {/* ── TOP HUD BAR ── */}
       <View style={[styles.hudBar, { borderBottomColor: theme.accent + '30' }]}>
         <RankBadge rank={hero.rank} color={theme.accent} />

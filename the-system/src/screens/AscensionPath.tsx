@@ -8,6 +8,7 @@ import { useSystemStore } from '../store/useSystemStore';
 import { getWeekCompletionRate } from '../db/queries';
 import { differenceInCalendarDays, parseISO } from 'date-fns';
 import CornerFrame from '../components/ui/CornerFrame';
+import SystemBackground from '../components/fx/SystemBackground';
 
 const TOTAL_NODES = 24;
 
@@ -176,6 +177,7 @@ export default function AscensionPath() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <SystemBackground color={theme.accent} background={theme.background} />
       {/* Header */}
       <View style={[styles.header, { borderBottomColor: theme.accent + '30', paddingTop: insets.top + 10 }]}>
         <View style={styles.headerTop}>

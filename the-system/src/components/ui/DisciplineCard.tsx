@@ -4,6 +4,7 @@ import Svg, { Polygon } from 'react-native-svg';
 import type { Discipline, DisciplineLog } from '../../types';
 import type { RankTheme } from '../../theme/rankThemes';
 import CornerFrame from './CornerFrame';
+import FadeInView from '../fx/FadeInView';
 
 interface Props {
   discipline: Discipline;
@@ -58,10 +59,28 @@ export default function DisciplineCard({ discipline, log, theme, onComplete, onF
       ? '#0e0505'
       : theme.primary;
 
-  const frameColor = isCompleted ? '#4caf5066' : isFailed ? '#f4433666' : theme.accent + '44';
+  const frameColor = isCompleted ? '#4caf5066' : isFailed ? '#f4433666' : theme.accent + '66';
+  const glowColor = isCompleted ? '#4caf50' : isFailed ? '#f44336' : theme.accent;
+  const active = !isCompleted && !isFailed;
 
   return (
-    <CornerFrame color={frameColor} size={10} thickness={1} style={[styles.card, { backgroundColor: cardBg }]}>
+    <FadeInView style={styles.cardWrap}>
+      <CornerFrame
+        color={frameColor}
+        size={10}
+        thickness={1}
+        style={[
+          styles.card,
+          {
+            backgroundColor: cardBg,
+            shadowColor: glowColor,
+            shadowOpacity: active ? 0.5 : 0.25,
+            shadowRadius: active ? 9 : 4,
+            shadowOffset: { width: 0, height: 0 },
+            elevation: active ? 6 : 2,
+          },
+        ]}
+      >
       {/* Difficulty stripe */}
       <View style={[styles.stripe, { backgroundColor: diffColor }]} />
 
@@ -124,11 +143,13 @@ export default function DisciplineCard({ discipline, log, theme, onComplete, onF
           )}
         </View>
       </View>
-    </CornerFrame>
+      </CornerFrame>
+    </FadeInView>
   );
 }
 
 const styles = StyleSheet.create({
+  cardWrap: {},
   card: {
     marginHorizontal: 14,
     marginVertical: 4,

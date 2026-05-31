@@ -11,6 +11,7 @@ import { differenceInCalendarDays, parseISO } from 'date-fns';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import { getDb } from '../db/database';
+import SystemBackground from '../components/fx/SystemBackground';
 
 type Nav = { goBack: () => void };
 
@@ -119,6 +120,7 @@ export default function Settings() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <SystemBackground color={theme.accent} background={theme.background} />
       <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
         <Text style={[styles.title, { color: theme.text }]}>SETTINGS</Text>
         <TouchableOpacity onPress={() => navigation.goBack()}>
