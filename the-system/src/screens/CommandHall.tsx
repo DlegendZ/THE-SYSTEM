@@ -3,6 +3,7 @@ import {
   View, Text, ScrollView, StyleSheet, TouchableOpacity, Animated, Alert, Dimensions,
 } from 'react-native';
 import Svg, { Polygon, Line, Rect } from 'react-native-svg';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import UsageStatsModule from '../native/UsageStatsModule';
 import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
@@ -100,6 +101,7 @@ function PresenceBar({ minutes, theme }: { minutes: number; theme: any }) {
 
 export default function CommandHall() {
   const navigation = useNavigation<Nav>();
+  const insets = useSafeAreaInsets();
   const {
     hero, disciplines, todayLogs, silenceStreak, pendingMandate, currentTheme: theme,
     completeDiscipline, failDiscipline, triggerRelapse,
@@ -182,7 +184,7 @@ export default function CommandHall() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <View style={[styles.container, { backgroundColor: theme.background, paddingTop: insets.top }]}>
       {/* ── TOP HUD BAR ── */}
       <View style={[styles.hudBar, { borderBottomColor: theme.accent + '30' }]}>
         <RankBadge rank={hero.rank} color={theme.accent} />
@@ -316,7 +318,7 @@ export default function CommandHall() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingTop: 44 },
+  container: { flex: 1 },
 
   // HUD Bar
   hudBar: {

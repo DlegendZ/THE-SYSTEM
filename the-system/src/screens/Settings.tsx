@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert, TextInput,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useSystemStore } from '../store/useSystemStore';
 import { getSystemState, setSystemState } from '../db/queries';
@@ -16,6 +17,7 @@ type Nav = { goBack: () => void };
 const INTERVALS = [1, 2, 3, 4, 6];
 
 export default function Settings() {
+  const insets = useSafeAreaInsets();
   const navigation = useNavigation<Nav>();
   const { hero, currentTheme: theme, initialize } = useSystemStore();
 
@@ -125,7 +127,7 @@ export default function Settings() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
         <Text style={[styles.title, { color: theme.text }]}>SETTINGS</Text>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Text style={[styles.closeBtn, { color: theme.textSecondary }]}>✕</Text>
@@ -207,7 +209,7 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   header: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    padding: 16, paddingTop: 48, borderBottomWidth: 1, borderBottomColor: '#333',
+    padding: 16, borderBottomWidth: 1, borderBottomColor: '#333',
   },
   title: { fontSize: 17, fontWeight: 'bold', letterSpacing: 3 },
   closeBtn: { fontSize: 20, padding: 4 },

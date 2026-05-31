@@ -28,12 +28,10 @@ export async function runMigrations(db: SQLiteDatabase): Promise<void> {
   pending.sort((a, b) => a.version - b.version);
 
   for (const migration of pending) {
-    await db.withTransactionAsync(async () => {
-      await migration.up(db);
-      await db.runAsync(
-        'INSERT INTO schema_version (version, applied_at) VALUES (?, ?)',
-        [migration.version, new Date().toISOString()]
-      );
-    });
+    await migration.up(db);
+    await db.runAsync(
+      'INSERT INTO schema_version (version, applied_at) VALUES (?, ?)',
+      [migration.version, new Date().toISOString()]
+    );
   }
 }

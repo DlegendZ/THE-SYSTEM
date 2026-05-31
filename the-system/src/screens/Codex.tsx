@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, TextInput, Alert,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSystemStore } from '../store/useSystemStore';
 import {
   setDisciplineActive, createCustomDiscipline, deleteDiscipline,
@@ -29,6 +30,7 @@ interface AddForm {
 const BLANK_FORM: AddForm = { name: '', description: '', difficulty: 'NORMAL', deadlineTime: '23:59' };
 
 export default function Codex() {
+  const insets = useSafeAreaInsets();
   const { disciplines, refresh, currentTheme: theme } = useSystemStore();
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState<AddForm>(BLANK_FORM);
@@ -85,7 +87,7 @@ export default function Codex() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top + 14 }]}>
         <Text style={[styles.title, { color: theme.text }]}>THE CODEX</Text>
         <TouchableOpacity style={[styles.addBtn, { borderColor: theme.accent }]} onPress={() => setShowAdd(true)}>
           <Text style={[styles.addBtnText, { color: theme.accent }]}>+ ADD</Text>
@@ -201,7 +203,7 @@ export default function Codex() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingTop: 48, paddingHorizontal: 16, paddingBottom: 16, borderBottomWidth: 1, borderBottomColor: '#333333' },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingBottom: 16, borderBottomWidth: 1, borderBottomColor: '#333333' },
   title: { fontSize: 17, fontWeight: 'bold', letterSpacing: 3 },
   addBtn: { borderWidth: 1, paddingHorizontal: 12, paddingVertical: 7 },
   addBtnText: { fontSize: 13, fontWeight: 'bold', letterSpacing: 1 },

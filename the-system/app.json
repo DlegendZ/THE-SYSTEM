@@ -30,7 +30,16 @@
       "expo-notifications",
       "expo-font",
       "expo-sharing",
-      "expo-audio"
+      "expo-audio",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 280,
+          "resizeMode": "contain",
+          "backgroundColor": "#000000"
+        }
+      ]
     ]
   }
 }

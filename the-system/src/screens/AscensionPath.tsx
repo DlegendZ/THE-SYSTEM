@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import {
   View, Text, ScrollView, StyleSheet, TouchableOpacity, Animated, Modal, Dimensions,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Polygon, Line, Circle, Path } from 'react-native-svg';
 import { useSystemStore } from '../store/useSystemStore';
 import { getWeekCompletionRate } from '../db/queries';
@@ -147,6 +148,7 @@ function NodeRow({ nodeNum, completionRate, isCurrent, isLocked, onPress, theme 
 }
 
 export default function AscensionPath() {
+  const insets = useSafeAreaInsets();
   const { hero, currentTheme: theme } = useSystemStore();
   const [completionRates, setCompletionRates] = useState<number[]>(new Array(TOTAL_NODES).fill(0));
   const [selectedNode, setSelectedNode] = useState<number | null>(null);
@@ -175,7 +177,7 @@ export default function AscensionPath() {
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       {/* Header */}
-      <View style={[styles.header, { borderBottomColor: theme.accent + '30' }]}>
+      <View style={[styles.header, { borderBottomColor: theme.accent + '30', paddingTop: insets.top + 10 }]}>
         <View style={styles.headerTop}>
           <Text style={[styles.title, { color: theme.text }]}>ASCENSION PATH</Text>
           <View style={[styles.weekBadge, { borderColor: theme.accent + '70', backgroundColor: theme.accent + '10' }]}>
@@ -301,7 +303,6 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
 
   header: {
-    paddingTop: 44,
     paddingHorizontal: 16,
     paddingBottom: 14,
     borderBottomWidth: 1,

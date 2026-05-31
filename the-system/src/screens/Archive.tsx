@@ -3,6 +3,7 @@ import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
 } from 'react-native';
 import Svg, { Polygon } from 'react-native-svg';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSystemStore } from '../store/useSystemStore';
 import {
   getLogsForRange, getAllMandates, getDisciplineLogsAll, getSilenceStreak,
@@ -72,6 +73,7 @@ const bigStatStyles = StyleSheet.create({
 });
 
 export default function Archive() {
+  const insets = useSafeAreaInsets();
   const { hero, disciplines, currentTheme: theme } = useSystemStore();
   const [activeTab, setActiveTab] = useState<Tab>('overview');
   const [mandates, setMandates] = useState<Mandate[]>([]);
@@ -108,7 +110,7 @@ export default function Archive() {
   const TABS: Tab[] = ['overview', 'disciplines', 'streaks', 'history'];
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <View style={[styles.container, { backgroundColor: theme.background, paddingTop: insets.top }]}>
       {/* Header */}
       <View style={[styles.header, { borderBottomColor: theme.accent + '30' }]}>
         <Text style={[styles.title, { color: theme.text }]}>THE ARCHIVE</Text>
@@ -274,7 +276,7 @@ export default function Archive() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingTop: 44 },
+  container: { flex: 1 },
   header: { paddingHorizontal: 16, paddingBottom: 12, borderBottomWidth: 1 },
   title: { fontSize: 17, fontWeight: 'bold', letterSpacing: 4 },
   subtitle: { fontSize: 10, letterSpacing: 3, marginTop: 3 },

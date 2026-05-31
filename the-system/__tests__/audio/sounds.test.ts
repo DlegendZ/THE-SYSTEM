@@ -1,13 +1,9 @@
-jest.mock('expo-av', () => ({
-  Audio: {
-    setAudioModeAsync: jest.fn().mockResolvedValue(undefined),
-    Sound: {
-      createAsync: jest.fn().mockResolvedValue({
-        sound: { replayAsync: jest.fn().mockResolvedValue(undefined) },
-        status: {},
-      }),
-    },
-  },
+jest.mock('expo-audio', () => ({
+  setAudioModeAsync: jest.fn().mockResolvedValue(undefined),
+  createAudioPlayer: jest.fn(() => ({
+    play: jest.fn(),
+    remove: jest.fn(),
+  })),
 }));
 
 jest.mock('expo-file-system/legacy', () => ({

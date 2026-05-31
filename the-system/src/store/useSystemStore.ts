@@ -65,6 +65,7 @@ export const useSystemStore = create<SystemState>((set, get) => ({
   onboardingComplete: false,
 
   initialize: async () => {
+    if (get().initialized) return;
     await initDatabase();
     const onboarding = await getSystemState('onboarding_complete');
     const hero = await getHero();

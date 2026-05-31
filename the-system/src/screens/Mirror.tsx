@@ -3,6 +3,7 @@ import {
   View, Text, ScrollView, StyleSheet,
 } from 'react-native';
 import Svg, { Polygon, Line, Rect, Circle } from 'react-native-svg';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSystemStore } from '../store/useSystemStore';
 import { getCosmetics } from '../db/queries';
 import { RANK_TITLES } from '../engine/xpConstants';
@@ -81,6 +82,7 @@ const equipStyles = StyleSheet.create({
 });
 
 export default function Mirror() {
+  const insets = useSafeAreaInsets();
   const { hero, todayLogs, disciplines, currentTheme: theme } = useSystemStore();
   const [cosmetics, setCosmetics] = useState<Cosmetic[]>([]);
 
@@ -103,7 +105,7 @@ export default function Mirror() {
   const titles = cosmetics.filter((c) => c.type === 'title' && c.unlocked);
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <View style={[styles.container, { backgroundColor: theme.background, paddingTop: insets.top }]}>
       {/* Header */}
       <View style={[styles.header, { borderBottomColor: theme.accent + '30' }]}>
         <View style={styles.nameRow}>
@@ -189,7 +191,7 @@ export default function Mirror() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingTop: 44 },
+  container: { flex: 1 },
   header: {
     paddingHorizontal: 16,
     paddingBottom: 14,

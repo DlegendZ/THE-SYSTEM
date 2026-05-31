@@ -11,6 +11,7 @@ export function getDb(): SQLite.SQLiteDatabase {
 }
 
 export async function initDatabase(): Promise<void> {
+  if (db) return;
   db = await SQLite.openDatabaseAsync('thesystem.db');
   await db.execAsync('PRAGMA journal_mode = WAL;');
   await db.execAsync('PRAGMA foreign_keys = ON;');
