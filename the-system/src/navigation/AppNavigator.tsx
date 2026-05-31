@@ -3,6 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { View, Text, StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Polygon, Line, Rect, Circle, Path } from 'react-native-svg';
 import { useSystemStore } from '../store/useSystemStore';
 import type { RootStackParamList } from './types';
@@ -87,6 +88,7 @@ function IconArchive({ color, focused }: { color: string; focused: boolean }) {
 
 function MainTabs() {
   const theme = useSystemStore((s) => s.currentTheme);
+  const insets = useSafeAreaInsets();
 
   return (
     <Tab.Navigator
@@ -96,8 +98,8 @@ function MainTabs() {
           backgroundColor: theme.primary,
           borderTopColor: theme.accent + '40',
           borderTopWidth: 1,
-          height: 58,
-          paddingBottom: 6,
+          height: 58 + insets.bottom,
+          paddingBottom: 6 + insets.bottom,
           paddingTop: 6,
         },
         tabBarActiveTintColor: theme.accent,

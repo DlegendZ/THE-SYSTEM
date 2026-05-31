@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { initDatabase } from '../db/database';
+import { initDatabase, getDb } from '../db/database';
 import {
   getHero,
   createHero,
@@ -50,6 +50,7 @@ interface SystemState {
   openMandate: () => Promise<LootResult | null>;
   requestMandate: () => Promise<boolean>;
   completeOnboarding: () => Promise<void>;
+  resetJourney: () => Promise<void>;
 }
 
 const today = () => format(new Date(), 'yyyy-MM-dd');
@@ -100,7 +101,9 @@ export const useSystemStore = create<SystemState>((set, get) => ({
   },
 
   createNewHero: async (name: string, heroClass: HeroClass) => {
-    await createHero(name, heroClass, new Date().toISOString().slice(0, 10));
+    // Use the local calendar date, not UTC — toISOString() can roll back a day
+    // for users east of UTC late at night.
+    await createHero(name, heroClass, today());
     await get().refresh();
   },
 
@@ -135,5 +138,27 @@ export const useSystemStore = create<SystemState>((set, get) => ({
   completeOnboarding: async () => {
     await setSystemState('onboarding_complete', '1');
     set({ onboardingComplete: true });
+  },
+
+  resetJourney: async () => {
+    const db = getDb();
+    await db.runAsync('DELETE FROM hero');
+    await db.runAsync('DELETE FROM discipline_logs');
+    await db.runAsync('DELETE FROM silence_streak');
+    await db.runAsync('DELETE FROM cosmetics');
+    await db.runAsync('DELETE FROM mandates');
+    await db.runAsync("DELETE FROM system_state WHERE key != 'notification_interval'");
+    // Reset in-memory state directly. initialize() can't be reused here because
+    // it early-returns once initialized; flipping onboardingComplete sends the
+    // navigator back to the Awakening flow.
+    set({
+      hero: null,
+      disciplines: [],
+      todayLogs: [],
+      silenceStreak: null,
+      pendingMandate: null,
+      onboardingComplete: false,
+      currentTheme: getThemeForRank('E'),
+    });
   },
 }));

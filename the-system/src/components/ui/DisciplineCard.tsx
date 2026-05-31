@@ -79,7 +79,7 @@ export default function DisciplineCard({ discipline, log, theme, onComplete, onF
           <Text style={[styles.name, { color: theme.text }]} numberOfLines={1}>
             {discipline.name}
           </Text>
-          <Text style={[styles.desc, { color: theme.textSecondary }]} numberOfLines={1}>
+          <Text style={[styles.desc, { color: theme.textSecondary }]}>
             {discipline.description}
           </Text>
           <View style={styles.metaRow}>

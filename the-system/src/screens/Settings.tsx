@@ -19,7 +19,7 @@ const INTERVALS = [1, 2, 3, 4, 6];
 export default function Settings() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<Nav>();
-  const { hero, currentTheme: theme, initialize } = useSystemStore();
+  const { hero, currentTheme: theme, resetJourney } = useSystemStore();
 
   const [notifInterval, setNotifInterval] = useState(3);
   const [quietStart, setQuietStart] = useState('00:00');
@@ -102,16 +102,8 @@ export default function Settings() {
           style: 'destructive',
           onPress: async () => {
             try {
-              const { getDb } = await import('../db/database');
-              const db = getDb();
-              await db.runAsync('DELETE FROM hero');
-              await db.runAsync('DELETE FROM discipline_logs');
-              await db.runAsync('DELETE FROM silence_streak');
-              await db.runAsync('DELETE FROM cosmetics');
-              await db.runAsync('DELETE FROM mandates');
-              await db.runAsync("DELETE FROM system_state WHERE key != 'notification_interval'");
               setResetConfirm('');
-              await initialize();
+              await resetJourney();
             } catch (err) {
               Alert.alert('RESET ERROR', String(err));
             }

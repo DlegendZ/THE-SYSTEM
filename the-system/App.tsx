@@ -4,7 +4,10 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import * as SplashScreen from 'expo-splash-screen';
 
-LogBox.ignoreLogs(['Text strings must be rendered within a <Text> component']);
+LogBox.ignoreLogs([
+  'Text strings must be rendered within a <Text> component',
+  'InteractionManager has been deprecated',
+]);
 import { useFonts } from 'expo-font';
 import AppNavigator from './src/navigation/AppNavigator';
 import { useSystemStore } from './src/store/useSystemStore';

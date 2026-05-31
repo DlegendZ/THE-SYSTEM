@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { useSystemStore } from '../store/useSystemStore';
 import { requestNotificationPermissions } from '../notifications/scheduler';
+import { format } from 'date-fns';
 import type { HeroClass } from '../types';
 
 const { width } = Dimensions.get('window');
@@ -142,7 +143,7 @@ export default function Awakening() {
         <View style={styles.section}>
           <Text style={styles.prompt}>YOUR COVENANT BEGINS.</Text>
           <Text style={styles.dateText}>
-            {new Date().toISOString().slice(0, 10)}
+            {format(new Date(), 'yyyy-MM-dd')}
           </Text>
           <TouchableOpacity style={styles.goldBtn} onPress={handleAccept}>
             <Text style={styles.goldBtnText}>I ACCEPT</Text>
