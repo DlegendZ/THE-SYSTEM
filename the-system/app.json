@@ -8,6 +8,8 @@
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "cover",
       "backgroundColor": "#000000"
     },
     "android": {
@@ -32,6 +34,9 @@
       [
         "expo-splash-screen",
         {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 1080,
+          "resizeMode": "cover",
           "backgroundColor": "#000000"
         }
       ]
