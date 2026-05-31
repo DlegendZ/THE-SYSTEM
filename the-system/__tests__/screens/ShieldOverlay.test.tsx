@@ -15,14 +15,12 @@ jest.mock('../../src/store/useSystemStore', () => ({
   }),
 }));
 
-jest.mock('../../src/native/ShieldModule', () => ({
-  __esModule: true,
-  default: {
-    lockNow: jest.fn().mockResolvedValue(true),
-    isAdminActive: jest.fn().mockResolvedValue(false),
-    openAdminSettings: jest.fn().mockResolvedValue(true),
-  },
+jest.mock('expo-keep-awake', () => ({
+  activateKeepAwakeAsync: jest.fn().mockResolvedValue(undefined),
+  deactivateKeepAwake: jest.fn(),
 }));
+
+jest.mock('../../src/audio/sounds', () => ({ playSound: jest.fn() }));
 
 import ShieldOverlay from '../../src/screens/ShieldOverlay';
 

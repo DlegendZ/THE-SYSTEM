@@ -26,7 +26,6 @@ async function ensureChannel(): Promise<void> {
     lightColor: ACCENT,
     lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
     vibrationPattern: [0, 250, 120, 250],
-    sound: 'default',
   });
 }
 

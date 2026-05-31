@@ -110,6 +110,18 @@ export default function CommandHall() {
 
   const floatAnim = React.useRef(new Animated.Value(0)).current;
   const glowAnim = React.useRef(new Animated.Value(0.4)).current;
+  const avatarFloat = React.useRef(new Animated.Value(0)).current;
+
+  React.useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(avatarFloat, { toValue: -6, duration: 1600, useNativeDriver: true }),
+        Animated.timing(avatarFloat, { toValue: 0, duration: 1600, useNativeDriver: true }),
+      ])
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [avatarFloat]);
 
   React.useEffect(() => {
     const glowLoop = Animated.loop(
@@ -219,13 +231,30 @@ export default function CommandHall() {
       <View style={styles.avatarSection}>
         {/* Avatar frame */}
         <View style={styles.avatarFrame}>
-          <HexagonFrame color={theme.accent + '40'} size={120} />
-          <Animated.View style={{ opacity: glowAnim }}>
+          {/* Rank aura glow — intensifies with screenGlow ranks */}
+          <Animated.View
+            style={[
+              styles.avatarGlow,
+              {
+                backgroundColor: (theme.auraColor ?? theme.accent) + '22',
+                shadowColor: theme.auraColor ?? theme.accent,
+                shadowRadius: theme.screenGlow ? 34 : 18,
+                opacity: glowAnim.interpolate({
+                  inputRange: [0.4, 1],
+                  outputRange: [0.35, 0.85],
+                }),
+              },
+            ]}
+          />
+          <HexagonFrame color={theme.accent + '55'} size={132} />
+          <Animated.View
+            style={{ opacity: glowAnim, transform: [{ translateY: avatarFloat }] }}
+          >
             <AvatarDisplay
               heroClass={hero.hero_class as HeroClass}
               rank={hero.rank}
               mood={mood}
-              pixelSize={5}
+              pixelSize={6}
             />
           </Animated.View>
         </View>
@@ -387,11 +416,20 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   avatarFrame: {
-    width: 120,
-    height: 120,
+    width: 132,
+    height: 132,
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
+  },
+  avatarGlow: {
+    position: 'absolute',
+    width: 104,
+    height: 104,
+    borderRadius: 52,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.9,
+    elevation: 8,
   },
   streakBox: {
     flex: 1,

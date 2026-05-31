@@ -65,9 +65,9 @@ export default function App() {
           <View pointerEvents="none" style={StyleSheet.absoluteFill}>
             <Particles
               color={theme.auraColor ?? theme.accent}
-              count={Math.min(theme.particleCount, 20)}
+              count={Math.min(theme.particleCount, 40)}
             />
-            <Scanlines color={theme.accent} />
+            <Scanlines color={theme.accent} intensity={theme.screenGlow ? 0.09 : 0.06} />
           </View>
         )}
         {!splashDone && (
