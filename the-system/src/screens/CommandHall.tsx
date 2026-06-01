@@ -294,7 +294,7 @@ export default function CommandHall() {
               onPress={() => navigation.navigate('MandateReveal')}
               style={[styles.chestBtn, { borderColor: theme.accent, backgroundColor: theme.accent + '20' }]}
             >
-              <Text style={{ fontSize: 28 }}>📦</Text>
+              <Text style={{ fontSize: 28, fontFamily: FONTS.body }}>📦</Text>
               <Text style={[styles.chestTier, { color: theme.accent }]}>{pendingMandate.tier}</Text>
             </TouchableOpacity>
           </Animated.View>

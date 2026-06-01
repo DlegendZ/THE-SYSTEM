@@ -16,7 +16,7 @@ export default function PixelText({ style, size = 12, color, children, ...props 
     <Text
       style={[
         styles.base,
-        { fontSize: size, color: color ?? '#EDEAE0' },
+        { fontSize: size, color: color ?? '#EDEAE0', fontFamily: FONTS.display },
         style,
       ]}
       {...props}
