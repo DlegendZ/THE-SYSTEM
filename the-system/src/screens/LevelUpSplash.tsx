@@ -101,7 +101,7 @@ export default function LevelUpSplash() {
   return (
     <View style={styles.overlay}>
       <Animated.View style={[styles.panel, { width: panelSize, opacity: fadeAnim, backgroundColor: '#000000' }]}>
-        <CornerBrackets color={rankColor} thickness={2} length={24} />
+        <CornerBrackets color={rankColor} thickness={2} length={24} style={{ zIndex: 2 }} />
 
         {/* Radiating rays */}
         <Animated.View style={[styles.raysWrap, { opacity: rayAnim }]}>

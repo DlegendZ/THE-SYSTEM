@@ -2,11 +2,11 @@ import React from 'react';
 import { View, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 
 export function CornerBrackets({
-  color, thickness = 2, length = 14, inset = 0,
-}: { color: string; thickness?: number; length?: number; inset?: number }) {
+  color, thickness = 2, length = 14, inset = 0, style,
+}: { color: string; thickness?: number; length?: number; inset?: number; style?: StyleProp<ViewStyle> }) {
   const c = { position: 'absolute' as const, width: length, height: length, borderColor: color };
   return (
-    <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+    <View pointerEvents="none" style={[StyleSheet.absoluteFill, style]}>
       <View style={[c, { top: inset, left: inset, borderTopWidth: thickness, borderLeftWidth: thickness }]} />
       <View style={[c, { top: inset, right: inset, borderTopWidth: thickness, borderRightWidth: thickness }]} />
       <View style={[c, { bottom: inset, left: inset, borderBottomWidth: thickness, borderLeftWidth: thickness }]} />
