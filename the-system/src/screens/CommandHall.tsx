@@ -11,13 +11,16 @@ import { useSystemStore } from '../store/useSystemStore';
 import { RANK_TITLES } from '../engine/xpConstants';
 import { differenceInCalendarDays, parseISO } from 'date-fns';
 import XPBar from '../components/ui/XPBar';
+import { CornerBrackets } from '../components/ui/CornerBox';
 import DisciplineCard from '../components/ui/DisciplineCard';
 import PixelText from '../components/ui/PixelText';
 import SectionDivider from '../components/ui/SectionDivider';
 import AvatarDisplay from '../components/avatar/AvatarDisplay';
 import AvatarOrbit from '../components/avatar/AvatarOrbit';
 import SystemBackground from '../components/fx/SystemBackground';
+import AmbientEmbers from '../components/fx/AmbientEmbers';
 import { getRandomQuote } from '../data/quotes';
+import Glyph from '../components/icons/Glyph';
 import { FONTS } from '../theme/typography';
 
 const ORBIT_BY_RANK: Record<string, number> = { E: 0, D: 2, C: 3, B: 5, A: 7, S: 10 };
@@ -60,10 +63,7 @@ function RankBadge({ rank, color }: { rank: string; color: string }) {
         <PixelText size={20} color={color}>{rank}</PixelText>
       </View>
       {/* Corner ticks */}
-      <View style={[styles.rankCorner, { top: -1, left: -1, borderTopWidth: 2, borderLeftWidth: 2, borderColor: color }]} />
-      <View style={[styles.rankCorner, { top: -1, right: -1, borderTopWidth: 2, borderRightWidth: 2, borderColor: color }]} />
-      <View style={[styles.rankCorner, { bottom: -1, left: -1, borderBottomWidth: 2, borderLeftWidth: 2, borderColor: color }]} />
-      <View style={[styles.rankCorner, { bottom: -1, right: -1, borderBottomWidth: 2, borderRightWidth: 2, borderColor: color }]} />
+      <CornerBrackets color={color} thickness={2} length={7} inset={-1} />
     </View>
   );
 }
@@ -92,9 +92,11 @@ function PresenceBar({ minutes, theme }: { minutes: number; theme: any }) {
     <View style={styles.presenceWrap}>
       <View style={styles.presenceRow}>
         <Text style={[styles.presenceLabel, { color: theme.textSecondary }]}>Screen time</Text>
-        <Text style={[styles.presenceTime, { color: barColor }]}>
-          {Math.round(minutes)}m {overLimit ? '▲ EXCEEDED' : '✓ OK'}
-        </Text>
+        <View style={styles.presenceTimeRow}>
+          <Text style={[styles.presenceTime, { color: barColor }]}>{Math.round(minutes)}m</Text>
+          <Glyph name={overLimit ? 'up' : 'check'} color={barColor} size={12} />
+          <Text style={[styles.presenceTime, { color: barColor }]}>{overLimit ? 'EXCEEDED' : 'OK'}</Text>
+        </View>
       </View>
       <View style={[styles.presenceBg, { backgroundColor: '#2A2725' }]}>
         <View style={[styles.presenceFill, { width: `${pct * 100}%`, backgroundColor: barColor }]} />
@@ -202,6 +204,7 @@ export default function CommandHall() {
   return (
     <View style={[styles.container, { backgroundColor: theme.background, paddingTop: insets.top }]}>
       <SystemBackground color={theme.accent} background={theme.background} />
+      <AmbientEmbers color={theme.auraColor ?? theme.accent} />
 
       {/* ── TOP HUD BAR ── */}
       <View style={[styles.hudBar, { borderBottomColor: theme.accent + '30' }]}>
@@ -294,7 +297,8 @@ export default function CommandHall() {
               onPress={() => navigation.navigate('MandateReveal')}
               style={[styles.chestBtn, { borderColor: theme.accent, backgroundColor: theme.accent + '20' }]}
             >
-              <Text style={{ fontSize: 28 }}>📦</Text>
+              <CornerBrackets color={theme.accent} thickness={1.5} length={8} />
+              <Glyph name="chest" color={theme.accent} size={28} />
               <Text style={[styles.chestTier, { color: theme.accent }]}>{pendingMandate.tier}</Text>
             </TouchableOpacity>
           </Animated.View>
@@ -355,11 +359,12 @@ export default function CommandHall() {
             activeOpacity={0.8}
           >
             <View style={[styles.shieldInner, { borderColor: '#ff4444', backgroundColor: '#1a0000' }]}>
-              <View style={[styles.shieldCorner, { top: 0, left: 0, borderTopWidth: 1.5, borderLeftWidth: 1.5, borderColor: '#ff4444' }]} />
-              <View style={[styles.shieldCorner, { top: 0, right: 0, borderTopWidth: 1.5, borderRightWidth: 1.5, borderColor: '#ff4444' }]} />
-              <View style={[styles.shieldCorner, { bottom: 0, left: 0, borderBottomWidth: 1.5, borderLeftWidth: 1.5, borderColor: '#ff4444' }]} />
-              <View style={[styles.shieldCorner, { bottom: 0, right: 0, borderBottomWidth: 1.5, borderRightWidth: 1.5, borderColor: '#ff4444' }]} />
-              <Text style={styles.shieldText}>🛡 Shield protocol</Text>
+              <CornerBrackets color="#ff4444" thickness={1.5} length={10} />
+              <View style={styles.shieldTitleRow}>
+                <Glyph name="shield" color="#ff4444" size={18} />
+                <Text style={styles.shieldText}>Shield Protocol</Text>
+                <Glyph name="shield" color="#ff4444" size={18} />
+              </View>
               <Text style={styles.shieldSub}>Engage digital fortress</Text>
             </View>
           </TouchableOpacity>
@@ -393,12 +398,14 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     lineHeight: 19,
     letterSpacing: 0.3,
+    fontFamily: FONTS.italic,
   },
   quoteAuthor: {
     fontSize: 11,
     marginTop: 4,
     letterSpacing: 1,
     textAlign: 'right',
+    fontFamily: FONTS.body,
   },
   rankBadgeOuter: {
     borderWidth: 1,
@@ -409,11 +416,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 4,
     alignItems: 'center',
-  },
-  rankCorner: {
-    position: 'absolute',
-    width: 7,
-    height: 7,
   },
   hudCenter: {
     flex: 1,
@@ -432,17 +434,18 @@ const styles = StyleSheet.create({
   },
   dayText: {
     fontSize: 17,
-    fontWeight: 'bold',
     letterSpacing: 1,
+    fontFamily: FONTS.display,
   },
   dayOf: {
     fontSize: 14,
-    fontWeight: 'bold',
+    fontFamily: FONTS.bold,
   },
   rankTitle: {
     fontSize: 10,
     letterSpacing: 0.5,
     marginTop: 2,
+    fontFamily: FONTS.body,
   },
   settingsBtn: { padding: 4 },
 
@@ -478,6 +481,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
     letterSpacing: 0.5,
     marginTop: 2,
+    fontFamily: FONTS.body,
   },
   chestFloat: {
     alignItems: 'center',
@@ -487,12 +491,13 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     padding: 8,
     alignItems: 'center',
+    position: 'relative',
   },
   chestTier: {
     fontSize: 8,
-    fontWeight: 'bold',
     marginTop: 2,
     letterSpacing: 1,
+    fontFamily: FONTS.bold,
   },
 
   // Presence
@@ -505,14 +510,20 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 3,
   },
+  presenceTimeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
   presenceLabel: {
     fontSize: 10,
     letterSpacing: 0.5,
+    fontFamily: FONTS.body,
   },
   presenceTime: {
     fontSize: 11,
-    fontWeight: 'bold',
     letterSpacing: 1,
+    fontFamily: FONTS.bold,
   },
   presenceBg: {
     height: 3,
@@ -544,6 +555,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
     letterSpacing: 1,
     minWidth: 110,
+    fontFamily: FONTS.body,
   },
   questProgressBar: {
     flex: 1,
@@ -567,15 +579,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     position: 'relative',
   },
-  shieldCorner: {
-    position: 'absolute',
-    width: 10,
-    height: 10,
+  shieldTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
   shieldText: {
     color: '#ff4444',
     fontSize: 15,
-    fontWeight: 'bold',
     letterSpacing: 0.3,
     fontFamily: FONTS.display,
   },
@@ -584,5 +595,6 @@ const styles = StyleSheet.create({
     fontSize: 10,
     letterSpacing: 0.5,
     marginTop: 4,
+    fontFamily: FONTS.body,
   },
 });

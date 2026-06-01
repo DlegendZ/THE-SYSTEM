@@ -8,6 +8,7 @@ import type { StackNavigationProp } from '@react-navigation/stack';
 import type { RouteProp } from '@react-navigation/native';
 import { useSystemStore } from '../store/useSystemStore';
 import { RANK_TITLES } from '../engine/xpConstants';
+import { CornerBrackets } from '../components/ui/CornerBox';
 import { FONTS } from '../theme/typography';
 import type { RootStackParamList } from '../navigation/types';
 import type { Rank } from '../types';
@@ -63,18 +64,6 @@ function RadiatingRays({ color, size }: { color: string; size: number }) {
   );
 }
 
-function CornerDeco({ color }: { color: string }) {
-  const sz = 32;
-  return (
-    <>
-      <View style={[styles.cornerDeco, { top: 0, left: 0, borderTopWidth: 2, borderLeftWidth: 2, borderColor: color }]} />
-      <View style={[styles.cornerDeco, { top: 0, right: 0, borderTopWidth: 2, borderRightWidth: 2, borderColor: color }]} />
-      <View style={[styles.cornerDeco, { bottom: 0, left: 0, borderBottomWidth: 2, borderLeftWidth: 2, borderColor: color }]} />
-      <View style={[styles.cornerDeco, { bottom: 0, right: 0, borderBottomWidth: 2, borderRightWidth: 2, borderColor: color }]} />
-    </>
-  );
-}
-
 export default function LevelUpSplash() {
   const navigation = useNavigation<Nav>();
   const route = useRoute<Route>();
@@ -112,7 +101,7 @@ export default function LevelUpSplash() {
   return (
     <View style={styles.overlay}>
       <Animated.View style={[styles.panel, { width: panelSize, opacity: fadeAnim, backgroundColor: '#000000' }]}>
-        <CornerDeco color={rankColor} />
+        <CornerBrackets color={rankColor} thickness={2} length={24} style={{ zIndex: 2 }} />
 
         {/* Radiating rays */}
         <Animated.View style={[styles.raysWrap, { opacity: rayAnim }]}>
@@ -152,6 +141,7 @@ export default function LevelUpSplash() {
 
           <View style={styles.xpRow}>
             <View style={[styles.xpBadge, { borderColor: rankColor + '60' }]}>
+              <CornerBrackets color={rankColor + '60'} length={8} />
               <Text style={[styles.xpText, { color: rankColor }]}>+{xpGained} XP</Text>
             </View>
           </View>
@@ -161,10 +151,7 @@ export default function LevelUpSplash() {
             onPress={() => navigation.goBack()}
             activeOpacity={0.8}
           >
-            <View style={[styles.btnCorner, { top: 0, left: 0, borderTopWidth: 1, borderLeftWidth: 1, borderColor: rankColor }]} />
-            <View style={[styles.btnCorner, { top: 0, right: 0, borderTopWidth: 1, borderRightWidth: 1, borderColor: rankColor }]} />
-            <View style={[styles.btnCorner, { bottom: 0, left: 0, borderBottomWidth: 1, borderLeftWidth: 1, borderColor: rankColor }]} />
-            <View style={[styles.btnCorner, { bottom: 0, right: 0, borderBottomWidth: 1, borderRightWidth: 1, borderColor: rankColor }]} />
+            <CornerBrackets color={rankColor} thickness={1} length={8} />
             <Text style={[styles.continueTxt, { color: rankColor }]}>Continue</Text>
           </TouchableOpacity>
         </View>
@@ -187,12 +174,6 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     alignItems: 'center',
   },
-  cornerDeco: {
-    position: 'absolute',
-    width: 24,
-    height: 24,
-    zIndex: 2,
-  },
   raysWrap: {
     position: 'absolute',
     top: 0, left: 0, right: 0, bottom: 0,
@@ -207,7 +188,6 @@ const styles = StyleSheet.create({
   },
   eventLabel: {
     fontSize: 12,
-    fontWeight: 'bold',
     letterSpacing: 0.3,
     marginBottom: 12,
     fontFamily: FONTS.display,
@@ -225,27 +205,25 @@ const styles = StyleSheet.create({
   },
   rankLetter: {
     fontFamily: 'Lora_600SemiBold',
-    fontSize: 96,
-    fontWeight: 'bold',
+    fontSize: 98,
     lineHeight: 100,
   },
   rankLetterBg: {
     fontFamily: 'Lora_600SemiBold',
     position: 'absolute',
     fontSize: 120,
-    fontWeight: 'bold',
     lineHeight: 120,
   },
   levelNumber: {
     fontFamily: 'Lora_600SemiBold',
-    fontSize: 96,
-    fontWeight: 'bold',
+    fontSize: 98,
     lineHeight: 100,
   },
   rankName: {
     fontSize: 13,
     letterSpacing: 0.3,
     marginBottom: 28,
+    fontFamily: FONTS.body,
   },
   xpRow: {
     marginBottom: 28,
@@ -254,11 +232,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     paddingHorizontal: 20,
     paddingVertical: 6,
+    position: 'relative',
   },
   xpText: {
     fontSize: 15,
-    fontWeight: 'bold',
     letterSpacing: 0.5,
+    fontFamily: FONTS.bold,
   },
   continueBtn: {
     borderWidth: 1,
@@ -266,14 +245,8 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     position: 'relative',
   },
-  btnCorner: {
-    position: 'absolute',
-    width: 8,
-    height: 8,
-  },
   continueTxt: {
     fontSize: 13,
-    fontWeight: 'bold',
     letterSpacing: 0.3,
     fontFamily: FONTS.display,
   },

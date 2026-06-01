@@ -29,5 +29,5 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, marginVertical: 12 },
   line: { flex: 1, height: 1 },
   gem: { marginHorizontal: 6 },
-  label: { fontSize: 11, fontWeight: 'bold', letterSpacing: 0.5, fontFamily: FONTS.display },
+  label: { fontSize: 11, letterSpacing: 0.5, fontFamily: FONTS.display },
 });

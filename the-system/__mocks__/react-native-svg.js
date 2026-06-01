@@ -42,6 +42,9 @@ function Line(props) {
 function Polygon(props) {
   return React.createElement('polygon-mock', null);
 }
+function Polyline(props) {
+  return React.createElement('polyline-mock', null);
+}
 function Pattern({ children }) {
   return React.createElement('pattern-mock', null, children);
 }
@@ -61,5 +64,6 @@ module.exports = {
   Stop,
   Line,
   Polygon,
+  Polyline,
   Pattern,
 };

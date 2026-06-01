@@ -11,17 +11,20 @@ import type { Cosmetic, Rank } from '../types';
 import AvatarDisplay from '../components/avatar/AvatarDisplay';
 import SectionDivider from '../components/ui/SectionDivider';
 import SystemBackground from '../components/fx/SystemBackground';
+import AmbientEmbers from '../components/fx/AmbientEmbers';
 import CornerFrame from '../components/ui/CornerFrame';
+import { CornerBrackets } from '../components/ui/CornerBox';
+import Glyph, { GlyphName } from '../components/icons/Glyph';
 import type { HeroClass } from '../components/avatar/avatarData';
 import { FONTS } from '../theme/typography';
 
 type MoodState = 'radiant' | 'steady' | 'worn' | 'broken';
 
-const STAT_DISCIPLINES: Array<{ label: string; code: string; icon: string }> = [
-  { label: 'Willpower', code: 'SILENCE', icon: '⚡' },
-  { label: 'Strength', code: 'FORGE', icon: '⚔' },
-  { label: 'Vitality', code: 'NOURISH', icon: '♥' },
-  { label: 'Knowledge', code: 'KNOWLEDGE', icon: '◈' },
+const STAT_DISCIPLINES: Array<{ label: string; code: string; glyph: GlyphName }> = [
+  { label: 'Willpower', code: 'SILENCE', glyph: 'bolt' },
+  { label: 'Strength', code: 'FORGE', glyph: 'sword' },
+  { label: 'Vitality', code: 'NOURISH', glyph: 'heart' },
+  { label: 'Knowledge', code: 'KNOWLEDGE', glyph: 'gem' },
 ];
 
 function computeMood(rate: number): MoodState {
@@ -31,13 +34,13 @@ function computeMood(rate: number): MoodState {
   return 'broken';
 }
 
-function StatBar({ label, icon, completed, level, color }: {
-  label: string; icon: string; completed: boolean; level: number; color: string;
+function StatBar({ label, glyph, completed, level, color }: {
+  label: string; glyph: GlyphName; completed: boolean; level: number; color: string;
 }) {
   const val = completed ? 100 : 30;
   return (
     <View style={statStyles.row}>
-      <Text style={[statStyles.icon, { color }]}>{icon}</Text>
+      <View style={statStyles.iconWrap}><Glyph name={glyph} color={color} size={16} /></View>
       <Text style={[statStyles.label, { color: '#888' }]}>{label}</Text>
       <View style={[statStyles.barBg, { backgroundColor: '#111' }]}>
         <View style={[statStyles.barFill, { width: `${val}%`, backgroundColor: color }]} />
@@ -53,12 +56,12 @@ function StatBar({ label, icon, completed, level, color }: {
 
 const statStyles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', marginBottom: 10, gap: 8 },
-  icon: { fontSize: 16, width: 22, textAlign: 'center' },
-  label: { fontSize: 11, letterSpacing: 0.3, width: 90 },
+  iconWrap: { width: 22, alignItems: 'center' },
+  label: { fontSize: 11, letterSpacing: 0.3, width: 90, fontFamily: FONTS.body },
   barBg: { flex: 1, height: 12, overflow: 'hidden', position: 'relative' },
   barFill: { height: 12, position: 'absolute', left: 0, top: 0, bottom: 0 },
   tick: { position: 'absolute', top: 2, bottom: 2, width: 1, backgroundColor: '#000' },
-  lvl: { fontSize: 12, fontWeight: 'bold', width: 28, textAlign: 'right' },
+  lvl: { fontSize: 12, width: 28, textAlign: 'right', fontFamily: FONTS.display },
 });
 
 function EquipSlot({ label, name, tier, color }: {
@@ -78,9 +81,9 @@ function EquipSlot({ label, name, tier, color }: {
 const equipStyles = StyleSheet.create({
   slot: { flex: 1 },
   inner: { padding: 10, alignItems: 'center', gap: 4 },
-  slotLabel: { fontSize: 10, letterSpacing: 0.5 },
-  tier: { fontSize: 18, fontWeight: 'bold' },
-  name: { fontSize: 11, textAlign: 'center', lineHeight: 15 },
+  slotLabel: { fontSize: 10, letterSpacing: 0.5, fontFamily: FONTS.body },
+  tier: { fontSize: 18, fontFamily: FONTS.display },
+  name: { fontSize: 11, textAlign: 'center', lineHeight: 15, fontFamily: FONTS.body },
 });
 
 export default function Mirror() {
@@ -109,11 +112,13 @@ export default function Mirror() {
   return (
     <View style={[styles.container, { backgroundColor: theme.background, paddingTop: insets.top }]}>
       <SystemBackground color={theme.accent} background={theme.background} />
+      <AmbientEmbers color={theme.auraColor ?? theme.accent} />
       {/* Header */}
       <View style={[styles.header, { borderBottomColor: theme.accent + '30' }]}>
         <View style={styles.nameRow}>
           <Text style={[styles.heroName, { color: theme.text }]}>{hero.name}</Text>
           <View style={[styles.rankPill, { borderColor: theme.accent + '80', backgroundColor: theme.accent + '15' }]}>
+            <CornerBrackets color={theme.accent + '80'} length={8} />
             <Text style={[styles.rankLetter, { color: theme.accent }]}>{hero.rank}</Text>
           </View>
         </View>
@@ -139,6 +144,7 @@ export default function Mirror() {
           </View>
           {/* Mood indicator */}
           <View style={[styles.moodBadge, { borderColor: theme.accent + '60', backgroundColor: theme.primary }]}>
+            <CornerBrackets color={theme.accent + '60'} length={8} />
             <Text style={[styles.moodText, { color: theme.accent }]}>
               {mood.charAt(0).toUpperCase() + mood.slice(1)}
             </Text>
@@ -156,7 +162,7 @@ export default function Mirror() {
         {/* Stats */}
         <SectionDivider title="Attributes" color={theme.accent} />
         <View style={styles.statsSection}>
-          {STAT_DISCIPLINES.map(({ label, code, icon }) => {
+          {STAT_DISCIPLINES.map(({ label, code, glyph }) => {
             const discipline = disciplines.find((d) => d.code === code);
             const log = todayLogs.find((l) => l.discipline_id === discipline?.id);
             const completed = log?.completed === 1;
@@ -164,7 +170,7 @@ export default function Mirror() {
               <StatBar
                 key={code}
                 label={label}
-                icon={icon}
+                glyph={glyph}
                 completed={completed}
                 level={hero.global_level}
                 color={theme.accent}
@@ -180,6 +186,7 @@ export default function Mirror() {
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.titlesRow}>
               {titles.map((t) => (
                 <View key={t.id} style={[styles.titleChip, { borderColor: theme.accent + '70', backgroundColor: theme.accent + '10' }]}>
+                  <CornerBrackets color={theme.accent + '70'} length={8} />
                   <Text style={[styles.titleTxt, { color: theme.accent }]}>{t.name}</Text>
                 </View>
               ))}
@@ -197,18 +204,20 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   header: {
     paddingHorizontal: 16,
+    paddingTop: 12,
     paddingBottom: 14,
     borderBottomWidth: 1,
   },
   nameRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  heroName: { fontSize: 18, fontWeight: 'bold', letterSpacing: 0.3, fontFamily: FONTS.display },
+  heroName: { fontSize: 18, letterSpacing: 0.3, fontFamily: FONTS.display },
   rankPill: {
     borderWidth: 1.5,
     paddingHorizontal: 10,
     paddingVertical: 3,
+    position: 'relative',
   },
-  rankLetter: { fontSize: 20, fontWeight: 'bold' },
-  rankTitle: { fontSize: 11, letterSpacing: 0.5, marginTop: 4 },
+  rankLetter: { fontSize: 20, fontFamily: FONTS.display },
+  rankTitle: { fontSize: 11, letterSpacing: 0.5, marginTop: 4, fontFamily: FONTS.body },
 
   scroll: { paddingBottom: 24 },
 
@@ -232,7 +241,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 3,
   },
-  moodText: { fontSize: 10, fontWeight: 'bold', letterSpacing: 0.3, fontFamily: FONTS.display },
+  moodText: { fontSize: 10, letterSpacing: 0.3, fontFamily: FONTS.display },
 
   equipRow: { flexDirection: 'row', paddingHorizontal: 14, gap: 8 },
 
@@ -244,8 +253,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 5,
     marginRight: 8,
+    position: 'relative',
   },
-  titleTxt: { fontSize: 12, fontWeight: 'bold', letterSpacing: 1 },
+  titleTxt: { fontSize: 12, letterSpacing: 1, fontFamily: FONTS.bold },
 
   bottomPad: { height: 64 },
 });

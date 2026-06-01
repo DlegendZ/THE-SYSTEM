@@ -3,8 +3,11 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Svg, { Polygon } from 'react-native-svg';
 import type { Discipline, DisciplineLog } from '../../types';
 import type { RankTheme } from '../../theme/rankThemes';
+import { FONTS } from '../../theme/typography';
 import CornerFrame from './CornerFrame';
+import { CornerBrackets } from './CornerBox';
 import FadeInView from '../fx/FadeInView';
+import Glyph from '../icons/Glyph';
 
 interface Props {
   discipline: Discipline;
@@ -41,9 +44,8 @@ function StatusMark({ type }: { type: 'complete' | 'fail' }) {
   const bg = type === 'complete' ? '#0a1a0a' : '#1a0a0a';
   return (
     <View style={[styles.statusBox, { borderColor: color, backgroundColor: bg }]}>
-      <Text style={[styles.statusGlyph, { color }]}>
-        {type === 'complete' ? '✓' : '✗'}
-      </Text>
+      <CornerBrackets color={color} length={9} />
+      <Glyph name={type === 'complete' ? 'check' : 'cross'} color={color} size={18} />
     </View>
   );
 }
@@ -128,7 +130,8 @@ export default function DisciplineCard({ discipline, log, theme, onComplete, onF
                 onPress={onComplete}
                 activeOpacity={0.7}
               >
-                <Text style={[styles.btnGlyph, { color: '#4caf50' }]}>✓</Text>
+                <CornerBrackets color="#4caf5088" length={9} />
+                <Glyph name="check" color="#4caf50" size={20} />
               </TouchableOpacity>
               {discipline.code === 'SILENCE' && (
                 <TouchableOpacity
@@ -136,7 +139,8 @@ export default function DisciplineCard({ discipline, log, theme, onComplete, onF
                   onPress={onFail}
                   activeOpacity={0.7}
                 >
-                  <Text style={[styles.btnGlyph, { color: '#f44336' }]}>✗</Text>
+                  <CornerBrackets color="#f4433688" length={9} />
+                  <Glyph name="cross" color="#f44336" size={20} />
                 </TouchableOpacity>
               )}
             </View>
@@ -174,8 +178,8 @@ const styles = StyleSheet.create({
   },
   diffAbbr: {
     fontSize: 10,
-    fontWeight: 'bold',
     letterSpacing: 0,
+    fontFamily: FONTS.bold,
   },
   info: {
     flex: 1,
@@ -183,12 +187,13 @@ const styles = StyleSheet.create({
   },
   name: {
     fontSize: 14,
-    fontWeight: 'bold',
     letterSpacing: 0.5,
+    fontFamily: FONTS.bold,
   },
   desc: {
     fontSize: 12,
     lineHeight: 15,
+    fontFamily: FONTS.body,
   },
   metaRow: {
     flexDirection: 'row',
@@ -197,12 +202,13 @@ const styles = StyleSheet.create({
   },
   xpGain: {
     fontSize: 12,
-    fontWeight: 'bold',
     color: '#4caf50',
+    fontFamily: FONTS.bold,
   },
   xpLoss: {
     fontSize: 12,
     color: '#f44336',
+    fontFamily: FONTS.body,
   },
   diffPill: {
     borderWidth: 1,
@@ -211,11 +217,12 @@ const styles = StyleSheet.create({
   },
   diffText: {
     fontSize: 9,
-    fontWeight: 'bold',
     letterSpacing: 0.5,
+    fontFamily: FONTS.bold,
   },
   deadline: {
     fontSize: 11,
+    fontFamily: FONTS.body,
   },
   action: {
     alignItems: 'center',
@@ -228,10 +235,11 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     alignItems: 'center',
     justifyContent: 'center',
+    position: 'relative',
   },
   statusGlyph: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontFamily: FONTS.bold,
   },
   btnStack: {
     gap: 5,
@@ -243,6 +251,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     alignItems: 'center',
     justifyContent: 'center',
+    position: 'relative',
   },
   btnComplete: {
     borderColor: '#4caf5088',
@@ -254,6 +263,6 @@ const styles = StyleSheet.create({
   },
   btnGlyph: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontFamily: FONTS.bold,
   },
 });

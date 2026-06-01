@@ -8,7 +8,9 @@ import { useSystemStore } from '../store/useSystemStore';
 import { getWeekCompletionRate } from '../db/queries';
 import { differenceInCalendarDays, parseISO } from 'date-fns';
 import CornerFrame from '../components/ui/CornerFrame';
+import { CornerBrackets } from '../components/ui/CornerBox';
 import SystemBackground from '../components/fx/SystemBackground';
+import AmbientEmbers from '../components/fx/AmbientEmbers';
 import ClaudeSpark from '../components/avatar/ClaudeSpark';
 import { FONTS } from '../theme/typography';
 
@@ -171,11 +173,13 @@ export default function AscensionPath() {
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       <SystemBackground color={theme.accent} background={theme.background} />
+      <AmbientEmbers color={theme.auraColor ?? theme.accent} />
       {/* Header */}
       <View style={[styles.header, { borderBottomColor: theme.accent + '30', paddingTop: insets.top + 10 }]}>
         <View style={styles.headerTop}>
           <Text style={[styles.title, { color: theme.text }]}>Ascension path</Text>
           <View style={[styles.weekBadge, { borderColor: theme.accent + '70', backgroundColor: theme.accent + '12' }]}>
+            <CornerBrackets color={theme.accent + '70'} length={8} />
             <Text style={[styles.weekNum, { color: theme.accent }]}>{currentWeek}</Text>
             <Text style={[styles.weekOf, { color: theme.textSecondary }]}>/{TOTAL_NODES}</Text>
           </View>
@@ -273,12 +277,14 @@ export default function AscensionPath() {
 
               <View style={styles.modalStats}>
                 <View style={[styles.modalStatBox, { borderColor: theme.accent + '50' }]}>
+                  <CornerBrackets color={theme.accent + '50'} />
                   <Text style={[styles.modalStatVal, { color: theme.accent }]}>
                     {Math.round(selectedRate * 100)}%
                   </Text>
                   <Text style={[styles.modalStatLabel, { color: theme.textSecondary }]}>Completion</Text>
                 </View>
                 <View style={[styles.modalStatBox, { borderColor: theme.accent + '50' }]}>
+                  <CornerBrackets color={theme.accent + '50'} />
                   <Text style={[styles.modalStatVal, { color: selectedNode === currentWeek ? theme.accent : theme.textSecondary }]}>
                     {selectedNode === currentWeek ? 'Now' : selectedNode !== null && selectedNode > currentWeek ? 'Locked' : 'Done'}
                   </Text>
@@ -290,6 +296,7 @@ export default function AscensionPath() {
                 style={[styles.modalClose, { borderColor: theme.accent + '70' }]}
                 onPress={() => setSelectedNode(null)}
               >
+                <CornerBrackets color={theme.accent + '70'} />
                 <Text style={[styles.modalCloseTxt, { color: theme.accent }]}>Close</Text>
               </TouchableOpacity>
             </TouchableOpacity>
@@ -306,13 +313,13 @@ const styles = StyleSheet.create({
   header: { paddingHorizontal: 16, paddingBottom: 14, borderBottomWidth: 1, gap: 10 },
   headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   title: { fontSize: 18, letterSpacing: 0.3, fontFamily: FONTS.display },
-  weekBadge: { flexDirection: 'row', alignItems: 'baseline', borderWidth: 1, paddingHorizontal: 10, paddingVertical: 4, gap: 2, borderRadius: 4 },
+  weekBadge: { flexDirection: 'row', alignItems: 'baseline', borderWidth: 1, paddingHorizontal: 10, paddingVertical: 4, gap: 2, borderRadius: 4, position: 'relative' },
   weekNum: { fontSize: 22, fontFamily: FONTS.display },
-  weekOf: { fontSize: 13 },
+  weekOf: { fontSize: 13, fontFamily: FONTS.body },
   headerBar: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   headerBarBg: { flex: 1, height: 4, overflow: 'hidden', borderRadius: 2 },
   headerBarFill: { height: 4, borderRadius: 2 },
-  headerPct: { fontSize: 11, letterSpacing: 0.5 },
+  headerPct: { fontSize: 11, letterSpacing: 0.5, fontFamily: FONTS.body },
 
   scroll: { flex: 1 },
   pathWrap: { paddingBottom: 16 },
@@ -325,20 +332,20 @@ const styles = StyleSheet.create({
 
   nodeRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, marginVertical: 4 },
   nodeCol: { alignItems: 'center', width: 96 },
-  nodeCaption: { fontSize: 10, letterSpacing: 0.3, marginTop: -4 },
+  nodeCaption: { fontSize: 10, letterSpacing: 0.3, marginTop: -4, fontFamily: FONTS.body },
 
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', alignItems: 'center' },
   modalBox: { width: Math.min(width * 0.85, 320) },
   modalInner: { padding: 24, gap: 14 },
   modalTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' },
   modalWeek: { fontSize: 22, letterSpacing: 0.3, fontFamily: FONTS.display },
-  modalZone: { fontSize: 11, letterSpacing: 0.3 },
+  modalZone: { fontSize: 11, letterSpacing: 0.3, fontFamily: FONTS.body },
   modalDivider: { height: 1 },
   modalLore: { fontSize: 14, lineHeight: 22, letterSpacing: 0.3, fontFamily: FONTS.displayRegular, fontStyle: 'italic' },
   modalStats: { flexDirection: 'row', gap: 10 },
-  modalStatBox: { flex: 1, borderWidth: 1, padding: 12, alignItems: 'center', gap: 4, borderRadius: 4 },
+  modalStatBox: { flex: 1, borderWidth: 1, padding: 12, alignItems: 'center', gap: 4, borderRadius: 4, position: 'relative' },
   modalStatVal: { fontSize: 20, fontFamily: FONTS.display },
-  modalStatLabel: { fontSize: 10, letterSpacing: 0.3 },
-  modalClose: { borderWidth: 1, padding: 12, alignItems: 'center', borderRadius: 4 },
+  modalStatLabel: { fontSize: 10, letterSpacing: 0.3, fontFamily: FONTS.body },
+  modalClose: { borderWidth: 1, padding: 12, alignItems: 'center', borderRadius: 4, position: 'relative' },
   modalCloseTxt: { fontSize: 13, letterSpacing: 0.3, fontFamily: FONTS.display },
 });

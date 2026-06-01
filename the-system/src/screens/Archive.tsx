@@ -11,9 +11,12 @@ import {
 import { differenceInCalendarDays, parseISO, format, subDays } from 'date-fns';
 import type { DisciplineLog, Discipline, Mandate, Rank } from '../types';
 import SystemBackground from '../components/fx/SystemBackground';
+import AmbientEmbers from '../components/fx/AmbientEmbers';
 import { RANK_TITLES } from '../engine/xpConstants';
 import SectionDivider from '../components/ui/SectionDivider';
 import CornerFrame from '../components/ui/CornerFrame';
+import { CornerBrackets } from '../components/ui/CornerBox';
+import Glyph from '../components/icons/Glyph';
 import { FONTS } from '../theme/typography';
 
 type Tab = 'overview' | 'disciplines' | 'streaks' | 'history';
@@ -70,8 +73,8 @@ function BigStat({ value, label, color }: { value: string; label: string; color:
 const bigStatStyles = StyleSheet.create({
   wrap: { flex: 1 },
   inner: { padding: 14, alignItems: 'center', gap: 4 },
-  value: { fontSize: 22, fontWeight: 'bold', textAlign: 'center', fontFamily: FONTS.display },
-  label: { fontSize: 10, letterSpacing: 0.5, textAlign: 'center' },
+  value: { fontSize: 22, textAlign: 'center', fontFamily: FONTS.display },
+  label: { fontSize: 10, letterSpacing: 0.5, textAlign: 'center', fontFamily: FONTS.body },
 });
 
 export default function Archive() {
@@ -114,6 +117,7 @@ export default function Archive() {
   return (
     <View style={[styles.container, { backgroundColor: theme.background, paddingTop: insets.top }]}>
       <SystemBackground color={theme.accent} background={theme.background} />
+      <AmbientEmbers color={theme.auraColor ?? theme.accent} />
       {/* Header */}
       <View style={[styles.header, { borderBottomColor: theme.accent + '30' }]}>
         <Text style={[styles.title, { color: theme.text }]}>The Archive</Text>
@@ -194,6 +198,7 @@ export default function Archive() {
               const rate = logs.length > 0 ? completed / logs.length : 0;
               return (
                 <View key={d.id} style={[styles.disciplineCard, { borderColor: theme.accent + '30', backgroundColor: theme.primary }]}>
+                  <CornerBrackets color={theme.accent + '30'} />
                   <View style={styles.disciplineTop}>
                     <Text style={[styles.disciplineName, { color: theme.text }]}>{d.name}</Text>
                     <Text style={[styles.disciplineRate, { color: Math.round(rate * 100) >= 70 ? '#4caf50' : '#888' }]}>
@@ -202,9 +207,15 @@ export default function Archive() {
                   </View>
                   <HeatmapRow discipline={d} logs={recentForThis} />
                   <View style={styles.disciplineStats}>
-                    <Text style={[styles.dStat, { color: '#4caf50' }]}>✓ {completed}</Text>
-                    <Text style={[styles.dStat, { color: '#f44336' }]}>✗ {failed}</Text>
-                    <Text style={[styles.dStat, { color: '#666' }]}>{logs.length} TOTAL</Text>
+                    <View style={styles.dStatItem}>
+                      <Glyph name="check" color="#4caf50" size={12} />
+                      <Text style={[styles.dStat, { color: '#4caf50' }]}>{completed}</Text>
+                    </View>
+                    <View style={styles.dStatItem}>
+                      <Glyph name="cross" color="#f44336" size={12} />
+                      <Text style={[styles.dStat, { color: '#f44336' }]}>{failed}</Text>
+                    </View>
+                    <Text style={[styles.dStat, { color: '#666' }]}>{logs.length} total</Text>
                   </View>
                 </View>
               );
@@ -281,14 +292,14 @@ export default function Archive() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   header: { paddingHorizontal: 16, paddingBottom: 12, borderBottomWidth: 1 },
-  title: { fontSize: 17, fontWeight: 'bold', letterSpacing: 0.3, fontFamily: FONTS.display },
-  subtitle: { fontSize: 10, letterSpacing: 0.5, marginTop: 3 },
+  title: { fontSize: 17, letterSpacing: 0.3, fontFamily: FONTS.display },
+  subtitle: { fontSize: 10, letterSpacing: 0.5, marginTop: 3, fontFamily: FONTS.body },
 
   tabBar: { flexDirection: 'row', borderBottomWidth: 1 },
   tabBtn: { flex: 1, paddingVertical: 10, alignItems: 'center', position: 'relative' },
   tabBtnActive: { borderBottomWidth: 2 },
   tabGem: { position: 'absolute', top: 4 },
-  tabTxt: { fontSize: 9, fontWeight: 'bold', letterSpacing: 0.3 },
+  tabTxt: { fontSize: 9, letterSpacing: 0.3, fontFamily: FONTS.bold },
 
   scroll: { flex: 1 },
   section: { padding: 14 },
@@ -297,12 +308,12 @@ const styles = StyleSheet.create({
   journeyWrap: { marginBottom: 8 },
   journeyInner: { padding: 16, gap: 8 },
   journeyTopRow: { flexDirection: 'row', alignItems: 'baseline', gap: 6 },
-  journeyDay: { fontSize: 30, fontWeight: 'bold' },
-  journeyOf: { fontSize: 13 },
+  journeyDay: { fontSize: 30, fontFamily: FONTS.display },
+  journeyOf: { fontSize: 13, fontFamily: FONTS.body },
   journeyBg: { height: 8, overflow: 'hidden', position: 'relative' },
   journeyFill: { height: 8, position: 'absolute', left: 0, top: 0, bottom: 0 },
   journeyTick: { position: 'absolute', top: 1, bottom: 1, width: 1, backgroundColor: '#000' },
-  journeyPct: { fontSize: 11, letterSpacing: 0.3 },
+  journeyPct: { fontSize: 11, letterSpacing: 0.3, fontFamily: FONTS.body },
 
   statsGrid: { flexDirection: 'row', gap: 8, marginBottom: 8 },
   silenceGrid: { flexDirection: 'row', gap: 8, marginBottom: 8 },
@@ -312,12 +323,14 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 10,
     gap: 8,
+    position: 'relative',
   },
   disciplineTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  disciplineName: { fontSize: 14, fontWeight: 'bold' },
-  disciplineRate: { fontSize: 16, fontWeight: 'bold' },
+  disciplineName: { fontSize: 14, fontFamily: FONTS.bold },
+  disciplineRate: { fontSize: 16, fontFamily: FONTS.display },
   disciplineStats: { flexDirection: 'row', gap: 16 },
-  dStat: { fontSize: 13 },
+  dStatItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  dStat: { fontSize: 13, fontFamily: FONTS.display },
 
   streakRow: {
     flexDirection: 'row',
@@ -326,11 +339,11 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     gap: 12,
   },
-  streakName: { fontSize: 13, flex: 1 },
+  streakName: { fontSize: 13, flex: 1, fontFamily: FONTS.body },
   streakRight: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   streakBarBg: { width: 80, height: 6, overflow: 'hidden' },
   streakBarFill: { height: 6, position: 'absolute', left: 0, top: 0 },
-  streakCount: { fontSize: 14, fontWeight: 'bold', minWidth: 28, textAlign: 'right' },
+  streakCount: { fontSize: 14, minWidth: 28, textAlign: 'right', fontFamily: FONTS.bold },
 
   histRow: {
     flexDirection: 'row',
@@ -340,9 +353,9 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   histLeft: { flex: 1, gap: 3 },
-  histDate: { fontSize: 12 },
+  histDate: { fontSize: 12, fontFamily: FONTS.body },
   histBarBg: { height: 3, overflow: 'hidden' },
   histBarFill: { height: 3, position: 'absolute', left: 0, top: 0 },
-  histComp: { fontSize: 13, fontWeight: 'bold', minWidth: 40, textAlign: 'center' },
-  histXP: { fontSize: 13, fontWeight: 'bold', minWidth: 50, textAlign: 'right' },
+  histComp: { fontSize: 13, minWidth: 40, textAlign: 'center', fontFamily: FONTS.bold },
+  histXP: { fontSize: 13, minWidth: 50, textAlign: 'right', fontFamily: FONTS.bold },
 });

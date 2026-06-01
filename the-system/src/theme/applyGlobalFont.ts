@@ -18,6 +18,7 @@ import React from 'react';
  */
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const RN = require('react-native');
+const { StyleSheet } = RN;
 
 type AnyComponent = React.ComponentType<{ style?: unknown }> & {
   displayName?: string;
@@ -25,13 +26,24 @@ type AnyComponent = React.ComponentType<{ style?: unknown }> & {
   __interWrapped?: boolean;
 };
 
+/**
+ * Returns `{ fontSize: n+2 }` when the caller's own style sets a fontSize, else
+ * null. Null means "leave it" so nested text keeps inheriting its parent size.
+ */
+export function bumpFontSize(style: unknown): { fontSize: number } | null {
+  if (!style) return null;
+  const flat = StyleSheet.flatten(style as object) as { fontSize?: number } | undefined;
+  if (flat && typeof flat.fontSize === 'number') return { fontSize: flat.fontSize + 2 };
+  return null;
+}
+
 function wrapWithFont(Original: AnyComponent, fontFamily: string): AnyComponent {
   // React 19 passes `ref` as a normal prop to function components, so spreading
   // `props` forwards it to the wrapped native component (e.g. TextInput.focus).
   const Wrapped = ((props: { style?: unknown }) =>
     React.createElement(Original, {
       ...props,
-      style: [{ fontFamily }, props.style],
+      style: [{ fontFamily }, props.style, bumpFontSize(props.style)],
     })) as AnyComponent;
   Wrapped.displayName = `Lora(${Original.displayName || Original.name || 'Component'})`;
   Wrapped.__interWrapped = true;

@@ -109,7 +109,6 @@ function MainTabs() {
         tabBarInactiveTintColor: theme.textSecondary,
         tabBarLabelStyle: {
           fontSize: 9,
-          fontWeight: 'bold',
           letterSpacing: 0.3,
           marginTop: 2,
           fontFamily: FONTS.display,
@@ -231,7 +230,6 @@ const styles = StyleSheet.create({
   loadingTitle: {
     color: '#D97757',
     fontSize: 28,
-    fontWeight: 'bold',
     letterSpacing: 0.3,
     fontFamily: FONTS.display,
   },
@@ -250,5 +248,6 @@ const styles = StyleSheet.create({
     color: '#9A968B',
     fontSize: 10,
     letterSpacing: 0.5,
+    fontFamily: FONTS.body,
   },
 });
