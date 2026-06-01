@@ -29,7 +29,7 @@ describe('CornerBox', () => {
         const s = Array.isArray(n.props.style) ? Object.assign({}, ...n.props.style.filter(Boolean)) : n.props.style;
         styles.push(s);
       }
-      if (n.children) n.children.forEach(walk);
+      if (Array.isArray(n.children)) n.children.forEach(walk);
     };
     walk(json);
     const corners = styles.filter((s) => s && (s.borderTopWidth === 2 || s.borderBottomWidth === 2));

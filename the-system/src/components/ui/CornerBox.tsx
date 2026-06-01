@@ -39,7 +39,7 @@ export default function CornerBox({
   return (
     <View
       style={[
-        { borderWidth, borderColor: color, position: 'relative' },
+        { borderWidth, borderColor: color, position: 'relative', overflow: 'visible' },
         radius != null && { borderRadius: radius },
         fill != null && { backgroundColor: fill },
         style,
