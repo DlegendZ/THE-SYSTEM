@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
+import { createStackNavigator, TransitionPresets } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { View, Text, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -94,6 +94,7 @@ function MainTabs() {
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
+        animation: 'fade',
         tabBarStyle: {
           backgroundColor: theme.primary,
           borderTopColor: theme.accent + '40',
@@ -173,7 +174,12 @@ export default function AppNavigator() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Navigator
+        screenOptions={{
+          headerShown: false,
+          ...TransitionPresets.FadeFromBottomAndroid,
+        }}
+      >
         {!onboardingComplete ? (
           <Stack.Screen name="Awakening" component={Awakening} />
         ) : (
@@ -214,13 +220,13 @@ export default function AppNavigator() {
 const styles = StyleSheet.create({
   loading: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: '#262624',
     justifyContent: 'center',
     alignItems: 'center',
     gap: 16,
   },
   loadingTitle: {
-    color: '#3bc9ff',
+    color: '#D97757',
     fontSize: 28,
     fontWeight: 'bold',
     letterSpacing: 6,
@@ -228,16 +234,16 @@ const styles = StyleSheet.create({
   loadingBar: {
     width: 160,
     height: 2,
-    backgroundColor: '#222',
+    backgroundColor: '#3A3733',
     overflow: 'hidden',
   },
   loadingFill: {
     width: '60%',
     height: 2,
-    backgroundColor: '#3bc9ff',
+    backgroundColor: '#D97757',
   },
   loadingSub: {
-    color: '#444',
+    color: '#9A968B',
     fontSize: 10,
     letterSpacing: 3,
   },
