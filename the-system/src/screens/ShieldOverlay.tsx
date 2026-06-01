@@ -185,6 +185,6 @@ const styles = StyleSheet.create({
   lockBtnText: { color: '#ffffff', fontSize: 13, fontWeight: 'bold', letterSpacing: 0.3, fontFamily: FONTS.display },
   cancelBtn: { padding: 8 },
   cancelText: { fontSize: 11, letterSpacing: 1 },
-  countdown: { fontFamily: 'Lora_600SemiBold', fontSize: 64, fontWeight: 'bold', marginBottom: 12, letterSpacing: 0.5 },
+  countdown: { fontFamily: 'Lora_600SemiBold', fontSize: 66, fontWeight: 'bold', marginBottom: 12, letterSpacing: 0.5 },
   resultBig: { fontSize: 24, fontWeight: 'bold', letterSpacing: 0.3, marginBottom: 16, textAlign: 'center', fontFamily: FONTS.display },
 });

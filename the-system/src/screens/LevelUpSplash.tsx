@@ -225,20 +225,20 @@ const styles = StyleSheet.create({
   },
   rankLetter: {
     fontFamily: 'Lora_600SemiBold',
-    fontSize: 96,
+    fontSize: 98,
     fontWeight: 'bold',
     lineHeight: 100,
   },
   rankLetterBg: {
     fontFamily: 'Lora_600SemiBold',
     position: 'absolute',
-    fontSize: 120,
+    fontSize: 122,
     fontWeight: 'bold',
     lineHeight: 120,
   },
   levelNumber: {
     fontFamily: 'Lora_600SemiBold',
-    fontSize: 96,
+    fontSize: 98,
     fontWeight: 'bold',
     lineHeight: 100,
   },

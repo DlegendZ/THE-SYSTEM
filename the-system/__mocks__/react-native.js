@@ -21,7 +21,15 @@ const ScrollView = ({ children, style, ...props }) =>
 
 const StyleSheet = {
   create: (styles) => styles,
-  flatten: (style) => style,
+  flatten: (style) => {
+    if (!style) return undefined;
+    if (Array.isArray(style)) {
+      return style
+        .filter(Boolean)
+        .reduce((acc, s) => Object.assign(acc, Array.isArray(s) ? StyleSheet.flatten(s) : s), {});
+    }
+    return style;
+  },
   hairlineWidth: 1,
 };
 
