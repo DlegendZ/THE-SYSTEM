@@ -24,7 +24,7 @@ export default function AvatarDisplay({ heroClass, rank, mood = 'steady', pixelS
 
   return (
     <View style={[styles.container, { opacity }]}>
-      <ClaudeSpark rank={rank} heroClass={heroClass} size={size} mood={mood} />
+      <ClaudeSpark rank={rank} heroClass={heroClass} size={size} />
     </View>
   );
 }
