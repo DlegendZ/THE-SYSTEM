@@ -14,7 +14,6 @@ LogBox.ignoreLogs([
 import { useFonts } from 'expo-font';
 import AppNavigator from './src/navigation/AppNavigator';
 import { useSystemStore } from './src/store/useSystemStore';
-import { preloadSounds } from './src/audio/sounds';
 
 // Keep the native splash up until our JS splash overlay is ready to draw,
 // so there is no black flash between them.
@@ -36,7 +35,6 @@ export default function App() {
 
   useEffect(() => {
     initialize();
-    preloadSounds(); // fire and forget
   }, []);
 
   const theme = useSystemStore((s) => s.currentTheme);

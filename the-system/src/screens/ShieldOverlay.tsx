@@ -5,7 +5,6 @@ import {
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import { useNavigation } from '@react-navigation/native';
 import { useSystemStore } from '../store/useSystemStore';
-import { playSound } from '../audio/sounds';
 
 const DANGER = '#ff4444';
 const DURATIONS = [15, 25, 45]; // minutes
@@ -71,14 +70,12 @@ export default function ShieldOverlay() {
   const hold = () => {
     clearTick();
     deactivateKeepAwake(KEEP_AWAKE_TAG);
-    playSound('levelUp');
     setPhase('held');
   };
 
   const breach = () => {
     clearTick();
     deactivateKeepAwake(KEEP_AWAKE_TAG);
-    playSound('fail');
     setPhase('breached');
   };
 

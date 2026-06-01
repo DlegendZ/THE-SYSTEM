@@ -20,7 +20,6 @@ import SystemBackground from '../components/fx/SystemBackground';
 import { getRandomQuote } from '../data/quotes';
 
 const ORBIT_BY_RANK: Record<string, number> = { E: 0, D: 2, C: 3, B: 5, A: 7, S: 10 };
-import { playSound } from '../audio/sounds';
 import type { Rank } from '../types';
 import type { RootStackParamList } from '../navigation/types';
 import type { HeroClass } from '../components/avatar/avatarData';
@@ -164,11 +163,9 @@ export default function CommandHall() {
   const mood = completionRate >= 0.9 ? 'radiant' : completionRate >= 0.6 ? 'steady' : completionRate >= 0.3 ? 'worn' : 'broken';
 
   const handleComplete = async (id: number) => {
-    await playSound('complete');
     const result = await completeDiscipline(id);
     if (result.levelUp) {
       if (result.levelUp.rankChanged && result.levelUp.newRank === 'S') {
-        await playSound('rankUp');
         navigation.navigate('LevelUpSplash', {
           level: result.levelUp.newLevel,
           xpGained: result.xpGained,
@@ -176,7 +173,6 @@ export default function CommandHall() {
           newRank: result.levelUp.newRank,
         });
       } else {
-        await playSound(result.levelUp.rankChanged ? 'rankUp' : 'levelUp');
         navigation.navigate('LevelUpSplash', {
           level: result.levelUp.newLevel,
           xpGained: result.xpGained,
@@ -199,7 +195,6 @@ export default function CommandHall() {
       );
     } else {
       await failDiscipline(id);
-      playSound('fail');
     }
   };
 
