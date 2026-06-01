@@ -22,7 +22,7 @@ import androidx.core.app.NotificationManagerCompat;
 public class RichNotificationReceiver extends BroadcastReceiver {
 
     public static final String CHANNEL_ID = "system-mandates";
-    private static final int ACCENT = 0xFF3BC9FF;
+    private static final int ACCENT = 0xFFD97757;
 
     @Override
     public void onReceive(Context context, Intent intent) {
