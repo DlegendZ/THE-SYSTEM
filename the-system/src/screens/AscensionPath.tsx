@@ -9,6 +9,7 @@ import { getWeekCompletionRate } from '../db/queries';
 import { differenceInCalendarDays, parseISO } from 'date-fns';
 import CornerFrame from '../components/ui/CornerFrame';
 import SystemBackground from '../components/fx/SystemBackground';
+import { FONTS } from '../theme/typography';
 
 const TOTAL_NODES = 24;
 
@@ -181,7 +182,7 @@ export default function AscensionPath() {
       {/* Header */}
       <View style={[styles.header, { borderBottomColor: theme.accent + '30', paddingTop: insets.top + 10 }]}>
         <View style={styles.headerTop}>
-          <Text style={[styles.title, { color: theme.text }]}>ASCENSION PATH</Text>
+          <Text style={[styles.title, { color: theme.text }]}>Ascension path</Text>
           <View style={[styles.weekBadge, { borderColor: theme.accent + '70', backgroundColor: theme.accent + '10' }]}>
             <Text style={[styles.weekNum, { color: theme.accent }]}>{currentWeek}</Text>
             <Text style={[styles.weekOf, { color: theme.textSecondary }]}>/{TOTAL_NODES}</Text>
@@ -277,13 +278,13 @@ export default function AscensionPath() {
                   <Text style={[styles.modalStatVal, { color: theme.accent }]}>
                     {Math.round(selectedRate * 100)}%
                   </Text>
-                  <Text style={[styles.modalStatLabel, { color: theme.textSecondary }]}>COMPLETION</Text>
+                  <Text style={[styles.modalStatLabel, { color: theme.textSecondary }]}>Completion</Text>
                 </View>
                 <View style={[styles.modalStatBox, { borderColor: theme.accent + '50' }]}>
                   <Text style={[styles.modalStatVal, { color: selectedNode === currentWeek ? theme.accent : theme.textSecondary }]}>
                     {selectedNode === currentWeek ? 'NOW' : selectedNode !== null && selectedNode > currentWeek ? 'LOCKED' : 'DONE'}
                   </Text>
-                  <Text style={[styles.modalStatLabel, { color: theme.textSecondary }]}>STATUS</Text>
+                  <Text style={[styles.modalStatLabel, { color: theme.textSecondary }]}>Status</Text>
                 </View>
               </View>
 
@@ -291,7 +292,7 @@ export default function AscensionPath() {
                 style={[styles.modalClose, { borderColor: theme.accent + '70' }]}
                 onPress={() => setSelectedNode(null)}
               >
-                <Text style={[styles.modalCloseTxt, { color: theme.accent }]}>CLOSE</Text>
+                <Text style={[styles.modalCloseTxt, { color: theme.accent }]}>Close</Text>
               </TouchableOpacity>
             </TouchableOpacity>
           </CornerFrame>
@@ -311,7 +312,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  title: { fontSize: 16, fontWeight: 'bold', letterSpacing: 4 },
+  title: { fontSize: 16, fontWeight: 'bold', letterSpacing: 0.3, fontFamily: FONTS.display },
   weekBadge: {
     flexDirection: 'row',
     alignItems: 'baseline',
@@ -339,7 +340,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   zoneLabelLine: { flex: 1, height: 1 },
-  zoneLabel: { fontSize: 9, letterSpacing: 3, fontWeight: 'bold' },
+  zoneLabel: { fontSize: 9, letterSpacing: 0.5, fontWeight: 'bold' },
 
   nodeRow: {
     flexDirection: 'row',
@@ -382,8 +383,8 @@ const styles = StyleSheet.create({
   },
   modalInner: { padding: 24, gap: 14 },
   modalTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' },
-  modalWeek: { fontSize: 22, fontWeight: 'bold', letterSpacing: 2 },
-  modalZone: { fontSize: 10, letterSpacing: 2 },
+  modalWeek: { fontSize: 22, fontWeight: 'bold', letterSpacing: 0.3, fontFamily: FONTS.display },
+  modalZone: { fontSize: 10, letterSpacing: 0.5 },
   modalDivider: { height: 1 },
   modalLore: { fontSize: 14, lineHeight: 22, letterSpacing: 0.3 },
   modalStats: { flexDirection: 'row', gap: 10 },
@@ -395,11 +396,11 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   modalStatVal: { fontSize: 20, fontWeight: 'bold' },
-  modalStatLabel: { fontSize: 10, letterSpacing: 1 },
+  modalStatLabel: { fontSize: 10, letterSpacing: 0.5 },
   modalClose: {
     borderWidth: 1,
     padding: 12,
     alignItems: 'center',
   },
-  modalCloseTxt: { fontSize: 12, fontWeight: 'bold', letterSpacing: 2 },
+  modalCloseTxt: { fontSize: 12, fontWeight: 'bold', letterSpacing: 0.5 },
 });

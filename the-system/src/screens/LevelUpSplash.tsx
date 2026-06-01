@@ -8,6 +8,7 @@ import type { StackNavigationProp } from '@react-navigation/stack';
 import type { RouteProp } from '@react-navigation/native';
 import { useSystemStore } from '../store/useSystemStore';
 import { RANK_TITLES } from '../engine/xpConstants';
+import { FONTS } from '../theme/typography';
 import type { RootStackParamList } from '../navigation/types';
 import type { Rank } from '../types';
 
@@ -122,7 +123,7 @@ export default function LevelUpSplash() {
         <View style={styles.panelContent}>
           {rankChanged ? (
             <>
-              <Text style={[styles.eventLabel, { color: rankColor }]}>RANK ASCENSION</Text>
+              <Text style={[styles.eventLabel, { color: rankColor }]}>Rank ascension</Text>
               <View style={[styles.rankDivider, { backgroundColor: rankColor + '50' }]} />
               <Animated.View style={[styles.bigLetterWrap, { transform: [{ scale: scaleAnim }] }]}>
                 <Animated.Text style={[styles.rankLetter, { color: rankColor, opacity: glowAnim }]}>
@@ -136,7 +137,7 @@ export default function LevelUpSplash() {
             </>
           ) : (
             <>
-              <Text style={[styles.eventLabel, { color: rankColor }]}>LEVEL ACHIEVED</Text>
+              <Text style={[styles.eventLabel, { color: rankColor }]}>Level achieved</Text>
               <View style={[styles.rankDivider, { backgroundColor: rankColor + '50' }]} />
               <Animated.View style={[styles.bigLetterWrap, { transform: [{ scale: scaleAnim }] }]}>
                 <Animated.Text style={[styles.levelNumber, { color: rankColor, opacity: glowAnim }]}>
@@ -164,7 +165,7 @@ export default function LevelUpSplash() {
             <View style={[styles.btnCorner, { top: 0, right: 0, borderTopWidth: 1, borderRightWidth: 1, borderColor: rankColor }]} />
             <View style={[styles.btnCorner, { bottom: 0, left: 0, borderBottomWidth: 1, borderLeftWidth: 1, borderColor: rankColor }]} />
             <View style={[styles.btnCorner, { bottom: 0, right: 0, borderBottomWidth: 1, borderRightWidth: 1, borderColor: rankColor }]} />
-            <Text style={[styles.continueTxt, { color: rankColor }]}>CONTINUE</Text>
+            <Text style={[styles.continueTxt, { color: rankColor }]}>Continue</Text>
           </TouchableOpacity>
         </View>
       </Animated.View>
@@ -207,8 +208,9 @@ const styles = StyleSheet.create({
   eventLabel: {
     fontSize: 12,
     fontWeight: 'bold',
-    letterSpacing: 4,
+    letterSpacing: 0.3,
     marginBottom: 12,
+    fontFamily: FONTS.display,
   },
   rankDivider: {
     width: 60,
@@ -242,7 +244,7 @@ const styles = StyleSheet.create({
   },
   rankName: {
     fontSize: 13,
-    letterSpacing: 3,
+    letterSpacing: 0.3,
     marginBottom: 28,
   },
   xpRow: {
@@ -256,7 +258,7 @@ const styles = StyleSheet.create({
   xpText: {
     fontSize: 15,
     fontWeight: 'bold',
-    letterSpacing: 2,
+    letterSpacing: 0.5,
   },
   continueBtn: {
     borderWidth: 1,
@@ -272,6 +274,7 @@ const styles = StyleSheet.create({
   continueTxt: {
     fontSize: 13,
     fontWeight: 'bold',
-    letterSpacing: 3,
+    letterSpacing: 0.3,
+    fontFamily: FONTS.display,
   },
 });

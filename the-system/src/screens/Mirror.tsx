@@ -13,6 +13,7 @@ import SectionDivider from '../components/ui/SectionDivider';
 import SystemBackground from '../components/fx/SystemBackground';
 import CornerFrame from '../components/ui/CornerFrame';
 import type { HeroClass } from '../components/avatar/avatarData';
+import { FONTS } from '../theme/typography';
 
 type MoodState = 'radiant' | 'steady' | 'worn' | 'broken';
 
@@ -53,7 +54,7 @@ function StatBar({ label, icon, completed, level, color }: {
 const statStyles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', marginBottom: 10, gap: 8 },
   icon: { fontSize: 16, width: 22, textAlign: 'center' },
-  label: { fontSize: 11, letterSpacing: 1, width: 90 },
+  label: { fontSize: 11, letterSpacing: 0.3, width: 90 },
   barBg: { flex: 1, height: 12, overflow: 'hidden', position: 'relative' },
   barFill: { height: 12, position: 'absolute', left: 0, top: 0, bottom: 0 },
   tick: { position: 'absolute', top: 2, bottom: 2, width: 1, backgroundColor: '#000' },
@@ -77,7 +78,7 @@ function EquipSlot({ label, name, tier, color }: {
 const equipStyles = StyleSheet.create({
   slot: { flex: 1 },
   inner: { padding: 10, alignItems: 'center', gap: 4 },
-  slotLabel: { fontSize: 10, letterSpacing: 2 },
+  slotLabel: { fontSize: 10, letterSpacing: 0.5 },
   tier: { fontSize: 18, fontWeight: 'bold' },
   name: { fontSize: 11, textAlign: 'center', lineHeight: 15 },
 });
@@ -117,7 +118,7 @@ export default function Mirror() {
           </View>
         </View>
         <Text style={[styles.rankTitle, { color: theme.textSecondary }]}>
-          {RANK_TITLES[hero.rank as Rank]} · {hero.hero_class.toUpperCase()}
+          {RANK_TITLES[hero.rank as Rank]} · {hero.hero_class}
         </Text>
       </View>
 
@@ -139,21 +140,21 @@ export default function Mirror() {
           {/* Mood indicator */}
           <View style={[styles.moodBadge, { borderColor: theme.accent + '60', backgroundColor: theme.primary }]}>
             <Text style={[styles.moodText, { color: theme.accent }]}>
-              {mood.toUpperCase()}
+              {mood.charAt(0).toUpperCase() + mood.slice(1)}
             </Text>
           </View>
         </View>
 
         {/* Equipment */}
-        <SectionDivider title="EQUIPMENT" color={theme.accent} />
+        <SectionDivider title="Equipment" color={theme.accent} />
         <View style={styles.equipRow}>
-          <EquipSlot label="WEAPON" name={equippedWeapon?.name ?? 'None'} tier={equippedWeapon?.tier ?? 1} color={theme.accent} />
-          <EquipSlot label="ARMOR" name={equippedArmor?.name ?? 'None'} tier={equippedArmor?.tier ?? 1} color={theme.accent} />
-          <EquipSlot label="CROWN" name={equippedCrown?.name ?? 'None'} tier={equippedCrown?.tier ?? 1} color={theme.accent} />
+          <EquipSlot label="Weapon" name={equippedWeapon?.name ?? 'None'} tier={equippedWeapon?.tier ?? 1} color={theme.accent} />
+          <EquipSlot label="Armor" name={equippedArmor?.name ?? 'None'} tier={equippedArmor?.tier ?? 1} color={theme.accent} />
+          <EquipSlot label="Crown" name={equippedCrown?.name ?? 'None'} tier={equippedCrown?.tier ?? 1} color={theme.accent} />
         </View>
 
         {/* Stats */}
-        <SectionDivider title="ATTRIBUTES" color={theme.accent} />
+        <SectionDivider title="Attributes" color={theme.accent} />
         <View style={styles.statsSection}>
           {STAT_DISCIPLINES.map(({ label, code, icon }) => {
             const discipline = disciplines.find((d) => d.code === code);
@@ -175,7 +176,7 @@ export default function Mirror() {
         {/* Titles */}
         {titles.length > 0 && (
           <>
-            <SectionDivider title="TITLES" color={theme.accent} />
+            <SectionDivider title="Titles" color={theme.accent} />
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.titlesRow}>
               {titles.map((t) => (
                 <View key={t.id} style={[styles.titleChip, { borderColor: theme.accent + '70', backgroundColor: theme.accent + '10' }]}>
@@ -200,14 +201,14 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
   },
   nameRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  heroName: { fontSize: 18, fontWeight: 'bold', letterSpacing: 2 },
+  heroName: { fontSize: 18, fontWeight: 'bold', letterSpacing: 0.3, fontFamily: FONTS.display },
   rankPill: {
     borderWidth: 1.5,
     paddingHorizontal: 10,
     paddingVertical: 3,
   },
   rankLetter: { fontSize: 20, fontWeight: 'bold' },
-  rankTitle: { fontSize: 11, letterSpacing: 2, marginTop: 4 },
+  rankTitle: { fontSize: 11, letterSpacing: 0.5, marginTop: 4 },
 
   scroll: { paddingBottom: 24 },
 
@@ -231,7 +232,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 3,
   },
-  moodText: { fontSize: 10, fontWeight: 'bold', letterSpacing: 3 },
+  moodText: { fontSize: 10, fontWeight: 'bold', letterSpacing: 0.3, fontFamily: FONTS.display },
 
   equipRow: { flexDirection: 'row', paddingHorizontal: 14, gap: 8 },
 

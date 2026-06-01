@@ -52,6 +52,6 @@ describe('Settings export', () => {
     expect(json).not.toBeNull();
     // Verify the tree contains EXPORT DATA text somewhere
     const treeStr = JSON.stringify(json);
-    expect(treeStr).toContain('EXPORT DATA');
+    expect(treeStr).toContain('Export data');
   });
 });

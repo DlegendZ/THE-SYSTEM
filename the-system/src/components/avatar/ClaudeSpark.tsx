@@ -8,6 +8,7 @@ interface Props {
   heroClass?: HeroClass;   // ray-style variant
   size?: number;
   mood?: 'radiant' | 'steady' | 'worn' | 'broken';
+  tint?: string;           // override ray fill and core color
 }
 
 const AnimatedSvg = Animated.createAnimatedComponent(Svg);
@@ -25,8 +26,9 @@ const RANK_SPEC: Record<string, { rays: number; len: number; tip: string; core: 
 // HeroClass tweaks ray silhouette: Mage=slender, Rogue=sharp, Warrior=broad.
 const CLASS_WIDTH: Record<string, number> = { Warrior: 0.16, Mage: 0.09, Rogue: 0.06 };
 
-export default function ClaudeSpark({ rank, heroClass = 'Warrior', size = 96, mood = 'steady' }: Props) {
-  const spec = RANK_SPEC[rank] ?? RANK_SPEC.E;
+export default function ClaudeSpark({ rank, heroClass = 'Warrior', size = 96, mood = 'steady', tint }: Props) {
+  const baseSpec = RANK_SPEC[rank] ?? RANK_SPEC.E;
+  const spec = tint ? { ...baseSpec, tip: tint, core: tint } : baseSpec;
   const widthFrac = CLASS_WIDTH[heroClass] ?? 0.12;
   const cx = size / 2;
   const cy = size / 2;

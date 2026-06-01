@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Svg, { Polygon } from 'react-native-svg';
+import { FONTS } from '../../theme/typography';
 
 interface Props {
   title: string;
@@ -28,5 +29,5 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, marginVertical: 12 },
   line: { flex: 1, height: 1 },
   gem: { marginHorizontal: 6 },
-  label: { fontSize: 11, fontWeight: 'bold', letterSpacing: 3 },
+  label: { fontSize: 11, fontWeight: 'bold', letterSpacing: 0.5, fontFamily: FONTS.display },
 });

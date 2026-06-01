@@ -9,6 +9,8 @@ import {
 } from '../db/queries';
 import type { Discipline } from '../types';
 import SystemBackground from '../components/fx/SystemBackground';
+import ClaudeSpark from '../components/avatar/ClaudeSpark';
+import { FONTS } from '../theme/typography';
 
 const DIFFICULTY_OPTIONS = ['EASY', 'NORMAL', 'HARD', 'LEGENDARY'] as const;
 type Difficulty = typeof DIFFICULTY_OPTIONS[number];
@@ -90,9 +92,9 @@ export default function Codex() {
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       <SystemBackground color={theme.accent} background={theme.background} />
       <View style={[styles.header, { paddingTop: insets.top + 14 }]}>
-        <Text style={[styles.title, { color: theme.text }]}>THE CODEX</Text>
+        <Text style={[styles.title, { color: theme.text }]}>The Codex</Text>
         <TouchableOpacity style={[styles.addBtn, { borderColor: theme.accent }]} onPress={() => setShowAdd(true)}>
-          <Text style={[styles.addBtnText, { color: theme.accent }]}>+ ADD</Text>
+          <Text style={[styles.addBtnText, { color: theme.accent }]}>+ Add</Text>
         </TouchableOpacity>
       </View>
 
@@ -102,7 +104,7 @@ export default function Codex() {
           return (
             <View key={d.id} style={[styles.row, { borderBottomColor: '#222222' }]}>
               <View style={[styles.iconBox, { borderColor: diffColor }]}>
-                <Text style={[styles.iconCode, { color: diffColor }]}>{d.code.slice(0, 3)}</Text>
+                <ClaudeSpark rank="C" size={26} tint={diffColor} />
               </View>
               <View style={styles.rowInfo}>
                 <Text style={[styles.rowName, { color: theme.text }]}>{d.name}</Text>
@@ -141,9 +143,9 @@ export default function Codex() {
       <Modal visible={showAdd} transparent animationType="slide" onRequestClose={() => setShowAdd(false)}>
         <View style={styles.modalOverlay}>
           <View style={[styles.modalBox, { backgroundColor: theme.background, borderColor: theme.accent }]}>
-            <Text style={[styles.modalTitle, { color: theme.text }]}>ADD DISCIPLINE</Text>
+            <Text style={[styles.modalTitle, { color: theme.text }]}>Add discipline</Text>
 
-            <Text style={[styles.formLabel, { color: theme.textSecondary }]}>NAME</Text>
+            <Text style={[styles.formLabel, { color: theme.textSecondary }]}>Name</Text>
             <TextInput
               style={[styles.input, { color: theme.text, borderColor: theme.accent }]}
               value={form.name}
@@ -153,7 +155,7 @@ export default function Codex() {
               maxLength={40}
             />
 
-            <Text style={[styles.formLabel, { color: theme.textSecondary }]}>DESCRIPTION</Text>
+            <Text style={[styles.formLabel, { color: theme.textSecondary }]}>Description</Text>
             <TextInput
               style={[styles.input, { color: theme.text, borderColor: theme.accent }]}
               value={form.description}
@@ -163,7 +165,7 @@ export default function Codex() {
               maxLength={100}
             />
 
-            <Text style={[styles.formLabel, { color: theme.textSecondary }]}>DIFFICULTY</Text>
+            <Text style={[styles.formLabel, { color: theme.textSecondary }]}>Difficulty</Text>
             <View style={styles.diffRow}>
               {DIFFICULTY_OPTIONS.map((opt) => (
                 <TouchableOpacity
@@ -190,10 +192,10 @@ export default function Codex() {
 
             <View style={styles.modalActions}>
               <TouchableOpacity style={[styles.cancelBtn, { borderColor: '#666666' }]} onPress={() => { setShowAdd(false); setForm(BLANK_FORM); }}>
-                <Text style={[styles.cancelText, { color: '#666666' }]}>CANCEL</Text>
+                <Text style={[styles.cancelText, { color: '#666666' }]}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity style={[styles.submitBtn, { backgroundColor: theme.accent }]} onPress={handleAddSubmit}>
-                <Text style={styles.submitText}>CREATE</Text>
+                <Text style={styles.submitText}>Create</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -206,13 +208,12 @@ export default function Codex() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingBottom: 16, borderBottomWidth: 1, borderBottomColor: '#333333' },
-  title: { fontSize: 17, fontWeight: 'bold', letterSpacing: 3 },
+  title: { fontSize: 17, fontWeight: 'bold', letterSpacing: 0.3, fontFamily: FONTS.display },
   addBtn: { borderWidth: 1, paddingHorizontal: 12, paddingVertical: 7 },
-  addBtnText: { fontSize: 13, fontWeight: 'bold', letterSpacing: 1 },
+  addBtnText: { fontSize: 13, fontWeight: 'bold', letterSpacing: 0.3 },
   scroll: { flex: 1 },
   row: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 14, borderBottomWidth: 1 },
   iconBox: { width: 48, height: 48, borderWidth: 1, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
-  iconCode: { fontSize: 12, fontWeight: 'bold' },
   rowInfo: { flex: 1 },
   rowName: { fontSize: 14, fontWeight: 'bold', marginBottom: 4 },
   rowMeta: { flexDirection: 'row', alignItems: 'center', gap: 8 },
@@ -228,8 +229,8 @@ const styles = StyleSheet.create({
   bottomPadding: { height: 64 },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'flex-end' },
   modalBox: { padding: 24, borderTopWidth: 2 },
-  modalTitle: { fontSize: 17, fontWeight: 'bold', letterSpacing: 2, marginBottom: 16 },
-  formLabel: { fontSize: 11, letterSpacing: 2, marginBottom: 6, marginTop: 12 },
+  modalTitle: { fontSize: 17, fontWeight: 'bold', letterSpacing: 0.3, marginBottom: 16, fontFamily: FONTS.display },
+  formLabel: { fontSize: 11, letterSpacing: 0.5, marginBottom: 6, marginTop: 12 },
   input: { borderWidth: 1, borderRadius: 2, padding: 10, fontSize: 14, marginBottom: 4 },
   diffRow: { flexDirection: 'row', gap: 8 },
   diffOption: { flex: 1, borderWidth: 1, padding: 8, alignItems: 'center', borderRadius: 2 },

@@ -13,6 +13,7 @@ import * as Sharing from 'expo-sharing';
 import { getDb } from '../db/database';
 import SystemBackground from '../components/fx/SystemBackground';
 import RichNotification from '../native/RichNotification';
+import { FONTS } from '../theme/typography';
 
 type Nav = { goBack: () => void };
 
@@ -124,14 +125,14 @@ export default function Settings() {
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       <SystemBackground color={theme.accent} background={theme.background} />
       <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
-        <Text style={[styles.title, { color: theme.text }]}>SETTINGS</Text>
+        <Text style={[styles.title, { color: theme.text }]}>Settings</Text>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Text style={[styles.closeBtn, { color: theme.textSecondary }]}>✕</Text>
         </TouchableOpacity>
       </View>
 
       <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
-        <Text style={[styles.sectionHeader, { color: theme.accent }]}>NOTIFICATIONS</Text>
+        <Text style={[styles.sectionHeader, { color: theme.accent }]}>Notifications</Text>
         <Text style={[styles.label, { color: theme.textSecondary }]}>Interval (hours)</Text>
         <View style={styles.intervalRow}>
           {INTERVALS.map((v) => (
@@ -157,19 +158,19 @@ export default function Settings() {
           Quiet hours: {quietStart} – {quietEnd}
         </Text>
 
-        <Text style={[styles.sectionHeader, { color: theme.accent }]}>ABOUT</Text>
+        <Text style={[styles.sectionHeader, { color: theme.accent }]}>About</Text>
         <Text style={[styles.infoText, { color: theme.text }]}>Player: {hero?.name ?? 'Unknown'}</Text>
         <Text style={[styles.infoText, { color: theme.text }]}>Journey start: {hero?.journey_start_date ?? '—'}</Text>
         <Text style={[styles.infoText, { color: theme.text }]}>Day {journeyDays} of 180</Text>
 
         {/* Data */}
-        <Text style={[styles.sectionHeader, { color: theme.accent }]}>DATA</Text>
+        <Text style={[styles.sectionHeader, { color: theme.accent }]}>Data</Text>
         <TouchableOpacity
           style={[styles.exportButton, { borderColor: theme.accent }]}
           onPress={handleExport}
         >
           <Text style={[styles.exportText, { color: theme.accent }]}>
-            EXPORT DATA (JSON)
+            Export data (JSON)
           </Text>
         </TouchableOpacity>
         <Text style={[styles.label, { color: theme.textSecondary }]}>
@@ -188,10 +189,10 @@ export default function Settings() {
             if (!ok) Alert.alert('NOTIFICATION', 'Rich notifications need the latest native build. Rebuild the app.');
           }}
         >
-          <Text style={[styles.exportText, { color: theme.accent }]}>TEST NOTIFICATION</Text>
+          <Text style={[styles.exportText, { color: theme.accent }]}>Test notification</Text>
         </TouchableOpacity>
 
-        <Text style={[styles.sectionHeader, { color: '#ff4444' }]}>DANGER ZONE</Text>
+        <Text style={[styles.sectionHeader, { color: '#ff4444' }]}>Danger zone</Text>
         <Text style={[styles.label, { color: theme.textSecondary }]}>
           Type "I ACCEPT THE RESET" to enable reset:
         </Text>
@@ -207,7 +208,7 @@ export default function Settings() {
           style={[styles.resetButton, { backgroundColor: resetConfirm === 'I ACCEPT THE RESET' ? '#ff4444' : '#333' }]}
           onPress={handleResetJourney}
         >
-          <Text style={styles.resetText}>RESET JOURNEY</Text>
+          <Text style={styles.resetText}>Reset journey</Text>
         </TouchableOpacity>
 
         <View style={styles.bottomPadding} />
@@ -222,10 +223,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     padding: 16, borderBottomWidth: 1, borderBottomColor: '#333',
   },
-  title: { fontSize: 17, fontWeight: 'bold', letterSpacing: 3 },
+  title: { fontSize: 17, fontWeight: 'bold', letterSpacing: 0.3, fontFamily: FONTS.display },
   closeBtn: { fontSize: 20, padding: 4 },
   scroll: { flex: 1, padding: 16 },
-  sectionHeader: { fontSize: 12, fontWeight: 'bold', letterSpacing: 3, marginTop: 24, marginBottom: 12 },
+  sectionHeader: { fontSize: 12, fontWeight: 'bold', letterSpacing: 0.5, marginTop: 24, marginBottom: 12, fontFamily: FONTS.display },
   label: { fontSize: 13, marginBottom: 8 },
   intervalRow: { flexDirection: 'row', gap: 8, marginBottom: 16 },
   intervalBtn: { borderWidth: 1, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 2 },
@@ -233,8 +234,8 @@ const styles = StyleSheet.create({
   infoText: { fontSize: 14, marginBottom: 6 },
   input: { borderWidth: 1, borderRadius: 2, padding: 10, marginBottom: 12, fontSize: 14 },
   resetButton: { padding: 14, alignItems: 'center', borderRadius: 2, marginBottom: 16 },
-  resetText: { color: '#fff', fontSize: 14, fontWeight: 'bold', letterSpacing: 2 },
+  resetText: { color: '#fff', fontSize: 14, fontWeight: 'bold', letterSpacing: 0.3 },
   bottomPadding: { height: 64 },
   exportButton: { borderWidth: 1, padding: 14, alignItems: 'center', marginBottom: 8 },
-  exportText: { fontSize: 13, fontWeight: 'bold', letterSpacing: 2 },
+  exportText: { fontSize: 13, fontWeight: 'bold', letterSpacing: 0.3 },
 });

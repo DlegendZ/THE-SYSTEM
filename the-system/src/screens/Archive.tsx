@@ -14,14 +14,15 @@ import SystemBackground from '../components/fx/SystemBackground';
 import { RANK_TITLES } from '../engine/xpConstants';
 import SectionDivider from '../components/ui/SectionDivider';
 import CornerFrame from '../components/ui/CornerFrame';
+import { FONTS } from '../theme/typography';
 
 type Tab = 'overview' | 'disciplines' | 'streaks' | 'history';
 
 const TAB_LABELS: Record<Tab, string> = {
-  overview: 'OVERVIEW',
-  disciplines: 'MISSIONS',
-  streaks: 'STREAKS',
-  history: 'HISTORY',
+  overview: 'Overview',
+  disciplines: 'Missions',
+  streaks: 'Streaks',
+  history: 'History',
 };
 
 function HeatCell({ completed, failed }: { completed: boolean; failed: boolean }) {
@@ -59,7 +60,7 @@ function BigStat({ value, label, color }: { value: string; label: string; color:
   return (
     <CornerFrame color={color + '40'} size={8} thickness={1} style={bigStatStyles.wrap}>
       <View style={bigStatStyles.inner}>
-        <Text style={[bigStatStyles.value, { color }]}>{value}</Text>
+        <Text style={[bigStatStyles.value, { color }]} numberOfLines={2} adjustsFontSizeToFit>{value}</Text>
         <Text style={[bigStatStyles.label, { color: '#666' }]}>{label}</Text>
       </View>
     </CornerFrame>
@@ -69,8 +70,8 @@ function BigStat({ value, label, color }: { value: string; label: string; color:
 const bigStatStyles = StyleSheet.create({
   wrap: { flex: 1 },
   inner: { padding: 14, alignItems: 'center', gap: 4 },
-  value: { fontSize: 32, fontWeight: 'bold' },
-  label: { fontSize: 10, letterSpacing: 2, textAlign: 'center' },
+  value: { fontSize: 22, fontWeight: 'bold', textAlign: 'center', fontFamily: FONTS.display },
+  label: { fontSize: 10, letterSpacing: 0.5, textAlign: 'center' },
 });
 
 export default function Archive() {
@@ -115,8 +116,8 @@ export default function Archive() {
       <SystemBackground color={theme.accent} background={theme.background} />
       {/* Header */}
       <View style={[styles.header, { borderBottomColor: theme.accent + '30' }]}>
-        <Text style={[styles.title, { color: theme.text }]}>THE ARCHIVE</Text>
-        <Text style={[styles.subtitle, { color: theme.textSecondary }]}>RECORD OF BECOMING</Text>
+        <Text style={[styles.title, { color: theme.text }]}>The Archive</Text>
+        <Text style={[styles.subtitle, { color: theme.textSecondary }]}>Record of becoming</Text>
       </View>
 
       {/* Tab bar */}
@@ -149,7 +150,7 @@ export default function Archive() {
         {/* ── OVERVIEW ── */}
         {activeTab === 'overview' && (
           <View style={styles.section}>
-            <SectionDivider title="JOURNEY" color={theme.accent} style={styles.firstDivider} />
+            <SectionDivider title="Journey" color={theme.accent} style={styles.firstDivider} />
 
             {/* Progress bar */}
             <CornerFrame color={theme.accent + '50'} size={8} thickness={1} style={styles.journeyWrap}>
@@ -170,14 +171,14 @@ export default function Archive() {
               </View>
             </CornerFrame>
 
-            <SectionDivider title="STATISTICS" color={theme.accent} />
+            <SectionDivider title="Statistics" color={theme.accent} />
             <View style={styles.statsGrid}>
-              <BigStat value={hero.rank + '-RANK'} label="CURRENT RANK" color={theme.accent} />
-              <BigStat value={RANK_TITLES[hero.rank as Rank].split(' ')[0]} label="TITLE" color={theme.accent} />
+              <BigStat value={hero.rank + '-Rank'} label="Current rank" color={theme.accent} />
+              <BigStat value={RANK_TITLES[hero.rank as Rank]} label="Title" color={theme.accent} />
             </View>
             <View style={styles.statsGrid}>
-              <BigStat value={hero.global_xp.toLocaleString()} label="TOTAL XP" color={theme.accent} />
-              <BigStat value={String(mandates.length)} label="MANDATES" color={theme.accent} />
+              <BigStat value={hero.global_xp.toLocaleString()} label="Total XP" color={theme.accent} />
+              <BigStat value={String(mandates.length)} label="Mandates" color={theme.accent} />
             </View>
           </View>
         )}
@@ -216,15 +217,15 @@ export default function Archive() {
           <View style={styles.section}>
             {silenceData && (
               <>
-                <SectionDivider title="SILENCE PROTOCOL" color={theme.accent} style={styles.firstDivider} />
+                <SectionDivider title="Silence protocol" color={theme.accent} style={styles.firstDivider} />
                 <View style={styles.silenceGrid}>
-                  <BigStat value={String(silenceData.current_streak)} label="CURRENT STREAK" color={theme.accent} />
-                  <BigStat value={String(silenceData.longest_streak)} label="BEST STREAK" color={theme.accent} />
-                  <BigStat value={String(silenceData.total_relapses)} label="RELAPSES" color="#f44336" />
+                  <BigStat value={String(silenceData.current_streak)} label="Current streak" color={theme.accent} />
+                  <BigStat value={String(silenceData.longest_streak)} label="Best streak" color={theme.accent} />
+                  <BigStat value={String(silenceData.total_relapses)} label="Relapses" color="#f44336" />
                 </View>
               </>
             )}
-            <SectionDivider title="ALL DISCIPLINES" color={theme.accent} />
+            <SectionDivider title="All disciplines" color={theme.accent} />
             {disciplines.map((d) => {
               const logs = disciplineLogs[d.id] ?? [];
               const total = logs.filter((l) => l.completed).length;
@@ -247,7 +248,7 @@ export default function Archive() {
         {/* ── HISTORY ── */}
         {activeTab === 'history' && (
           <View style={styles.section}>
-            <SectionDivider title="LAST 28 DAYS" color={theme.accent} style={styles.firstDivider} />
+            <SectionDivider title="Last 28 days" color={theme.accent} style={styles.firstDivider} />
             {[...new Set(recentLogs.map((l) => l.log_date))].sort().reverse().map((date) => {
               const dayLogs = recentLogs.filter((l) => l.log_date === date);
               const comp = dayLogs.filter((l) => l.completed).length;
@@ -280,14 +281,14 @@ export default function Archive() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   header: { paddingHorizontal: 16, paddingBottom: 12, borderBottomWidth: 1 },
-  title: { fontSize: 17, fontWeight: 'bold', letterSpacing: 4 },
-  subtitle: { fontSize: 10, letterSpacing: 3, marginTop: 3 },
+  title: { fontSize: 17, fontWeight: 'bold', letterSpacing: 0.3, fontFamily: FONTS.display },
+  subtitle: { fontSize: 10, letterSpacing: 0.5, marginTop: 3 },
 
   tabBar: { flexDirection: 'row', borderBottomWidth: 1 },
   tabBtn: { flex: 1, paddingVertical: 10, alignItems: 'center', position: 'relative' },
   tabBtnActive: { borderBottomWidth: 2 },
   tabGem: { position: 'absolute', top: 4 },
-  tabTxt: { fontSize: 9, fontWeight: 'bold', letterSpacing: 1 },
+  tabTxt: { fontSize: 9, fontWeight: 'bold', letterSpacing: 0.3 },
 
   scroll: { flex: 1 },
   section: { padding: 14 },
@@ -301,7 +302,7 @@ const styles = StyleSheet.create({
   journeyBg: { height: 8, overflow: 'hidden', position: 'relative' },
   journeyFill: { height: 8, position: 'absolute', left: 0, top: 0, bottom: 0 },
   journeyTick: { position: 'absolute', top: 1, bottom: 1, width: 1, backgroundColor: '#000' },
-  journeyPct: { fontSize: 11, letterSpacing: 2 },
+  journeyPct: { fontSize: 11, letterSpacing: 0.3 },
 
   statsGrid: { flexDirection: 'row', gap: 8, marginBottom: 8 },
   silenceGrid: { flexDirection: 'row', gap: 8, marginBottom: 8 },

@@ -7,6 +7,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import { useSystemStore } from '../store/useSystemStore';
 import type { RootStackParamList } from '../navigation/types';
+import { FONTS } from '../theme/typography';
 
 type Nav = StackNavigationProp<RootStackParamList>;
 
@@ -159,7 +160,7 @@ export default function MandateReveal() {
           <Text style={[styles.tier, { color: tierColor }]}>
             {pendingMandate?.tier ?? 'BRONZE'}
           </Text>
-          <Text style={[styles.mandateWord, { color: tierColor + 'aa' }]}>MANDATE</Text>
+          <Text style={[styles.mandateWord, { color: tierColor + 'aa' }]}>Mandate</Text>
           <View style={[styles.titleLine, { backgroundColor: tierColor + '50' }]} />
         </View>
 
@@ -198,14 +199,14 @@ export default function MandateReveal() {
               style={[styles.dismissBtn, { borderColor: tierColor, backgroundColor: tierColor + '20' }]}
               onPress={() => navigation.goBack()}
             >
-              <Text style={[styles.dismissTxt, { color: tierColor }]}>MANDATE RECEIVED</Text>
+              <Text style={[styles.dismissTxt, { color: tierColor }]}>Mandate received</Text>
             </TouchableOpacity>
           </Animated.View>
         )}
 
         {!opened && (
           <TouchableOpacity style={styles.closeBtn} onPress={() => navigation.goBack()}>
-            <Text style={[styles.closeTxt, { color: theme.textSecondary }]}>CLOSE</Text>
+            <Text style={[styles.closeTxt, { color: theme.textSecondary }]}>Close</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -240,8 +241,8 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   titleLine: { flex: 1, height: 1 },
-  tier: { fontSize: 17, fontWeight: 'bold', letterSpacing: 3 },
-  mandateWord: { fontSize: 12, letterSpacing: 2 },
+  tier: { fontSize: 17, fontWeight: 'bold', letterSpacing: 0.3, fontFamily: FONTS.display },
+  mandateWord: { fontSize: 12, letterSpacing: 0.5 },
   chestWrap: {
     width: 100,
     height: 80,
@@ -265,7 +266,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
   },
-  lootCategory: { fontSize: 11, fontWeight: 'bold', letterSpacing: 3 },
+  lootCategory: { fontSize: 11, fontWeight: 'bold', letterSpacing: 0.5 },
   lootDivider: { width: 40, height: 1 },
   lootName: { fontSize: 22, fontWeight: 'bold', textAlign: 'center', letterSpacing: 1 },
   dismissBtn: {
@@ -275,7 +276,7 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
   },
-  dismissTxt: { fontSize: 13, fontWeight: 'bold', letterSpacing: 2 },
+  dismissTxt: { fontSize: 13, fontWeight: 'bold', letterSpacing: 0.3, fontFamily: FONTS.display },
   closeBtn: { marginTop: 8 },
   closeTxt: { fontSize: 12, letterSpacing: 1 },
 });

@@ -18,6 +18,7 @@ import AvatarDisplay from '../components/avatar/AvatarDisplay';
 import AvatarOrbit from '../components/avatar/AvatarOrbit';
 import SystemBackground from '../components/fx/SystemBackground';
 import { getRandomQuote } from '../data/quotes';
+import { FONTS } from '../theme/typography';
 
 const ORBIT_BY_RANK: Record<string, number> = { E: 0, D: 2, C: 3, B: 5, A: 7, S: 10 };
 import type { Rank } from '../types';
@@ -90,7 +91,7 @@ function PresenceBar({ minutes, theme }: { minutes: number; theme: any }) {
   return (
     <View style={styles.presenceWrap}>
       <View style={styles.presenceRow}>
-        <Text style={[styles.presenceLabel, { color: theme.textSecondary }]}>SCREEN TIME</Text>
+        <Text style={[styles.presenceLabel, { color: theme.textSecondary }]}>Screen time</Text>
         <Text style={[styles.presenceTime, { color: barColor }]}>
           {Math.round(minutes)}m {overLimit ? '▲ EXCEEDED' : '✓ OK'}
         </Text>
@@ -282,7 +283,7 @@ export default function CommandHall() {
         {silenceStreak && silenceStreak.current_streak > 0 && (
           <View style={styles.streakBox}>
             <PixelText size={32} color={theme.accent}>{String(silenceStreak.current_streak)}</PixelText>
-            <Text style={[styles.streakLabel, { color: theme.textSecondary }]}>DAYS CLEAN</Text>
+            <Text style={[styles.streakLabel, { color: theme.textSecondary }]}>Days clean</Text>
           </View>
         )}
 
@@ -308,14 +309,14 @@ export default function CommandHall() {
 
       {/* ── QUEST LOG ── */}
       <SectionDivider
-        title="DAILY OBJECTIVES"
+        title="Daily objectives"
         color={theme.accent}
         style={styles.sectionDivider}
       />
 
       <View style={styles.questProgress}>
         <Text style={[styles.questCount, { color: theme.textSecondary }]}>
-          {completedToday}/{activeDisciplines.length} COMPLETE
+          {completedToday}/{activeDisciplines.length} complete
         </Text>
         <View style={[styles.questProgressBar, { backgroundColor: '#2A2725' }]}>
           <View
@@ -358,8 +359,8 @@ export default function CommandHall() {
               <View style={[styles.shieldCorner, { top: 0, right: 0, borderTopWidth: 1.5, borderRightWidth: 1.5, borderColor: '#ff4444' }]} />
               <View style={[styles.shieldCorner, { bottom: 0, left: 0, borderBottomWidth: 1.5, borderLeftWidth: 1.5, borderColor: '#ff4444' }]} />
               <View style={[styles.shieldCorner, { bottom: 0, right: 0, borderBottomWidth: 1.5, borderRightWidth: 1.5, borderColor: '#ff4444' }]} />
-              <Text style={styles.shieldText}>🛡 SHIELD PROTOCOL</Text>
-              <Text style={styles.shieldSub}>ENGAGE DIGITAL FORTRESS</Text>
+              <Text style={styles.shieldText}>🛡 Shield protocol</Text>
+              <Text style={styles.shieldSub}>Engage digital fortress</Text>
             </View>
           </TouchableOpacity>
         </View>
@@ -440,7 +441,7 @@ const styles = StyleSheet.create({
   },
   rankTitle: {
     fontSize: 10,
-    letterSpacing: 2,
+    letterSpacing: 0.5,
     marginTop: 2,
   },
   settingsBtn: { padding: 4 },
@@ -475,7 +476,7 @@ const styles = StyleSheet.create({
   },
   streakLabel: {
     fontSize: 10,
-    letterSpacing: 2,
+    letterSpacing: 0.5,
     marginTop: 2,
   },
   chestFloat: {
@@ -506,7 +507,7 @@ const styles = StyleSheet.create({
   },
   presenceLabel: {
     fontSize: 10,
-    letterSpacing: 2,
+    letterSpacing: 0.5,
   },
   presenceTime: {
     fontSize: 11,
@@ -575,12 +576,13 @@ const styles = StyleSheet.create({
     color: '#ff4444',
     fontSize: 15,
     fontWeight: 'bold',
-    letterSpacing: 2,
+    letterSpacing: 0.3,
+    fontFamily: FONTS.display,
   },
   shieldSub: {
     color: '#ff444488',
     fontSize: 10,
-    letterSpacing: 2,
+    letterSpacing: 0.5,
     marginTop: 4,
   },
 });

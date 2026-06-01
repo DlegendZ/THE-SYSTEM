@@ -13,6 +13,7 @@ import { requestNotificationPermissions } from '../notifications/scheduler';
 import { format } from 'date-fns';
 import SystemBackground from '../components/fx/SystemBackground';
 import type { HeroClass } from '../types';
+import { FONTS } from '../theme/typography';
 
 const { width } = Dimensions.get('window');
 
@@ -66,7 +67,7 @@ export default function Awakening() {
           <Animated.View style={{ opacity }}>
             <Text style={styles.introText}>{introText}</Text>
             {introText.length >= fullIntro.length && (
-              <Text style={styles.tapHint}>TAP TO CONTINUE</Text>
+              <Text style={styles.tapHint}>Tap to continue</Text>
             )}
           </Animated.View>
         </TouchableOpacity>
@@ -86,7 +87,7 @@ export default function Awakening() {
             style={styles.goldBtn}
             onPress={() => name.trim() && setStep('class')}
           >
-            <Text style={styles.goldBtnText}>CONFIRM</Text>
+            <Text style={styles.goldBtnText}>Confirm</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -103,7 +104,7 @@ export default function Awakening() {
               ]}
               onPress={() => setHeroClass(c.name)}
             >
-              <Text style={styles.className}>{c.name.toUpperCase()}</Text>
+              <Text style={styles.className}>{c.name}</Text>
               <Text style={styles.classDesc}>{c.desc}</Text>
             </TouchableOpacity>
           ))}
@@ -112,7 +113,7 @@ export default function Awakening() {
               style={styles.goldBtn}
               onPress={() => setStep('permissions')}
             >
-              <Text style={styles.goldBtnText}>CONFIRM</Text>
+              <Text style={styles.goldBtnText}>Confirm</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -129,14 +130,14 @@ export default function Awakening() {
               await requestNotificationPermissions();
             }}
           >
-            <Text style={styles.permBtnText}>GRANT NOTIFICATIONS</Text>
+            <Text style={styles.permBtnText}>Grant notifications</Text>
             <Text style={styles.permDesc}>Required to deliver system mandates.</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.goldBtn, { marginTop: 24 }]}
             onPress={() => setStep('accept')}
           >
-            <Text style={styles.goldBtnText}>CONTINUE</Text>
+            <Text style={styles.goldBtnText}>Continue</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -148,7 +149,7 @@ export default function Awakening() {
             {format(new Date(), 'yyyy-MM-dd')}
           </Text>
           <TouchableOpacity style={styles.goldBtn} onPress={handleAccept}>
-            <Text style={styles.goldBtnText}>I ACCEPT</Text>
+            <Text style={styles.goldBtnText}>I accept</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -160,7 +161,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#262624' },
   fullScreen: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 32 },
   section: { flex: 1, justifyContent: 'center', padding: 32 },
-  introText: { color: '#D97757', fontSize: 20, textAlign: 'center', fontWeight: 'bold' },
+  introText: { color: '#D97757', fontSize: 20, textAlign: 'center', fontWeight: 'bold', fontFamily: FONTS.display },
   tapHint: { color: '#666', fontSize: 10, textAlign: 'center', marginTop: 32 },
   prompt: { color: '#D97757', fontSize: 16, textAlign: 'center', marginBottom: 24, fontWeight: 'bold' },
   input: {
@@ -178,7 +179,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 4,
   },
-  goldBtnText: { color: '#000', fontSize: 14, fontWeight: 'bold' },
+  goldBtnText: { color: '#000', fontSize: 14, fontWeight: 'bold', fontFamily: FONTS.display },
   classCard: {
     borderWidth: 1,
     borderColor: '#333',

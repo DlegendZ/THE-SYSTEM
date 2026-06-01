@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Polygon, Line, Rect, Circle, Path } from 'react-native-svg';
 import { useSystemStore } from '../store/useSystemStore';
 import type { RootStackParamList } from './types';
+import { FONTS } from '../theme/typography';
 
 import CommandHall from '../screens/CommandHall';
 import AscensionPath from '../screens/AscensionPath';
@@ -108,8 +109,9 @@ function MainTabs() {
         tabBarLabelStyle: {
           fontSize: 9,
           fontWeight: 'bold',
-          letterSpacing: 1.5,
+          letterSpacing: 0.3,
           marginTop: 2,
+          fontFamily: FONTS.display,
         },
       }}
     >
@@ -117,7 +119,7 @@ function MainTabs() {
         name="CommandHall"
         component={CommandHall}
         options={{
-          tabBarLabel: 'COMMAND',
+          tabBarLabel: 'Command',
           tabBarIcon: ({ focused, color }) => <IconCommand color={color} focused={focused} />,
         }}
       />
@@ -125,7 +127,7 @@ function MainTabs() {
         name="AscensionPath"
         component={AscensionPath}
         options={{
-          tabBarLabel: 'ASCEND',
+          tabBarLabel: 'Ascend',
           tabBarIcon: ({ focused, color }) => <IconAscend color={color} focused={focused} />,
         }}
       />
@@ -133,7 +135,7 @@ function MainTabs() {
         name="Mirror"
         component={Mirror}
         options={{
-          tabBarLabel: 'MIRROR',
+          tabBarLabel: 'Mirror',
           tabBarIcon: ({ focused, color }) => <IconMirror color={color} focused={focused} />,
         }}
       />
@@ -141,7 +143,7 @@ function MainTabs() {
         name="Codex"
         component={Codex}
         options={{
-          tabBarLabel: 'CODEX',
+          tabBarLabel: 'Codex',
           tabBarIcon: ({ focused, color }) => <IconCodex color={color} focused={focused} />,
         }}
       />
@@ -149,7 +151,7 @@ function MainTabs() {
         name="Archive"
         component={Archive}
         options={{
-          tabBarLabel: 'ARCHIVE',
+          tabBarLabel: 'Archive',
           tabBarIcon: ({ focused, color }) => <IconArchive color={color} focused={focused} />,
         }}
       />
@@ -167,7 +169,7 @@ export default function AppNavigator() {
         <View style={styles.loadingBar}>
           <View style={styles.loadingFill} />
         </View>
-        <Text style={styles.loadingSub}>INITIALIZING...</Text>
+        <Text style={styles.loadingSub}>Initializing…</Text>
       </View>
     );
   }
@@ -229,7 +231,8 @@ const styles = StyleSheet.create({
     color: '#D97757',
     fontSize: 28,
     fontWeight: 'bold',
-    letterSpacing: 6,
+    letterSpacing: 0.3,
+    fontFamily: FONTS.display,
   },
   loadingBar: {
     width: 160,
@@ -245,6 +248,6 @@ const styles = StyleSheet.create({
   loadingSub: {
     color: '#9A968B',
     fontSize: 10,
-    letterSpacing: 3,
+    letterSpacing: 0.5,
   },
 });
