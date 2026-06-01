@@ -59,7 +59,7 @@ const statStyles = StyleSheet.create({
   barBg: { flex: 1, height: 12, overflow: 'hidden', position: 'relative' },
   barFill: { height: 12, position: 'absolute', left: 0, top: 0, bottom: 0 },
   tick: { position: 'absolute', top: 2, bottom: 2, width: 1, backgroundColor: '#000' },
-  lvl: { fontSize: 12, fontWeight: 'bold', width: 28, textAlign: 'right', fontFamily: FONTS.display },
+  lvl: { fontSize: 12, width: 28, textAlign: 'right', fontFamily: FONTS.display },
 });
 
 function EquipSlot({ label, name, tier, color }: {
@@ -80,7 +80,7 @@ const equipStyles = StyleSheet.create({
   slot: { flex: 1 },
   inner: { padding: 10, alignItems: 'center', gap: 4 },
   slotLabel: { fontSize: 10, letterSpacing: 0.5, fontFamily: FONTS.body },
-  tier: { fontSize: 18, fontWeight: 'bold', fontFamily: FONTS.display },
+  tier: { fontSize: 18, fontFamily: FONTS.display },
   name: { fontSize: 11, textAlign: 'center', lineHeight: 15, fontFamily: FONTS.body },
 });
 
@@ -205,14 +205,14 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
   },
   nameRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  heroName: { fontSize: 18, fontWeight: 'bold', letterSpacing: 0.3, fontFamily: FONTS.display },
+  heroName: { fontSize: 18, letterSpacing: 0.3, fontFamily: FONTS.display },
   rankPill: {
     borderWidth: 1.5,
     paddingHorizontal: 10,
     paddingVertical: 3,
     position: 'relative',
   },
-  rankLetter: { fontSize: 20, fontWeight: 'bold', fontFamily: FONTS.display },
+  rankLetter: { fontSize: 20, fontFamily: FONTS.display },
   rankTitle: { fontSize: 11, letterSpacing: 0.5, marginTop: 4, fontFamily: FONTS.body },
 
   scroll: { paddingBottom: 24 },
@@ -237,7 +237,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 3,
   },
-  moodText: { fontSize: 10, fontWeight: 'bold', letterSpacing: 0.3, fontFamily: FONTS.display },
+  moodText: { fontSize: 10, letterSpacing: 0.3, fontFamily: FONTS.display },
 
   equipRow: { flexDirection: 'row', paddingHorizontal: 14, gap: 8 },
 
@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
     marginRight: 8,
     position: 'relative',
   },
-  titleTxt: { fontSize: 12, fontWeight: 'bold', letterSpacing: 1, fontFamily: FONTS.bold },
+  titleTxt: { fontSize: 12, letterSpacing: 1, fontFamily: FONTS.bold },
 
   bottomPad: { height: 64 },
 });

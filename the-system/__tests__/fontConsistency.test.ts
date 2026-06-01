@@ -87,6 +87,19 @@ describe('font consistency', () => {
     expect(bad).toEqual([]);
   });
 
+  it('no style sets fontWeight (weight is encoded in the Lora family name)', () => {
+    const bad: string[] = [];
+    for (const f of files) {
+      const src = fs.readFileSync(f, 'utf8');
+      const re = /\bfontWeight\b/g;
+      let m: RegExpExecArray | null;
+      while ((m = re.exec(src))) {
+        bad.push(`${path.relative(SRC, f)}:${src.slice(0, m.index).split('\n').length}`);
+      }
+    }
+    expect(bad).toEqual([]);
+  });
+
   it('every FONTS value is a Lora family', () => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { FONTS } = require('../src/theme/typography');

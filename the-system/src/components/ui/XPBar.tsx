@@ -95,8 +95,8 @@ const styles = StyleSheet.create({
     minWidth: 44,
     position: 'relative',
   },
-  lvlLabel: { fontSize: 9, fontWeight: 'bold', letterSpacing: 1, fontFamily: FONTS.bold },
-  lvlNum: { fontSize: 20, fontWeight: 'bold', lineHeight: 24, fontFamily: FONTS.display },
+  lvlLabel: { fontSize: 9, letterSpacing: 1, fontFamily: FONTS.bold },
+  lvlNum: { fontSize: 20, lineHeight: 24, fontFamily: FONTS.display },
   barWrap: {
     flex: 1,
     height: 18,

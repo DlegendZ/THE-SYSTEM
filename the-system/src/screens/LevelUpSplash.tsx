@@ -188,7 +188,6 @@ const styles = StyleSheet.create({
   },
   eventLabel: {
     fontSize: 12,
-    fontWeight: 'bold',
     letterSpacing: 0.3,
     marginBottom: 12,
     fontFamily: FONTS.display,
@@ -207,20 +206,17 @@ const styles = StyleSheet.create({
   rankLetter: {
     fontFamily: 'Lora_600SemiBold',
     fontSize: 98,
-    fontWeight: 'bold',
     lineHeight: 100,
   },
   rankLetterBg: {
     fontFamily: 'Lora_600SemiBold',
     position: 'absolute',
     fontSize: 120,
-    fontWeight: 'bold',
     lineHeight: 120,
   },
   levelNumber: {
     fontFamily: 'Lora_600SemiBold',
     fontSize: 98,
-    fontWeight: 'bold',
     lineHeight: 100,
   },
   rankName: {
@@ -240,7 +236,6 @@ const styles = StyleSheet.create({
   },
   xpText: {
     fontSize: 15,
-    fontWeight: 'bold',
     letterSpacing: 0.5,
     fontFamily: FONTS.bold,
   },
@@ -252,7 +247,6 @@ const styles = StyleSheet.create({
   },
   continueTxt: {
     fontSize: 13,
-    fontWeight: 'bold',
     letterSpacing: 0.3,
     fontFamily: FONTS.display,
   },

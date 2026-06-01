@@ -179,7 +179,6 @@ const styles = StyleSheet.create({
   },
   diffAbbr: {
     fontSize: 10,
-    fontWeight: 'bold',
     letterSpacing: 0,
     fontFamily: FONTS.bold,
   },
@@ -189,7 +188,6 @@ const styles = StyleSheet.create({
   },
   name: {
     fontSize: 14,
-    fontWeight: 'bold',
     letterSpacing: 0.5,
     fontFamily: FONTS.bold,
   },
@@ -205,7 +203,6 @@ const styles = StyleSheet.create({
   },
   xpGain: {
     fontSize: 12,
-    fontWeight: 'bold',
     color: '#4caf50',
     fontFamily: FONTS.bold,
   },
@@ -221,7 +218,6 @@ const styles = StyleSheet.create({
   },
   diffText: {
     fontSize: 9,
-    fontWeight: 'bold',
     letterSpacing: 0.5,
     fontFamily: FONTS.bold,
   },
@@ -244,7 +240,6 @@ const styles = StyleSheet.create({
   },
   statusGlyph: {
     fontSize: 18,
-    fontWeight: 'bold',
     fontFamily: FONTS.bold,
   },
   btnStack: {
@@ -269,7 +264,6 @@ const styles = StyleSheet.create({
   },
   btnGlyph: {
     fontSize: 16,
-    fontWeight: 'bold',
     fontFamily: FONTS.bold,
   },
 });

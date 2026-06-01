@@ -425,13 +425,11 @@ const styles = StyleSheet.create({
   },
   dayText: {
     fontSize: 17,
-    fontWeight: 'bold',
     letterSpacing: 1,
     fontFamily: FONTS.display,
   },
   dayOf: {
     fontSize: 14,
-    fontWeight: 'bold',
     fontFamily: FONTS.bold,
   },
   rankTitle: {
@@ -488,7 +486,6 @@ const styles = StyleSheet.create({
   },
   chestTier: {
     fontSize: 8,
-    fontWeight: 'bold',
     marginTop: 2,
     letterSpacing: 1,
     fontFamily: FONTS.bold,
@@ -511,7 +508,6 @@ const styles = StyleSheet.create({
   },
   presenceTime: {
     fontSize: 11,
-    fontWeight: 'bold',
     letterSpacing: 1,
     fontFamily: FONTS.bold,
   },
@@ -572,7 +568,6 @@ const styles = StyleSheet.create({
   shieldText: {
     color: '#ff4444',
     fontSize: 15,
-    fontWeight: 'bold',
     letterSpacing: 0.3,
     fontFamily: FONTS.display,
   },

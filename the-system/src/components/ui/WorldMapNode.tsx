@@ -53,7 +53,7 @@ export default function WorldMapNode({ weekNumber, status, completionPct = 0, on
           <Circle cx={NODE_SIZE / 2} cy={NODE_SIZE / 2} r={NODE_SIZE / 2 - 2} fill="none" stroke={c.border} strokeWidth={3} />
           <SvgText
             x={NODE_SIZE / 2} y={NODE_SIZE / 2 + 5}
-            fontSize={14} fontWeight="bold"
+            fontSize={14}
             fontFamily={FONTS.display}
             fill={c.text} textAnchor="middle"
           >

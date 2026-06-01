@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
   tapHint: { color: '#555555', fontSize: 9, letterSpacing: 0.5, marginBottom: 20, fontFamily: FONTS.body },
   dotRow: { flexDirection: 'row', gap: 8 },
   dot: { width: 8, height: 8, borderRadius: 4 },
-  finalTitle: { color: '#ffd700', fontSize: 40, fontWeight: 'bold', letterSpacing: 0.3, textAlign: 'center', fontFamily: 'Lora_600SemiBold' },
+  finalTitle: { color: '#ffd700', fontSize: 40, letterSpacing: 0.3, textAlign: 'center', fontFamily: 'Lora_600SemiBold' },
   finalSubtitle: { color: '#ffffff', fontSize: 12, letterSpacing: 0.5, textAlign: 'center', marginTop: 12, fontFamily: FONTS.body },
   finalText: { color: '#aaaaaa', fontSize: 11, textAlign: 'center', lineHeight: 22, marginVertical: 40, letterSpacing: 0.5, fontFamily: FONTS.body },
   completeBtn: { borderWidth: 2, borderColor: '#ffd700', paddingHorizontal: 24, paddingVertical: 16, position: 'relative' },

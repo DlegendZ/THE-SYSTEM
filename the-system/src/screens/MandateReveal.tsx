@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   titleLine: { flex: 1, height: 1 },
-  tier: { fontSize: 17, fontWeight: 'bold', letterSpacing: 0.3, fontFamily: FONTS.display },
+  tier: { fontSize: 17, letterSpacing: 0.3, fontFamily: FONTS.display },
   mandateWord: { fontSize: 12, letterSpacing: 0.5, fontFamily: FONTS.body },
   chestWrap: {
     width: 100,
@@ -253,7 +253,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     position: 'relative',
   },
-  tapText: { fontSize: 13, fontWeight: 'bold', letterSpacing: 0.3, fontFamily: FONTS.display },
+  tapText: { fontSize: 13, letterSpacing: 0.3, fontFamily: FONTS.display },
   lootBox: { width: '100%', alignItems: 'center', gap: 16 },
   lootInner: {
     borderWidth: 1,
@@ -263,9 +263,9 @@ const styles = StyleSheet.create({
     gap: 10,
     position: 'relative',
   },
-  lootCategory: { fontSize: 11, fontWeight: 'bold', letterSpacing: 0.5, fontFamily: FONTS.bold },
+  lootCategory: { fontSize: 11, letterSpacing: 0.5, fontFamily: FONTS.bold },
   lootDivider: { width: 40, height: 1 },
-  lootName: { fontSize: 22, fontWeight: 'bold', textAlign: 'center', letterSpacing: 1, fontFamily: FONTS.display },
+  lootName: { fontSize: 22, textAlign: 'center', letterSpacing: 1, fontFamily: FONTS.display },
   dismissBtn: {
     borderWidth: 1.5,
     paddingHorizontal: 24,
@@ -274,7 +274,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     position: 'relative',
   },
-  dismissTxt: { fontSize: 13, fontWeight: 'bold', letterSpacing: 0.3, fontFamily: FONTS.display },
+  dismissTxt: { fontSize: 13, letterSpacing: 0.3, fontFamily: FONTS.display },
   closeBtn: { marginTop: 8 },
   closeTxt: { fontSize: 12, letterSpacing: 1, fontFamily: FONTS.body },
 });
