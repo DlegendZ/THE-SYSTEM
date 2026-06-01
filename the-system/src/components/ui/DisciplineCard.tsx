@@ -15,10 +15,10 @@ interface Props {
 }
 
 const DIFFICULTY_COLORS: Record<string, string> = {
-  EASY: '#4caf50',
-  NORMAL: '#2196f3',
-  HARD: '#ff9800',
-  LEGENDARY: '#e040fb',
+  EASY: '#9CA77F',
+  NORMAL: '#D2A24C',
+  HARD: '#D97757',
+  LEGENDARY: '#C0506B',
 };
 
 const DIFFICULTY_ABBR: Record<string, string> = {

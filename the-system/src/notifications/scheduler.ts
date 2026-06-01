@@ -111,7 +111,7 @@ export async function scheduleNotifications(
         content: {
           title: 'THE SYSTEM',
           body: message,
-          color: '#3bc9ff',
+          color: '#D97757',
           categoryIdentifier: CATEGORY_ID,
           data: { type: 'progress' },
         },
