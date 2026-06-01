@@ -95,7 +95,7 @@ function PresenceBar({ minutes, theme }: { minutes: number; theme: any }) {
           {Math.round(minutes)}m {overLimit ? '▲ EXCEEDED' : '✓ OK'}
         </Text>
       </View>
-      <View style={[styles.presenceBg, { backgroundColor: '#1a1a1a' }]}>
+      <View style={[styles.presenceBg, { backgroundColor: '#2A2725' }]}>
         <View style={[styles.presenceFill, { width: `${pct * 100}%`, backgroundColor: barColor }]} />
         <View style={[styles.presenceLimit, { left: '100%', backgroundColor: theme.textSecondary + '40' }]} />
       </View>
@@ -317,7 +317,7 @@ export default function CommandHall() {
         <Text style={[styles.questCount, { color: theme.textSecondary }]}>
           {completedToday}/{activeDisciplines.length} COMPLETE
         </Text>
-        <View style={[styles.questProgressBar, { backgroundColor: '#1a1a1a' }]}>
+        <View style={[styles.questProgressBar, { backgroundColor: '#2A2725' }]}>
           <View
             style={[
               styles.questProgressFill,

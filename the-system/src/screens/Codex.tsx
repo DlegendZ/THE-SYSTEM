@@ -14,7 +14,7 @@ const DIFFICULTY_OPTIONS = ['EASY', 'NORMAL', 'HARD', 'LEGENDARY'] as const;
 type Difficulty = typeof DIFFICULTY_OPTIONS[number];
 
 const DIFFICULTY_COLORS: Record<Difficulty, string> = {
-  EASY: '#4caf50', NORMAL: '#D2A24C', HARD: '#ff9800', LEGENDARY: '#f44336',
+  EASY: '#9CA77F', NORMAL: '#D2A24C', HARD: '#D97757', LEGENDARY: '#C0506B',
 };
 
 const XP_DEFAULTS: Record<Difficulty, [number, number]> = {
