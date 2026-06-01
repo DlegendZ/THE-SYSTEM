@@ -9,12 +9,12 @@
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash-native.png",
-      "backgroundColor": "#000000"
+      "backgroundColor": "#262624"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#000000"
+        "backgroundColor": "#262624"
       },
       "package": "com.thesystem",
       "versionCode": 1,
@@ -31,7 +31,7 @@
         "expo-notifications",
         {
           "icon": "./assets/notification-icon.png",
-          "color": "#3bc9ff"
+          "color": "#D97757"
         }
       ],
       "expo-font",
@@ -40,7 +40,7 @@
         "expo-splash-screen",
         {
           "image": "./assets/splash-native.png",
-          "backgroundColor": "#000000"
+          "backgroundColor": "#262624"
         }
       ]
     ]
