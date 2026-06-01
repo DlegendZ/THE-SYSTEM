@@ -5,7 +5,6 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import * as SplashScreen from 'expo-splash-screen';
 import './src/theme/applyGlobalFont';
 import Particles from './src/components/fx/Particles';
-import Scanlines from './src/components/fx/Scanlines';
 
 LogBox.ignoreLogs([
   'Text strings must be rendered within a <Text> component',
@@ -62,7 +61,7 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <StatusBar barStyle="light-content" backgroundColor="#000000" />
+        <StatusBar barStyle="light-content" backgroundColor="#262624" />
         {ready && <AppNavigator />}
         {ready && (
           <View pointerEvents="none" style={StyleSheet.absoluteFill}>
@@ -70,7 +69,6 @@ export default function App() {
               color={theme.auraColor ?? theme.accent}
               count={Math.min(theme.particleCount, 40)}
             />
-            <Scanlines color={theme.accent} intensity={theme.screenGlow ? 0.09 : 0.06} />
           </View>
         )}
         {!splashDone && (
@@ -91,6 +89,6 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  splash: { backgroundColor: '#000', justifyContent: 'center', alignItems: 'center' },
+  splash: { backgroundColor: '#262624', justifyContent: 'center', alignItems: 'center' },
   splashImage: { width: '100%', height: '100%' },
 });
