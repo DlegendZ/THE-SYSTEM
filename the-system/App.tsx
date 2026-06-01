@@ -12,6 +12,8 @@ LogBox.ignoreLogs([
   'InteractionManager has been deprecated',
 ]);
 import { useFonts } from 'expo-font';
+import { Inter_400Regular, Inter_500Medium, Inter_600SemiBold } from '@expo-google-fonts/inter';
+import { Lora_400Regular, Lora_600SemiBold } from '@expo-google-fonts/lora';
 import AppNavigator from './src/navigation/AppNavigator';
 import { useSystemStore } from './src/store/useSystemStore';
 
@@ -26,8 +28,11 @@ export default function App() {
   const initialize = useSystemStore((s) => s.initialize);
 
   const [fontsLoaded, fontError] = useFonts({
-    'PressStart2P': require('./src/assets/fonts/PressStart2P-Regular.ttf'),
-    'Cinzel': require('./src/assets/fonts/Cinzel.ttf'),
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_600SemiBold,
+    Lora_400Regular,
+    Lora_600SemiBold,
   });
 
   const [splashDone, setSplashDone] = useState(false);
