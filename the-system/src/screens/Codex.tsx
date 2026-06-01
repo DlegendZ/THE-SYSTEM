@@ -9,6 +9,7 @@ import {
 } from '../db/queries';
 import type { Discipline } from '../types';
 import SystemBackground from '../components/fx/SystemBackground';
+import { CornerBrackets } from '../components/ui/CornerBox';
 import ClaudeSpark from '../components/avatar/ClaudeSpark';
 import { FONTS } from '../theme/typography';
 
@@ -94,6 +95,7 @@ export default function Codex() {
       <View style={[styles.header, { paddingTop: insets.top + 14 }]}>
         <Text style={[styles.title, { color: theme.text }]}>The Codex</Text>
         <TouchableOpacity style={[styles.addBtn, { borderColor: theme.accent }]} onPress={() => setShowAdd(true)}>
+          <CornerBrackets color={theme.accent} />
           <Text style={[styles.addBtnText, { color: theme.accent }]}>+ Add</Text>
         </TouchableOpacity>
       </View>
@@ -104,6 +106,7 @@ export default function Codex() {
           return (
             <View key={d.id} style={[styles.row, { borderBottomColor: '#222222' }]}>
               <View style={[styles.iconBox, { borderColor: diffColor }]}>
+                <CornerBrackets color={diffColor} />
                 <ClaudeSpark rank="C" size={26} tint={diffColor} />
               </View>
               <View style={styles.rowInfo}>
@@ -124,6 +127,7 @@ export default function Codex() {
                   style={[styles.toggleBtn, { backgroundColor: d.is_active ? theme.accent + '20' : '#333333', borderColor: d.is_active ? theme.accent : '#444444' }]}
                   onPress={() => handleToggleActive(d)}
                 >
+                  <CornerBrackets color={d.is_active ? theme.accent : '#444444'} length={8} />
                   <Text style={[styles.toggleText, { color: d.is_active ? theme.accent : '#666666' }]}>
                     {d.is_active ? 'ON' : 'OFF'}
                   </Text>
@@ -146,24 +150,30 @@ export default function Codex() {
             <Text style={[styles.modalTitle, { color: theme.text }]}>Add discipline</Text>
 
             <Text style={[styles.formLabel, { color: theme.textSecondary }]}>Name</Text>
-            <TextInput
-              style={[styles.input, { color: theme.text, borderColor: theme.accent }]}
-              value={form.name}
-              onChangeText={(v) => setForm({ ...form, name: v })}
-              placeholder="Discipline name"
-              placeholderTextColor={theme.textSecondary}
-              maxLength={40}
-            />
+            <View style={styles.inputWrap}>
+              <TextInput
+                style={[styles.input, { color: theme.text, borderColor: theme.accent }]}
+                value={form.name}
+                onChangeText={(v) => setForm({ ...form, name: v })}
+                placeholder="Discipline name"
+                placeholderTextColor={theme.textSecondary}
+                maxLength={40}
+              />
+              <CornerBrackets color={theme.accent} length={8} />
+            </View>
 
             <Text style={[styles.formLabel, { color: theme.textSecondary }]}>Description</Text>
-            <TextInput
-              style={[styles.input, { color: theme.text, borderColor: theme.accent }]}
-              value={form.description}
-              onChangeText={(v) => setForm({ ...form, description: v })}
-              placeholder="Brief description"
-              placeholderTextColor={theme.textSecondary}
-              maxLength={100}
-            />
+            <View style={styles.inputWrap}>
+              <TextInput
+                style={[styles.input, { color: theme.text, borderColor: theme.accent }]}
+                value={form.description}
+                onChangeText={(v) => setForm({ ...form, description: v })}
+                placeholder="Brief description"
+                placeholderTextColor={theme.textSecondary}
+                maxLength={100}
+              />
+              <CornerBrackets color={theme.accent} length={8} />
+            </View>
 
             <Text style={[styles.formLabel, { color: theme.textSecondary }]}>Difficulty</Text>
             <View style={styles.diffRow}>
@@ -173,6 +183,7 @@ export default function Codex() {
                   style={[styles.diffOption, { borderColor: form.difficulty === opt ? DIFFICULTY_COLORS[opt] : '#444444', backgroundColor: form.difficulty === opt ? DIFFICULTY_COLORS[opt] + '30' : 'transparent' }]}
                   onPress={() => setForm({ ...form, difficulty: opt })}
                 >
+                  <CornerBrackets color={form.difficulty === opt ? DIFFICULTY_COLORS[opt] : '#444444'} length={8} />
                   <Text style={[styles.diffOptionText, { color: form.difficulty === opt ? DIFFICULTY_COLORS[opt] : '#666666' }]}>
                     {opt.slice(0, 4)}
                   </Text>
@@ -181,17 +192,21 @@ export default function Codex() {
             </View>
 
             <Text style={[styles.formLabel, { color: theme.textSecondary }]}>DEADLINE (HH:MM)</Text>
-            <TextInput
-              style={[styles.input, { color: theme.text, borderColor: theme.accent }]}
-              value={form.deadlineTime}
-              onChangeText={(v) => setForm({ ...form, deadlineTime: v })}
-              placeholder="23:59"
-              placeholderTextColor={theme.textSecondary}
-              maxLength={5}
-            />
+            <View style={styles.inputWrap}>
+              <TextInput
+                style={[styles.input, { color: theme.text, borderColor: theme.accent }]}
+                value={form.deadlineTime}
+                onChangeText={(v) => setForm({ ...form, deadlineTime: v })}
+                placeholder="23:59"
+                placeholderTextColor={theme.textSecondary}
+                maxLength={5}
+              />
+              <CornerBrackets color={theme.accent} length={8} />
+            </View>
 
             <View style={styles.modalActions}>
               <TouchableOpacity style={[styles.cancelBtn, { borderColor: '#666666' }]} onPress={() => { setShowAdd(false); setForm(BLANK_FORM); }}>
+                <CornerBrackets color="#666666" />
                 <Text style={[styles.cancelText, { color: '#666666' }]}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity style={[styles.submitBtn, { backgroundColor: theme.accent }]} onPress={handleAddSubmit}>
@@ -209,11 +224,11 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingBottom: 16, borderBottomWidth: 1, borderBottomColor: '#333333' },
   title: { fontSize: 17, fontWeight: 'bold', letterSpacing: 0.3, fontFamily: FONTS.display },
-  addBtn: { borderWidth: 1, paddingHorizontal: 12, paddingVertical: 7 },
+  addBtn: { borderWidth: 1, paddingHorizontal: 12, paddingVertical: 7, position: 'relative' },
   addBtnText: { fontSize: 13, fontWeight: 'bold', letterSpacing: 0.3, fontFamily: FONTS.bold },
   scroll: { flex: 1 },
   row: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 14, borderBottomWidth: 1 },
-  iconBox: { width: 48, height: 48, borderWidth: 1, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
+  iconBox: { width: 48, height: 48, borderWidth: 1, alignItems: 'center', justifyContent: 'center', marginRight: 12, position: 'relative' },
   rowInfo: { flex: 1 },
   rowName: { fontSize: 14, fontWeight: 'bold', marginBottom: 4, fontFamily: FONTS.bold },
   rowMeta: { flexDirection: 'row', alignItems: 'center', gap: 8 },
@@ -222,7 +237,7 @@ const styles = StyleSheet.create({
   xpText: { fontSize: 12, fontFamily: FONTS.body },
   deadlineText: { fontSize: 12, marginTop: 2, fontFamily: FONTS.body },
   actions: { alignItems: 'center', gap: 4 },
-  toggleBtn: { borderWidth: 1, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 2 },
+  toggleBtn: { borderWidth: 1, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 2, position: 'relative' },
   toggleText: { fontSize: 12, fontWeight: 'bold', fontFamily: FONTS.bold },
   deleteBtn: { padding: 4 },
   deleteText: { color: '#f44336', fontSize: 16, fontFamily: FONTS.body },
@@ -231,12 +246,13 @@ const styles = StyleSheet.create({
   modalBox: { padding: 24, borderTopWidth: 2 },
   modalTitle: { fontSize: 17, fontWeight: 'bold', letterSpacing: 0.3, marginBottom: 16, fontFamily: FONTS.display },
   formLabel: { fontSize: 11, letterSpacing: 0.5, marginBottom: 6, marginTop: 12, fontFamily: FONTS.body },
-  input: { borderWidth: 1, borderRadius: 2, padding: 10, fontSize: 14, marginBottom: 4, fontFamily: FONTS.body },
+  inputWrap: { position: 'relative', marginBottom: 4 },
+  input: { borderWidth: 1, borderRadius: 2, padding: 10, fontSize: 14, fontFamily: FONTS.body },
   diffRow: { flexDirection: 'row', gap: 8 },
-  diffOption: { flex: 1, borderWidth: 1, padding: 8, alignItems: 'center', borderRadius: 2 },
+  diffOption: { flex: 1, borderWidth: 1, padding: 8, alignItems: 'center', borderRadius: 2, position: 'relative' },
   diffOptionText: { fontSize: 11, fontWeight: 'bold', fontFamily: FONTS.bold },
   modalActions: { flexDirection: 'row', gap: 12, marginTop: 20 },
-  cancelBtn: { flex: 1, borderWidth: 1, padding: 13, alignItems: 'center' },
+  cancelBtn: { flex: 1, borderWidth: 1, padding: 13, alignItems: 'center', position: 'relative' },
   cancelText: { fontSize: 13, fontWeight: 'bold', fontFamily: FONTS.bold },
   submitBtn: { flex: 1, padding: 13, alignItems: 'center', borderRadius: 2 },
   submitText: { color: '#000000', fontSize: 13, fontWeight: 'bold', letterSpacing: 1, fontFamily: FONTS.display },

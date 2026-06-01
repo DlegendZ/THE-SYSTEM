@@ -5,6 +5,7 @@ import {
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import { useNavigation } from '@react-navigation/native';
 import { useSystemStore } from '../store/useSystemStore';
+import { CornerBrackets } from '../components/ui/CornerBox';
 import { FONTS } from '../theme/typography';
 
 const DANGER = '#ff4444';
@@ -94,6 +95,7 @@ export default function ShieldOverlay() {
   return (
     <View style={styles.overlay}>
       <View style={[styles.container, { backgroundColor: theme.background, borderColor: DANGER }]}>
+        <CornerBrackets color={DANGER} />
         <Text style={[styles.title, { color: DANGER }]}>Shield protocol</Text>
 
         {phase === 'select' && (
@@ -114,6 +116,7 @@ export default function ShieldOverlay() {
                     },
                   ]}
                 >
+                  <CornerBrackets color={minutes === d ? theme.accent : theme.textSecondary} />
                   <Text style={[styles.durationText, { color: minutes === d ? theme.accent : theme.textSecondary }]}>
                     {d}m
                   </Text>
@@ -174,12 +177,12 @@ export default function ShieldOverlay() {
 
 const styles = StyleSheet.create({
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.92)', justifyContent: 'center', alignItems: 'center' },
-  container: { width: 320, padding: 32, borderWidth: 2, alignItems: 'center' },
+  container: { width: 320, padding: 32, borderWidth: 2, alignItems: 'center', position: 'relative', overflow: 'visible' },
   title: { fontSize: 16, fontWeight: 'bold', letterSpacing: 0.3, marginBottom: 20, fontFamily: FONTS.display },
   body: { fontSize: 13, textAlign: 'center', marginBottom: 12, lineHeight: 20, fontFamily: FONTS.body },
   warning: { fontSize: 11, textAlign: 'center', marginTop: 4, fontFamily: FONTS.body },
   durationRow: { flexDirection: 'row', gap: 12, marginVertical: 16 },
-  durationBtn: { borderWidth: 1, paddingHorizontal: 18, paddingVertical: 10 },
+  durationBtn: { borderWidth: 1, paddingHorizontal: 18, paddingVertical: 10, position: 'relative', overflow: 'visible' },
   durationText: { fontSize: 15, fontWeight: 'bold', letterSpacing: 1, fontFamily: FONTS.bold },
   lockBtn: { paddingHorizontal: 24, paddingVertical: 14, marginTop: 8, marginBottom: 12 },
   lockBtnText: { color: '#ffffff', fontSize: 13, fontWeight: 'bold', letterSpacing: 0.3, fontFamily: FONTS.display },

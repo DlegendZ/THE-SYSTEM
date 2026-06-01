@@ -5,6 +5,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useSystemStore } from '../store/useSystemStore';
+import { CornerBrackets } from '../components/ui/CornerBox';
 import { getSystemState, setSystemState } from '../db/queries';
 import { differenceInCalendarDays, parseISO } from 'date-fns';
 // expo-file-system v18+ moved legacy APIs to expo-file-system/legacy
@@ -147,6 +148,7 @@ export default function Settings() {
               ]}
               onPress={() => saveInterval(v)}
             >
+              <CornerBrackets color={notifInterval === v ? theme.accent : theme.textSecondary} />
               <Text style={[styles.intervalText, { color: notifInterval === v ? theme.accent : theme.textSecondary }]}>
                 {v}h
               </Text>
@@ -169,6 +171,7 @@ export default function Settings() {
           style={[styles.exportButton, { borderColor: theme.accent }]}
           onPress={handleExport}
         >
+          <CornerBrackets color={theme.accent} />
           <Text style={[styles.exportText, { color: theme.accent }]}>
             Export data (JSON)
           </Text>
@@ -189,6 +192,7 @@ export default function Settings() {
             if (!ok) Alert.alert('NOTIFICATION', 'Rich notifications need the latest native build. Rebuild the app.');
           }}
         >
+          <CornerBrackets color={theme.accent} />
           <Text style={[styles.exportText, { color: theme.accent }]}>Test notification</Text>
         </TouchableOpacity>
 
@@ -196,14 +200,17 @@ export default function Settings() {
         <Text style={[styles.label, { color: theme.textSecondary }]}>
           Type "I ACCEPT THE RESET" to enable reset:
         </Text>
-        <TextInput
-          style={[styles.input, { color: theme.text, borderColor: '#ff4444' }]}
-          value={resetConfirm}
-          onChangeText={setResetConfirm}
-          placeholder="Type here..."
-          placeholderTextColor={theme.textSecondary}
-          autoCapitalize="characters"
-        />
+        <View style={styles.inputWrap}>
+          <TextInput
+            style={[styles.input, { color: theme.text, borderColor: '#ff4444' }]}
+            value={resetConfirm}
+            onChangeText={setResetConfirm}
+            placeholder="Type here..."
+            placeholderTextColor={theme.textSecondary}
+            autoCapitalize="characters"
+          />
+          <CornerBrackets color="#ff4444" />
+        </View>
         <TouchableOpacity
           style={[styles.resetButton, { backgroundColor: resetConfirm === 'I ACCEPT THE RESET' ? '#ff4444' : '#333' }]}
           onPress={handleResetJourney}
@@ -229,13 +236,14 @@ const styles = StyleSheet.create({
   sectionHeader: { fontSize: 12, fontWeight: 'bold', letterSpacing: 0.5, marginTop: 24, marginBottom: 12, fontFamily: FONTS.display },
   label: { fontSize: 13, marginBottom: 8, fontFamily: FONTS.body },
   intervalRow: { flexDirection: 'row', gap: 8, marginBottom: 16 },
-  intervalBtn: { borderWidth: 1, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 2 },
+  intervalBtn: { borderWidth: 1, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 2, position: 'relative' },
   intervalText: { fontSize: 13, fontWeight: 'bold', fontFamily: FONTS.bold },
   infoText: { fontSize: 14, marginBottom: 6, fontFamily: FONTS.body },
-  input: { borderWidth: 1, borderRadius: 2, padding: 10, marginBottom: 12, fontSize: 14, fontFamily: FONTS.body },
+  inputWrap: { position: 'relative', marginBottom: 12 },
+  input: { borderWidth: 1, borderRadius: 2, padding: 10, fontSize: 14, fontFamily: FONTS.body },
   resetButton: { padding: 14, alignItems: 'center', borderRadius: 2, marginBottom: 16 },
   resetText: { color: '#fff', fontSize: 14, fontWeight: 'bold', letterSpacing: 0.3, fontFamily: FONTS.bold },
   bottomPadding: { height: 64 },
-  exportButton: { borderWidth: 1, padding: 14, alignItems: 'center', marginBottom: 8 },
+  exportButton: { borderWidth: 1, padding: 14, alignItems: 'center', marginBottom: 8, position: 'relative' },
   exportText: { fontSize: 13, fontWeight: 'bold', letterSpacing: 0.3, fontFamily: FONTS.bold },
 });

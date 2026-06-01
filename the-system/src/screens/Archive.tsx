@@ -14,6 +14,7 @@ import SystemBackground from '../components/fx/SystemBackground';
 import { RANK_TITLES } from '../engine/xpConstants';
 import SectionDivider from '../components/ui/SectionDivider';
 import CornerFrame from '../components/ui/CornerFrame';
+import { CornerBrackets } from '../components/ui/CornerBox';
 import { FONTS } from '../theme/typography';
 
 type Tab = 'overview' | 'disciplines' | 'streaks' | 'history';
@@ -194,6 +195,7 @@ export default function Archive() {
               const rate = logs.length > 0 ? completed / logs.length : 0;
               return (
                 <View key={d.id} style={[styles.disciplineCard, { borderColor: theme.accent + '30', backgroundColor: theme.primary }]}>
+                  <CornerBrackets color={theme.accent + '30'} />
                   <View style={styles.disciplineTop}>
                     <Text style={[styles.disciplineName, { color: theme.text }]}>{d.name}</Text>
                     <Text style={[styles.disciplineRate, { color: Math.round(rate * 100) >= 70 ? '#4caf50' : '#888' }]}>
@@ -312,6 +314,7 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 10,
     gap: 8,
+    position: 'relative',
   },
   disciplineTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   disciplineName: { fontSize: 14, fontWeight: 'bold', fontFamily: FONTS.bold },

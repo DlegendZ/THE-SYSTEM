@@ -2,6 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
 import { useSystemStore } from '../../store/useSystemStore';
 import { getXpForLevel, XP_TABLE } from '../../engine/xpConstants';
+import { CornerBrackets } from './CornerBox';
 import { FONTS } from '../../theme/typography';
 
 export default function XPBar() {
@@ -42,6 +43,7 @@ export default function XPBar() {
       <View style={styles.row}>
         {/* Level badge */}
         <View style={[styles.levelBadge, { borderColor: theme.accent + 'aa' }]}>
+          <CornerBrackets color={theme.accent + 'aa'} length={8} />
           <Text style={[styles.lvlLabel, { color: theme.textSecondary }]}>LVL</Text>
           <Text style={[styles.lvlNum, { color: theme.accent }]}>{hero.global_level}</Text>
         </View>
@@ -49,10 +51,7 @@ export default function XPBar() {
         {/* Bar */}
         <View style={styles.barWrap}>
           {/* Corner ticks */}
-          <View style={[styles.tick, { top: 0, left: 0, borderTopWidth: 1, borderLeftWidth: 1, borderColor: theme.accent + '80' }]} />
-          <View style={[styles.tick, { top: 0, right: 0, borderTopWidth: 1, borderRightWidth: 1, borderColor: theme.accent + '80' }]} />
-          <View style={[styles.tick, { bottom: 0, left: 0, borderBottomWidth: 1, borderLeftWidth: 1, borderColor: theme.accent + '80' }]} />
-          <View style={[styles.tick, { bottom: 0, right: 0, borderBottomWidth: 1, borderRightWidth: 1, borderColor: theme.accent + '80' }]} />
+          <CornerBrackets color={theme.accent + '80'} thickness={1} length={6} />
 
           <View style={[styles.barBg, { backgroundColor: theme.background }]}>
             {/* Fill */}
@@ -94,6 +93,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     alignItems: 'center',
     minWidth: 44,
+    position: 'relative',
   },
   lvlLabel: { fontSize: 9, fontWeight: 'bold', letterSpacing: 1, fontFamily: FONTS.bold },
   lvlNum: { fontSize: 20, fontWeight: 'bold', lineHeight: 24, fontFamily: FONTS.display },
@@ -102,11 +102,6 @@ const styles = StyleSheet.create({
     height: 18,
     position: 'relative',
     padding: 2,
-  },
-  tick: {
-    position: 'absolute',
-    width: 6,
-    height: 6,
   },
   barBg: {
     flex: 1,

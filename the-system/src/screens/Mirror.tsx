@@ -12,6 +12,7 @@ import AvatarDisplay from '../components/avatar/AvatarDisplay';
 import SectionDivider from '../components/ui/SectionDivider';
 import SystemBackground from '../components/fx/SystemBackground';
 import CornerFrame from '../components/ui/CornerFrame';
+import { CornerBrackets } from '../components/ui/CornerBox';
 import type { HeroClass } from '../components/avatar/avatarData';
 import { FONTS } from '../theme/typography';
 
@@ -114,6 +115,7 @@ export default function Mirror() {
         <View style={styles.nameRow}>
           <Text style={[styles.heroName, { color: theme.text }]}>{hero.name}</Text>
           <View style={[styles.rankPill, { borderColor: theme.accent + '80', backgroundColor: theme.accent + '15' }]}>
+            <CornerBrackets color={theme.accent + '80'} length={8} />
             <Text style={[styles.rankLetter, { color: theme.accent }]}>{hero.rank}</Text>
           </View>
         </View>
@@ -139,6 +141,7 @@ export default function Mirror() {
           </View>
           {/* Mood indicator */}
           <View style={[styles.moodBadge, { borderColor: theme.accent + '60', backgroundColor: theme.primary }]}>
+            <CornerBrackets color={theme.accent + '60'} length={8} />
             <Text style={[styles.moodText, { color: theme.accent }]}>
               {mood.charAt(0).toUpperCase() + mood.slice(1)}
             </Text>
@@ -180,6 +183,7 @@ export default function Mirror() {
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.titlesRow}>
               {titles.map((t) => (
                 <View key={t.id} style={[styles.titleChip, { borderColor: theme.accent + '70', backgroundColor: theme.accent + '10' }]}>
+                  <CornerBrackets color={theme.accent + '70'} length={8} />
                   <Text style={[styles.titleTxt, { color: theme.accent }]}>{t.name}</Text>
                 </View>
               ))}
@@ -206,6 +210,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     paddingHorizontal: 10,
     paddingVertical: 3,
+    position: 'relative',
   },
   rankLetter: { fontSize: 20, fontWeight: 'bold', fontFamily: FONTS.display },
   rankTitle: { fontSize: 11, letterSpacing: 0.5, marginTop: 4, fontFamily: FONTS.body },
@@ -244,6 +249,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 5,
     marginRight: 8,
+    position: 'relative',
   },
   titleTxt: { fontSize: 12, fontWeight: 'bold', letterSpacing: 1, fontFamily: FONTS.bold },
 

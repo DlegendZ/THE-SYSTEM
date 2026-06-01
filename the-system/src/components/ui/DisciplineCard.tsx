@@ -5,6 +5,7 @@ import type { Discipline, DisciplineLog } from '../../types';
 import type { RankTheme } from '../../theme/rankThemes';
 import { FONTS } from '../../theme/typography';
 import CornerFrame from './CornerFrame';
+import { CornerBrackets } from './CornerBox';
 import FadeInView from '../fx/FadeInView';
 
 interface Props {
@@ -42,6 +43,7 @@ function StatusMark({ type }: { type: 'complete' | 'fail' }) {
   const bg = type === 'complete' ? '#0a1a0a' : '#1a0a0a';
   return (
     <View style={[styles.statusBox, { borderColor: color, backgroundColor: bg }]}>
+      <CornerBrackets color={color} length={9} />
       <Text style={[styles.statusGlyph, { color }]}>
         {type === 'complete' ? '✓' : '✗'}
       </Text>
@@ -129,6 +131,7 @@ export default function DisciplineCard({ discipline, log, theme, onComplete, onF
                 onPress={onComplete}
                 activeOpacity={0.7}
               >
+                <CornerBrackets color="#4caf5088" length={9} />
                 <Text style={[styles.btnGlyph, { color: '#4caf50' }]}>✓</Text>
               </TouchableOpacity>
               {discipline.code === 'SILENCE' && (
@@ -137,6 +140,7 @@ export default function DisciplineCard({ discipline, log, theme, onComplete, onF
                   onPress={onFail}
                   activeOpacity={0.7}
                 >
+                  <CornerBrackets color="#f4433688" length={9} />
                   <Text style={[styles.btnGlyph, { color: '#f44336' }]}>✗</Text>
                 </TouchableOpacity>
               )}
@@ -236,6 +240,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     alignItems: 'center',
     justifyContent: 'center',
+    position: 'relative',
   },
   statusGlyph: {
     fontSize: 18,
@@ -252,6 +257,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     alignItems: 'center',
     justifyContent: 'center',
+    position: 'relative',
   },
   btnComplete: {
     borderColor: '#4caf5088',

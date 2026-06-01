@@ -9,6 +9,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { useSystemStore } from '../store/useSystemStore';
+import { CornerBrackets } from '../components/ui/CornerBox';
 import { requestNotificationPermissions } from '../notifications/scheduler';
 import { format } from 'date-fns';
 import SystemBackground from '../components/fx/SystemBackground';
@@ -76,13 +77,16 @@ export default function Awakening() {
       {step === 'name' && (
         <View style={styles.section}>
           <Text style={styles.prompt}>IDENTIFY YOURSELF.</Text>
-          <TextInput
-            style={styles.input}
-            value={name}
-            onChangeText={setName}
-            placeholderTextColor="#666"
-            selectionColor="#D97757"
-          />
+          <View style={styles.inputWrap}>
+            <TextInput
+              style={styles.input}
+              value={name}
+              onChangeText={setName}
+              placeholderTextColor="#666"
+              selectionColor="#D97757"
+            />
+            <CornerBrackets color="#D97757" />
+          </View>
           <TouchableOpacity
             style={styles.goldBtn}
             onPress={() => name.trim() && setStep('class')}
@@ -104,6 +108,7 @@ export default function Awakening() {
               ]}
               onPress={() => setHeroClass(c.name)}
             >
+              <CornerBrackets color={heroClass === c.name ? '#D97757' : '#333'} />
               <Text style={styles.className}>{c.name}</Text>
               <Text style={styles.classDesc}>{c.desc}</Text>
             </TouchableOpacity>
@@ -130,6 +135,7 @@ export default function Awakening() {
               await requestNotificationPermissions();
             }}
           >
+            <CornerBrackets color="#333" />
             <Text style={styles.permBtnText}>Grant notifications</Text>
             <Text style={styles.permDesc}>Required to deliver system mandates.</Text>
           </TouchableOpacity>
@@ -164,6 +170,7 @@ const styles = StyleSheet.create({
   introText: { color: '#D97757', fontSize: 20, textAlign: 'center', fontWeight: 'bold', fontFamily: FONTS.display },
   tapHint: { color: '#666', fontSize: 10, textAlign: 'center', marginTop: 32, fontFamily: FONTS.body },
   prompt: { color: '#D97757', fontSize: 16, textAlign: 'center', marginBottom: 24, fontWeight: 'bold', fontFamily: FONTS.bold },
+  inputWrap: { position: 'relative', marginBottom: 24 },
   input: {
     borderWidth: 1,
     borderColor: '#D97757',
@@ -171,7 +178,6 @@ const styles = StyleSheet.create({
     padding: 12,
     fontSize: 16,
     textAlign: 'center',
-    marginBottom: 24,
     fontFamily: FONTS.body,
   },
   goldBtn: {
@@ -187,6 +193,7 @@ const styles = StyleSheet.create({
     padding: 16,
     marginVertical: 6,
     borderRadius: 4,
+    position: 'relative',
   },
   classCardSelected: { borderColor: '#D97757', backgroundColor: '#322E29' },
   className: { color: '#D97757', fontSize: 14, fontWeight: 'bold', fontFamily: FONTS.bold },
@@ -197,6 +204,7 @@ const styles = StyleSheet.create({
     padding: 16,
     marginVertical: 6,
     borderRadius: 4,
+    position: 'relative',
   },
   permBtnText: { color: '#D97757', fontSize: 12, fontWeight: 'bold', fontFamily: FONTS.bold },
   permDesc: { color: '#666', fontSize: 10, marginTop: 4, fontFamily: FONTS.body },

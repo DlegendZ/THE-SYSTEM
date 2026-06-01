@@ -1,7 +1,7 @@
 import React from 'react';
 import renderer from 'react-test-renderer';
 import { Text } from 'react-native';
-import CornerBox from '../src/components/ui/CornerBox';
+import CornerBox, { CornerBrackets } from '../src/components/ui/CornerBox';
 
 describe('CornerBox', () => {
   it('renders children', () => {
@@ -36,5 +36,12 @@ describe('CornerBox', () => {
     expect(corners.length).toBe(4);
     const edge = styles.find((s) => s && s.borderWidth === 1);
     expect(edge).toBeTruthy();
+  });
+
+  it('CornerBrackets renders four brackets, non-interactive', () => {
+    let tree: any;
+    renderer.act(() => { tree = renderer.create(<CornerBrackets color="#D97757" thickness={2} />); });
+    const json = JSON.stringify(tree.toJSON());
+    expect(json).toContain('"pointerEvents":"none"');
   });
 });

@@ -1,5 +1,19 @@
 import React from 'react';
-import { View, StyleProp, ViewStyle } from 'react-native';
+import { View, StyleSheet, StyleProp, ViewStyle } from 'react-native';
+
+export function CornerBrackets({
+  color, thickness = 2, length = 14, inset = 0,
+}: { color: string; thickness?: number; length?: number; inset?: number }) {
+  const c = { position: 'absolute' as const, width: length, height: length, borderColor: color };
+  return (
+    <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+      <View style={[c, { top: inset, left: inset, borderTopWidth: thickness, borderLeftWidth: thickness }]} />
+      <View style={[c, { top: inset, right: inset, borderTopWidth: thickness, borderRightWidth: thickness }]} />
+      <View style={[c, { bottom: inset, left: inset, borderBottomWidth: thickness, borderLeftWidth: thickness }]} />
+      <View style={[c, { bottom: inset, right: inset, borderBottomWidth: thickness, borderRightWidth: thickness }]} />
+    </View>
+  );
+}
 
 interface Props {
   /** Edge + corner color (corner overridable via cornerColor). */
@@ -34,8 +48,6 @@ export default function CornerBox({
   style,
   children,
 }: Props) {
-  const cc = cornerColor ?? color;
-  const corner = { position: 'absolute' as const, width: cornerLength, height: cornerLength, borderColor: cc };
   return (
     <View
       style={[
@@ -45,10 +57,7 @@ export default function CornerBox({
         style,
       ]}
     >
-      <View style={[corner, { top: -borderWidth, left: -borderWidth, borderTopWidth: cornerThickness, borderLeftWidth: cornerThickness }]} />
-      <View style={[corner, { top: -borderWidth, right: -borderWidth, borderTopWidth: cornerThickness, borderRightWidth: cornerThickness }]} />
-      <View style={[corner, { bottom: -borderWidth, left: -borderWidth, borderBottomWidth: cornerThickness, borderLeftWidth: cornerThickness }]} />
-      <View style={[corner, { bottom: -borderWidth, right: -borderWidth, borderBottomWidth: cornerThickness, borderRightWidth: cornerThickness }]} />
+      <CornerBrackets color={cornerColor ?? color} thickness={cornerThickness} length={cornerLength} inset={-borderWidth} />
       {children}
     </View>
   );

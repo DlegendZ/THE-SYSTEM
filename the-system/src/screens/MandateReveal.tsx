@@ -6,6 +6,7 @@ import Svg, { Polygon, Line, Rect } from 'react-native-svg';
 import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import { useSystemStore } from '../store/useSystemStore';
+import { CornerBrackets } from '../components/ui/CornerBox';
 import type { RootStackParamList } from '../navigation/types';
 import { FONTS } from '../theme/typography';
 
@@ -149,10 +150,7 @@ export default function MandateReveal() {
     <View style={styles.overlay}>
       <View style={[styles.panel, { width: panelW, backgroundColor: tierBg, borderColor: tierColor + '60' }]}>
         {/* Corner brackets */}
-        <View style={[styles.cornerDeco, { top: 0, left: 0, borderTopWidth: 2, borderLeftWidth: 2, borderColor: tierColor }]} />
-        <View style={[styles.cornerDeco, { top: 0, right: 0, borderTopWidth: 2, borderRightWidth: 2, borderColor: tierColor }]} />
-        <View style={[styles.cornerDeco, { bottom: 0, left: 0, borderBottomWidth: 2, borderLeftWidth: 2, borderColor: tierColor }]} />
-        <View style={[styles.cornerDeco, { bottom: 0, right: 0, borderBottomWidth: 2, borderRightWidth: 2, borderColor: tierColor }]} />
+        <CornerBrackets color={tierColor} length={20} />
 
         {/* Title */}
         <View style={styles.titleRow}>
@@ -178,6 +176,7 @@ export default function MandateReveal() {
           <>
             <TouchableOpacity style={styles.tapArea} onPress={handleTapChest}>
               <View style={[styles.tapBtn, { borderColor: tierColor + '70', backgroundColor: tierColor + '15' }]}>
+                <CornerBrackets color={tierColor + '70'} />
                 <Text style={[styles.tapText, { color: tierColor }]}>▶ Open mandate</Text>
               </View>
             </TouchableOpacity>
@@ -189,6 +188,7 @@ export default function MandateReveal() {
             style={[styles.lootBox, { opacity: lootAnim, transform: [{ scale: lootAnim }] }]}
           >
             <View style={[styles.lootInner, { borderColor: tierColor + '60', backgroundColor: tierColor + '10' }]}>
+              <CornerBrackets color={tierColor + '60'} />
               <Text style={[styles.lootCategory, { color: tierColor }]}>
                 {LOOT_TYPE_LABELS[loot.type] ?? loot.type}
               </Text>
@@ -199,6 +199,7 @@ export default function MandateReveal() {
               style={[styles.dismissBtn, { borderColor: tierColor, backgroundColor: tierColor + '20' }]}
               onPress={() => navigation.goBack()}
             >
+              <CornerBrackets color={tierColor} />
               <Text style={[styles.dismissTxt, { color: tierColor }]}>Mandate received</Text>
             </TouchableOpacity>
           </Animated.View>
@@ -227,12 +228,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     position: 'relative',
   },
-  cornerDeco: {
-    position: 'absolute',
-    width: 20,
-    height: 20,
-    zIndex: 1,
-  },
   titleRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -256,6 +251,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     paddingHorizontal: 28,
     paddingVertical: 12,
+    position: 'relative',
   },
   tapText: { fontSize: 13, fontWeight: 'bold', letterSpacing: 0.3, fontFamily: FONTS.display },
   lootBox: { width: '100%', alignItems: 'center', gap: 16 },
@@ -265,6 +261,7 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     gap: 10,
+    position: 'relative',
   },
   lootCategory: { fontSize: 11, fontWeight: 'bold', letterSpacing: 0.5, fontFamily: FONTS.bold },
   lootDivider: { width: 40, height: 1 },
@@ -275,6 +272,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     width: '100%',
     alignItems: 'center',
+    position: 'relative',
   },
   dismissTxt: { fontSize: 13, fontWeight: 'bold', letterSpacing: 0.3, fontFamily: FONTS.display },
   closeBtn: { marginTop: 8 },

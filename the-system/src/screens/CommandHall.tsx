@@ -11,6 +11,7 @@ import { useSystemStore } from '../store/useSystemStore';
 import { RANK_TITLES } from '../engine/xpConstants';
 import { differenceInCalendarDays, parseISO } from 'date-fns';
 import XPBar from '../components/ui/XPBar';
+import { CornerBrackets } from '../components/ui/CornerBox';
 import DisciplineCard from '../components/ui/DisciplineCard';
 import PixelText from '../components/ui/PixelText';
 import SectionDivider from '../components/ui/SectionDivider';
@@ -60,10 +61,7 @@ function RankBadge({ rank, color }: { rank: string; color: string }) {
         <PixelText size={20} color={color}>{rank}</PixelText>
       </View>
       {/* Corner ticks */}
-      <View style={[styles.rankCorner, { top: -1, left: -1, borderTopWidth: 2, borderLeftWidth: 2, borderColor: color }]} />
-      <View style={[styles.rankCorner, { top: -1, right: -1, borderTopWidth: 2, borderRightWidth: 2, borderColor: color }]} />
-      <View style={[styles.rankCorner, { bottom: -1, left: -1, borderBottomWidth: 2, borderLeftWidth: 2, borderColor: color }]} />
-      <View style={[styles.rankCorner, { bottom: -1, right: -1, borderBottomWidth: 2, borderRightWidth: 2, borderColor: color }]} />
+      <CornerBrackets color={color} thickness={2} length={7} inset={-1} />
     </View>
   );
 }
@@ -294,6 +292,7 @@ export default function CommandHall() {
               onPress={() => navigation.navigate('MandateReveal')}
               style={[styles.chestBtn, { borderColor: theme.accent, backgroundColor: theme.accent + '20' }]}
             >
+              <CornerBrackets color={theme.accent} thickness={1.5} length={8} />
               <Text style={{ fontSize: 28, fontFamily: FONTS.body }}>📦</Text>
               <Text style={[styles.chestTier, { color: theme.accent }]}>{pendingMandate.tier}</Text>
             </TouchableOpacity>
@@ -355,10 +354,7 @@ export default function CommandHall() {
             activeOpacity={0.8}
           >
             <View style={[styles.shieldInner, { borderColor: '#ff4444', backgroundColor: '#1a0000' }]}>
-              <View style={[styles.shieldCorner, { top: 0, left: 0, borderTopWidth: 1.5, borderLeftWidth: 1.5, borderColor: '#ff4444' }]} />
-              <View style={[styles.shieldCorner, { top: 0, right: 0, borderTopWidth: 1.5, borderRightWidth: 1.5, borderColor: '#ff4444' }]} />
-              <View style={[styles.shieldCorner, { bottom: 0, left: 0, borderBottomWidth: 1.5, borderLeftWidth: 1.5, borderColor: '#ff4444' }]} />
-              <View style={[styles.shieldCorner, { bottom: 0, right: 0, borderBottomWidth: 1.5, borderRightWidth: 1.5, borderColor: '#ff4444' }]} />
+              <CornerBrackets color="#ff4444" thickness={1.5} length={10} />
               <Text style={styles.shieldText}>🛡 Shield protocol</Text>
               <Text style={styles.shieldSub}>Engage digital fortress</Text>
             </View>
@@ -411,11 +407,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 4,
     alignItems: 'center',
-  },
-  rankCorner: {
-    position: 'absolute',
-    width: 7,
-    height: 7,
   },
   hudCenter: {
     flex: 1,
@@ -493,6 +484,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     padding: 8,
     alignItems: 'center',
+    position: 'relative',
   },
   chestTier: {
     fontSize: 8,
@@ -576,11 +568,6 @@ const styles = StyleSheet.create({
     padding: 16,
     alignItems: 'center',
     position: 'relative',
-  },
-  shieldCorner: {
-    position: 'absolute',
-    width: 10,
-    height: 10,
   },
   shieldText: {
     color: '#ff4444',
