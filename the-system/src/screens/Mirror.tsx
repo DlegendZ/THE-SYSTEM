@@ -13,16 +13,17 @@ import SectionDivider from '../components/ui/SectionDivider';
 import SystemBackground from '../components/fx/SystemBackground';
 import CornerFrame from '../components/ui/CornerFrame';
 import { CornerBrackets } from '../components/ui/CornerBox';
+import Glyph, { GlyphName } from '../components/icons/Glyph';
 import type { HeroClass } from '../components/avatar/avatarData';
 import { FONTS } from '../theme/typography';
 
 type MoodState = 'radiant' | 'steady' | 'worn' | 'broken';
 
-const STAT_DISCIPLINES: Array<{ label: string; code: string; icon: string }> = [
-  { label: 'Willpower', code: 'SILENCE', icon: '⚡' },
-  { label: 'Strength', code: 'FORGE', icon: '⚔' },
-  { label: 'Vitality', code: 'NOURISH', icon: '♥' },
-  { label: 'Knowledge', code: 'KNOWLEDGE', icon: '◈' },
+const STAT_DISCIPLINES: Array<{ label: string; code: string; glyph: GlyphName }> = [
+  { label: 'Willpower', code: 'SILENCE', glyph: 'bolt' },
+  { label: 'Strength', code: 'FORGE', glyph: 'sword' },
+  { label: 'Vitality', code: 'NOURISH', glyph: 'heart' },
+  { label: 'Knowledge', code: 'KNOWLEDGE', glyph: 'gem' },
 ];
 
 function computeMood(rate: number): MoodState {
@@ -32,13 +33,13 @@ function computeMood(rate: number): MoodState {
   return 'broken';
 }
 
-function StatBar({ label, icon, completed, level, color }: {
-  label: string; icon: string; completed: boolean; level: number; color: string;
+function StatBar({ label, glyph, completed, level, color }: {
+  label: string; glyph: GlyphName; completed: boolean; level: number; color: string;
 }) {
   const val = completed ? 100 : 30;
   return (
     <View style={statStyles.row}>
-      <Text style={[statStyles.icon, { color }]}>{icon}</Text>
+      <View style={statStyles.iconWrap}><Glyph name={glyph} color={color} size={16} /></View>
       <Text style={[statStyles.label, { color: '#888' }]}>{label}</Text>
       <View style={[statStyles.barBg, { backgroundColor: '#111' }]}>
         <View style={[statStyles.barFill, { width: `${val}%`, backgroundColor: color }]} />
@@ -54,7 +55,7 @@ function StatBar({ label, icon, completed, level, color }: {
 
 const statStyles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', marginBottom: 10, gap: 8 },
-  icon: { fontSize: 16, width: 22, textAlign: 'center', fontFamily: FONTS.body },
+  iconWrap: { width: 22, alignItems: 'center' },
   label: { fontSize: 11, letterSpacing: 0.3, width: 90, fontFamily: FONTS.body },
   barBg: { flex: 1, height: 12, overflow: 'hidden', position: 'relative' },
   barFill: { height: 12, position: 'absolute', left: 0, top: 0, bottom: 0 },
@@ -159,7 +160,7 @@ export default function Mirror() {
         {/* Stats */}
         <SectionDivider title="Attributes" color={theme.accent} />
         <View style={styles.statsSection}>
-          {STAT_DISCIPLINES.map(({ label, code, icon }) => {
+          {STAT_DISCIPLINES.map(({ label, code, glyph }) => {
             const discipline = disciplines.find((d) => d.code === code);
             const log = todayLogs.find((l) => l.discipline_id === discipline?.id);
             const completed = log?.completed === 1;
@@ -167,7 +168,7 @@ export default function Mirror() {
               <StatBar
                 key={code}
                 label={label}
-                icon={icon}
+                glyph={glyph}
                 completed={completed}
                 level={hero.global_level}
                 color={theme.accent}

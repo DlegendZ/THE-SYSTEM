@@ -19,6 +19,7 @@ import AvatarDisplay from '../components/avatar/AvatarDisplay';
 import AvatarOrbit from '../components/avatar/AvatarOrbit';
 import SystemBackground from '../components/fx/SystemBackground';
 import { getRandomQuote } from '../data/quotes';
+import Glyph from '../components/icons/Glyph';
 import { FONTS } from '../theme/typography';
 
 const ORBIT_BY_RANK: Record<string, number> = { E: 0, D: 2, C: 3, B: 5, A: 7, S: 10 };
@@ -90,9 +91,11 @@ function PresenceBar({ minutes, theme }: { minutes: number; theme: any }) {
     <View style={styles.presenceWrap}>
       <View style={styles.presenceRow}>
         <Text style={[styles.presenceLabel, { color: theme.textSecondary }]}>Screen time</Text>
-        <Text style={[styles.presenceTime, { color: barColor }]}>
-          {Math.round(minutes)}m {overLimit ? '▲ EXCEEDED' : '✓ OK'}
-        </Text>
+        <View style={styles.presenceTimeRow}>
+          <Text style={[styles.presenceTime, { color: barColor }]}>{Math.round(minutes)}m</Text>
+          <Glyph name={overLimit ? 'up' : 'check'} color={barColor} size={12} />
+          <Text style={[styles.presenceTime, { color: barColor }]}>{overLimit ? 'EXCEEDED' : 'OK'}</Text>
+        </View>
       </View>
       <View style={[styles.presenceBg, { backgroundColor: '#2A2725' }]}>
         <View style={[styles.presenceFill, { width: `${pct * 100}%`, backgroundColor: barColor }]} />
@@ -293,7 +296,7 @@ export default function CommandHall() {
               style={[styles.chestBtn, { borderColor: theme.accent, backgroundColor: theme.accent + '20' }]}
             >
               <CornerBrackets color={theme.accent} thickness={1.5} length={8} />
-              <Text style={{ fontSize: 28, fontFamily: FONTS.body }}>📦</Text>
+              <Glyph name="chest" color={theme.accent} size={28} />
               <Text style={[styles.chestTier, { color: theme.accent }]}>{pendingMandate.tier}</Text>
             </TouchableOpacity>
           </Animated.View>
@@ -355,7 +358,10 @@ export default function CommandHall() {
           >
             <View style={[styles.shieldInner, { borderColor: '#ff4444', backgroundColor: '#1a0000' }]}>
               <CornerBrackets color="#ff4444" thickness={1.5} length={10} />
-              <Text style={styles.shieldText}>🛡 Shield protocol</Text>
+              <View style={styles.shieldTitleRow}>
+                <Glyph name="shield" color="#ff4444" size={18} />
+                <Text style={styles.shieldText}>Shield protocol</Text>
+              </View>
               <Text style={styles.shieldSub}>Engage digital fortress</Text>
             </View>
           </TouchableOpacity>
@@ -501,6 +507,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 3,
   },
+  presenceTimeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
   presenceLabel: {
     fontSize: 10,
     letterSpacing: 0.5,
@@ -564,6 +575,11 @@ const styles = StyleSheet.create({
     padding: 16,
     alignItems: 'center',
     position: 'relative',
+  },
+  shieldTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
   shieldText: {
     color: '#ff4444',

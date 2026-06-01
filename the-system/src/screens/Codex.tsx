@@ -10,7 +10,8 @@ import {
 import type { Discipline } from '../types';
 import SystemBackground from '../components/fx/SystemBackground';
 import { CornerBrackets } from '../components/ui/CornerBox';
-import ClaudeSpark from '../components/avatar/ClaudeSpark';
+import DisciplineEmblem from '../components/icons/DisciplineEmblem';
+import Glyph from '../components/icons/Glyph';
 import { FONTS } from '../theme/typography';
 
 const DIFFICULTY_OPTIONS = ['EASY', 'NORMAL', 'HARD', 'LEGENDARY'] as const;
@@ -107,7 +108,7 @@ export default function Codex() {
             <View key={d.id} style={[styles.row, { borderBottomColor: '#222222' }]}>
               <View style={[styles.iconBox, { borderColor: diffColor }]}>
                 <CornerBrackets color={diffColor} />
-                <ClaudeSpark rank="C" size={26} tint={diffColor} />
+                <DisciplineEmblem seed={d.id} color={diffColor} size={30} />
               </View>
               <View style={styles.rowInfo}>
                 <Text style={[styles.rowName, { color: theme.text }]}>{d.name}</Text>
@@ -134,7 +135,7 @@ export default function Codex() {
                 </TouchableOpacity>
                 {d.is_custom && (
                   <TouchableOpacity style={styles.deleteBtn} onPress={() => handleDelete(d)}>
-                    <Text style={styles.deleteText}>✕</Text>
+                    <Glyph name="close" color="#f44336" size={16} />
                   </TouchableOpacity>
                 )}
               </View>

@@ -15,6 +15,7 @@ import { RANK_TITLES } from '../engine/xpConstants';
 import SectionDivider from '../components/ui/SectionDivider';
 import CornerFrame from '../components/ui/CornerFrame';
 import { CornerBrackets } from '../components/ui/CornerBox';
+import Glyph from '../components/icons/Glyph';
 import { FONTS } from '../theme/typography';
 
 type Tab = 'overview' | 'disciplines' | 'streaks' | 'history';
@@ -204,9 +205,15 @@ export default function Archive() {
                   </View>
                   <HeatmapRow discipline={d} logs={recentForThis} />
                   <View style={styles.disciplineStats}>
-                    <Text style={[styles.dStat, { color: '#4caf50' }]}>✓ {completed}</Text>
-                    <Text style={[styles.dStat, { color: '#f44336' }]}>✗ {failed}</Text>
-                    <Text style={[styles.dStat, { color: '#666' }]}>{logs.length} TOTAL</Text>
+                    <View style={styles.dStatItem}>
+                      <Glyph name="check" color="#4caf50" size={12} />
+                      <Text style={[styles.dStat, { color: '#4caf50' }]}>{completed}</Text>
+                    </View>
+                    <View style={styles.dStatItem}>
+                      <Glyph name="cross" color="#f44336" size={12} />
+                      <Text style={[styles.dStat, { color: '#f44336' }]}>{failed}</Text>
+                    </View>
+                    <Text style={[styles.dStat, { color: '#666' }]}>{logs.length} total</Text>
                   </View>
                 </View>
               );
@@ -320,6 +327,7 @@ const styles = StyleSheet.create({
   disciplineName: { fontSize: 14, fontFamily: FONTS.bold },
   disciplineRate: { fontSize: 16, fontFamily: FONTS.display },
   disciplineStats: { flexDirection: 'row', gap: 16 },
+  dStatItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   dStat: { fontSize: 13, fontFamily: FONTS.display },
 
   streakRow: {

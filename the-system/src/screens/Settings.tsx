@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useSystemStore } from '../store/useSystemStore';
 import { CornerBrackets } from '../components/ui/CornerBox';
+import Glyph from '../components/icons/Glyph';
 import { getSystemState, setSystemState } from '../db/queries';
 import { differenceInCalendarDays, parseISO } from 'date-fns';
 // expo-file-system v18+ moved legacy APIs to expo-file-system/legacy
@@ -127,8 +128,8 @@ export default function Settings() {
       <SystemBackground color={theme.accent} background={theme.background} />
       <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
         <Text style={[styles.title, { color: theme.text }]}>Settings</Text>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={[styles.closeBtn, { color: theme.textSecondary }]}>✕</Text>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.closeBtn}>
+          <Glyph name="close" color={theme.textSecondary} size={20} />
         </TouchableOpacity>
       </View>
 

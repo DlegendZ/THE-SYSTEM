@@ -7,6 +7,7 @@ import { FONTS } from '../../theme/typography';
 import CornerFrame from './CornerFrame';
 import { CornerBrackets } from './CornerBox';
 import FadeInView from '../fx/FadeInView';
+import Glyph from '../icons/Glyph';
 
 interface Props {
   discipline: Discipline;
@@ -44,9 +45,7 @@ function StatusMark({ type }: { type: 'complete' | 'fail' }) {
   return (
     <View style={[styles.statusBox, { borderColor: color, backgroundColor: bg }]}>
       <CornerBrackets color={color} length={9} />
-      <Text style={[styles.statusGlyph, { color }]}>
-        {type === 'complete' ? '✓' : '✗'}
-      </Text>
+      <Glyph name={type === 'complete' ? 'check' : 'cross'} color={color} size={18} />
     </View>
   );
 }
@@ -132,7 +131,7 @@ export default function DisciplineCard({ discipline, log, theme, onComplete, onF
                 activeOpacity={0.7}
               >
                 <CornerBrackets color="#4caf5088" length={9} />
-                <Text style={[styles.btnGlyph, { color: '#4caf50' }]}>✓</Text>
+                <Glyph name="check" color="#4caf50" size={20} />
               </TouchableOpacity>
               {discipline.code === 'SILENCE' && (
                 <TouchableOpacity
@@ -141,7 +140,7 @@ export default function DisciplineCard({ discipline, log, theme, onComplete, onF
                   activeOpacity={0.7}
                 >
                   <CornerBrackets color="#f4433688" length={9} />
-                  <Text style={[styles.btnGlyph, { color: '#f44336' }]}>✗</Text>
+                  <Glyph name="cross" color="#f44336" size={20} />
                 </TouchableOpacity>
               )}
             </View>
