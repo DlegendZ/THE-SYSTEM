@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Animated,
+  Easing,
   Dimensions,
 } from 'react-native';
 import { useSystemStore } from '../store/useSystemStore';
@@ -13,6 +14,7 @@ import { CornerBrackets } from '../components/ui/CornerBox';
 import { requestNotificationPermissions } from '../notifications/scheduler';
 import { format } from 'date-fns';
 import SystemBackground from '../components/fx/SystemBackground';
+import OnboardingOrbit from '../components/fx/OnboardingOrbit';
 import type { HeroClass } from '../types';
 import { FONTS } from '../theme/typography';
 
@@ -32,27 +34,20 @@ export default function Awakening() {
   const [step, setStep] = useState<Step>('intro');
   const [name, setName] = useState('');
   const [heroClass, setHeroClass] = useState<HeroClass | null>(null);
-  const [introText, setIntroText] = useState('');
   const opacity = useRef(new Animated.Value(0)).current;
+  const rise = useRef(new Animated.Value(12)).current;
 
   const fullIntro = 'THE SYSTEM HAS DETECTED A CANDIDATE.';
 
   useEffect(() => {
-    if (step === 'intro') {
-      let i = 0;
-      const interval = setInterval(() => {
-        setIntroText(fullIntro.slice(0, i + 1));
-        i++;
-        if (i >= fullIntro.length) clearInterval(interval);
-      }, 60);
-      Animated.timing(opacity, {
-        toValue: 1,
-        duration: 1000,
-        useNativeDriver: true,
-      }).start();
-      return () => clearInterval(interval);
-    }
-  }, [step]);
+    if (step !== 'intro') return;
+    opacity.setValue(0);
+    rise.setValue(12);
+    Animated.parallel([
+      Animated.timing(opacity, { toValue: 1, duration: 900, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
+      Animated.timing(rise, { toValue: 0, duration: 900, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
+    ]).start();
+  }, [step, opacity, rise]);
 
   const handleAccept = async () => {
     if (!heroClass) return;
@@ -63,13 +58,12 @@ export default function Awakening() {
   return (
     <View style={styles.container}>
       <SystemBackground color="#D97757" background="#262624" />
+      <OnboardingOrbit color="#D97757" />
       {step === 'intro' && (
         <TouchableOpacity style={styles.fullScreen} onPress={() => setStep('name')}>
-          <Animated.View style={{ opacity }}>
-            <Text style={styles.introText}>{introText}</Text>
-            {introText.length >= fullIntro.length && (
-              <Text style={styles.tapHint}>Tap to continue</Text>
-            )}
+          <Animated.View style={{ opacity, transform: [{ translateY: rise }] }}>
+            <Text style={styles.introText}>{fullIntro}</Text>
+            <Text style={styles.tapHint}>Tap to continue</Text>
           </Animated.View>
         </TouchableOpacity>
       )}
