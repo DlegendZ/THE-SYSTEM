@@ -18,10 +18,10 @@ import { FONTS } from '../theme/typography';
 type MoodState = 'radiant' | 'steady' | 'worn' | 'broken';
 
 const STAT_DISCIPLINES: Array<{ label: string; code: string; icon: string }> = [
-  { label: 'WILLPOWER', code: 'SILENCE', icon: '⚡' },
-  { label: 'STRENGTH', code: 'FORGE', icon: '⚔' },
-  { label: 'VITALITY', code: 'NOURISH', icon: '♥' },
-  { label: 'KNOWLEDGE', code: 'KNOWLEDGE', icon: '◈' },
+  { label: 'Willpower', code: 'SILENCE', icon: '⚡' },
+  { label: 'Strength', code: 'FORGE', icon: '⚔' },
+  { label: 'Vitality', code: 'NOURISH', icon: '♥' },
+  { label: 'Knowledge', code: 'KNOWLEDGE', icon: '◈' },
 ];
 
 function computeMood(rate: number): MoodState {
