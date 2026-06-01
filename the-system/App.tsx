@@ -11,8 +11,14 @@ LogBox.ignoreLogs([
   'InteractionManager has been deprecated',
 ]);
 import { useFonts } from 'expo-font';
-import { Inter_400Regular, Inter_500Medium, Inter_600SemiBold } from '@expo-google-fonts/inter';
-import { Lora_400Regular, Lora_600SemiBold } from '@expo-google-fonts/lora';
+import {
+  Lora_400Regular,
+  Lora_500Medium,
+  Lora_600SemiBold,
+  Lora_700Bold,
+  Lora_400Regular_Italic,
+  Lora_600SemiBold_Italic,
+} from '@expo-google-fonts/lora';
 import AppNavigator from './src/navigation/AppNavigator';
 import { useSystemStore } from './src/store/useSystemStore';
 
@@ -27,11 +33,12 @@ export default function App() {
   const initialize = useSystemStore((s) => s.initialize);
 
   const [fontsLoaded, fontError] = useFonts({
-    Inter_400Regular,
-    Inter_500Medium,
-    Inter_600SemiBold,
     Lora_400Regular,
+    Lora_500Medium,
     Lora_600SemiBold,
+    Lora_700Bold,
+    Lora_400Regular_Italic,
+    Lora_600SemiBold_Italic,
   });
 
   const [splashDone, setSplashDone] = useState(false);
