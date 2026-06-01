@@ -20,8 +20,6 @@ jest.mock('expo-keep-awake', () => ({
   deactivateKeepAwake: jest.fn(),
 }));
 
-jest.mock('../../src/audio/sounds', () => ({ playSound: jest.fn() }));
-
 import ShieldOverlay from '../../src/screens/ShieldOverlay';
 
 describe('ShieldOverlay', () => {

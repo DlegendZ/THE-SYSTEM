@@ -5,7 +5,6 @@ import {
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import { useNavigation } from '@react-navigation/native';
 import { useSystemStore } from '../store/useSystemStore';
-import { playSound } from '../audio/sounds';
 
 const DANGER = '#ff4444';
 const DURATIONS = [15, 25, 45]; // minutes
@@ -71,14 +70,12 @@ export default function ShieldOverlay() {
   const hold = () => {
     clearTick();
     deactivateKeepAwake(KEEP_AWAKE_TAG);
-    playSound('levelUp');
     setPhase('held');
   };
 
   const breach = () => {
     clearTick();
     deactivateKeepAwake(KEEP_AWAKE_TAG);
-    playSound('fail');
     setPhase('breached');
   };
 
@@ -187,6 +184,6 @@ const styles = StyleSheet.create({
   lockBtnText: { color: '#ffffff', fontSize: 13, fontWeight: 'bold', letterSpacing: 2 },
   cancelBtn: { padding: 8 },
   cancelText: { fontSize: 11, letterSpacing: 1 },
-  countdown: { fontFamily: 'Cinzel', fontSize: 64, fontWeight: 'bold', marginBottom: 12, letterSpacing: 2 },
+  countdown: { fontFamily: 'Lora_600SemiBold', fontSize: 64, fontWeight: 'bold', marginBottom: 12, letterSpacing: 2 },
   resultBig: { fontSize: 24, fontWeight: 'bold', letterSpacing: 2, marginBottom: 16, textAlign: 'center' },
 });

@@ -222,20 +222,20 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   rankLetter: {
-    fontFamily: 'Cinzel',
+    fontFamily: 'Lora_600SemiBold',
     fontSize: 96,
     fontWeight: 'bold',
     lineHeight: 100,
   },
   rankLetterBg: {
-    fontFamily: 'Cinzel',
+    fontFamily: 'Lora_600SemiBold',
     position: 'absolute',
     fontSize: 120,
     fontWeight: 'bold',
     lineHeight: 120,
   },
   levelNumber: {
-    fontFamily: 'Cinzel',
+    fontFamily: 'Lora_600SemiBold',
     fontSize: 96,
     fontWeight: 'bold',
     lineHeight: 100,

@@ -1,15 +1,15 @@
 import React from 'react';
 
 /**
- * Default every <Text> / <TextInput> to the Cinzel fantasy font.
+ * Default every <Text> / <TextInput> to the Inter sans-serif font.
  *
  * Under React 19 + RN 0.85 the `Text` export is a plain function component —
  * the old `Text.render` forwardRef field no longer exists, so the previous
  * render-monkeypatch silently did nothing and everything rendered in the
  * system sans-serif. Instead we override the lazy `Text`/`TextInput` getters on
  * the react-native module with thin wrappers that inject `{ fontFamily:
- * 'Cinzel' }` as the *base* style. Any explicit `style` a caller passes still
- * wins (so PixelText's `fontFamily: 'PressStart2P'` keeps its pixel font).
+ * 'Inter_400Regular' }` as the *base* style. Any explicit `style` a caller passes still
+ * wins (so PixelText's `fontFamily: 'Lora_600SemiBold'` keeps its display font).
  *
  * Imported for its side effect at the top of App.tsx, before AppNavigator, so
  * the override is in place before any screen renders. Consumers reference the
@@ -21,7 +21,7 @@ const RN = require('react-native');
 type AnyComponent = React.ComponentType<{ style?: unknown }> & {
   displayName?: string;
   name?: string;
-  __cinzelWrapped?: boolean;
+  __interWrapped?: boolean;
 };
 
 function wrapWithFont(Original: AnyComponent, fontFamily: string): AnyComponent {
@@ -32,15 +32,15 @@ function wrapWithFont(Original: AnyComponent, fontFamily: string): AnyComponent 
       ...props,
       style: [{ fontFamily }, props.style],
     })) as AnyComponent;
-  Wrapped.displayName = `Cinzel(${Original.displayName || Original.name || 'Component'})`;
-  Wrapped.__cinzelWrapped = true;
+  Wrapped.displayName = `Inter(${Original.displayName || Original.name || 'Component'})`;
+  Wrapped.__interWrapped = true;
   return Wrapped;
 }
 
 function overrideFont(name: 'Text' | 'TextInput'): void {
   const Original = RN[name] as AnyComponent | undefined;
-  if (!Original || Original.__cinzelWrapped) return;
-  const Wrapped = wrapWithFont(Original, 'Cinzel');
+  if (!Original || Original.__interWrapped) return;
+  const Wrapped = wrapWithFont(Original, 'Inter_400Regular');
   try {
     Object.defineProperty(RN, name, {
       configurable: true,

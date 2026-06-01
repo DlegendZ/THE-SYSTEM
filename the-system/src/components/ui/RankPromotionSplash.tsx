@@ -125,10 +125,10 @@ const styles = StyleSheet.create({
     zIndex: 999,
   },
   rayContainer: { ...StyleSheet.absoluteFill },
-  rankLetter: { fontFamily: 'Cinzel', fontSize: 120, fontWeight: 'bold', letterSpacing: 8 },
-  rankLabel: { fontFamily: 'Cinzel', fontSize: 24, fontWeight: 'bold', letterSpacing: 12, marginTop: -16 },
+  rankLetter: { fontFamily: 'Lora_600SemiBold', fontSize: 120, fontWeight: 'bold', letterSpacing: 8 },
+  rankLabel: { fontFamily: 'Lora_600SemiBold', fontSize: 24, fontWeight: 'bold', letterSpacing: 12, marginTop: -16 },
   title: {
-    fontFamily: 'Cinzel',
+    fontFamily: 'Lora_600SemiBold',
     fontSize: 18,
     fontWeight: 'bold',
     letterSpacing: 4,
@@ -136,5 +136,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingHorizontal: 32,
   },
-  tap: { fontFamily: 'Cinzel', fontSize: 10, color: '#666666', letterSpacing: 4, marginTop: 48 },
+  tap: { fontFamily: 'Lora_600SemiBold', fontSize: 10, color: '#666666', letterSpacing: 4, marginTop: 48 },
 });

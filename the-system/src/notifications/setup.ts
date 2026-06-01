@@ -3,7 +3,7 @@ import { Platform } from 'react-native';
 
 export const CHANNEL_ID = 'system-mandates';
 export const CATEGORY_ID = 'system-mandate';
-const ACCENT = '#3bc9ff';
+const ACCENT = '#D97757';
 
 /** Foreground presentation: show heads-up banner + play sound. */
 export function configureNotificationHandler(): void {

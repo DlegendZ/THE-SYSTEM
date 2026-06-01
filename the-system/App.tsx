@@ -5,16 +5,16 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import * as SplashScreen from 'expo-splash-screen';
 import './src/theme/applyGlobalFont';
 import Particles from './src/components/fx/Particles';
-import Scanlines from './src/components/fx/Scanlines';
 
 LogBox.ignoreLogs([
   'Text strings must be rendered within a <Text> component',
   'InteractionManager has been deprecated',
 ]);
 import { useFonts } from 'expo-font';
+import { Inter_400Regular, Inter_500Medium, Inter_600SemiBold } from '@expo-google-fonts/inter';
+import { Lora_400Regular, Lora_600SemiBold } from '@expo-google-fonts/lora';
 import AppNavigator from './src/navigation/AppNavigator';
 import { useSystemStore } from './src/store/useSystemStore';
-import { preloadSounds } from './src/audio/sounds';
 
 // Keep the native splash up until our JS splash overlay is ready to draw,
 // so there is no black flash between them.
@@ -27,8 +27,11 @@ export default function App() {
   const initialize = useSystemStore((s) => s.initialize);
 
   const [fontsLoaded, fontError] = useFonts({
-    'PressStart2P': require('./src/assets/fonts/PressStart2P-Regular.ttf'),
-    'Cinzel': require('./src/assets/fonts/Cinzel.ttf'),
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_600SemiBold,
+    Lora_400Regular,
+    Lora_600SemiBold,
   });
 
   const [splashDone, setSplashDone] = useState(false);
@@ -36,7 +39,6 @@ export default function App() {
 
   useEffect(() => {
     initialize();
-    preloadSounds(); // fire and forget
   }, []);
 
   const theme = useSystemStore((s) => s.currentTheme);
@@ -59,7 +61,7 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <StatusBar barStyle="light-content" backgroundColor="#000000" />
+        <StatusBar barStyle="light-content" backgroundColor="#262624" />
         {ready && <AppNavigator />}
         {ready && (
           <View pointerEvents="none" style={StyleSheet.absoluteFill}>
@@ -67,7 +69,6 @@ export default function App() {
               color={theme.auraColor ?? theme.accent}
               count={Math.min(theme.particleCount, 40)}
             />
-            <Scanlines color={theme.accent} intensity={theme.screenGlow ? 0.09 : 0.06} />
           </View>
         )}
         {!splashDone && (
@@ -88,6 +89,6 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  splash: { backgroundColor: '#000', justifyContent: 'center', alignItems: 'center' },
+  splash: { backgroundColor: '#262624', justifyContent: 'center', alignItems: 'center' },
   splashImage: { width: '100%', height: '100%' },
 });

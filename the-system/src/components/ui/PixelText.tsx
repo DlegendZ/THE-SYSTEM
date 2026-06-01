@@ -1,5 +1,6 @@
 import React from 'react';
 import { Text, TextProps, StyleSheet } from 'react-native';
+import { FONTS } from '../../theme/typography';
 
 interface PixelTextProps extends TextProps {
   size?: number;
@@ -15,7 +16,7 @@ export default function PixelText({ style, size = 12, color, children, ...props 
     <Text
       style={[
         styles.base,
-        { fontSize: size, color: color ?? '#ffffff' },
+        { fontSize: size, color: color ?? '#EDEAE0' },
         style,
       ]}
       {...props}
@@ -27,6 +28,6 @@ export default function PixelText({ style, size = 12, color, children, ...props 
 
 const styles = StyleSheet.create({
   base: {
-    fontFamily: 'PressStart2P',
+    fontFamily: FONTS.display,
   },
 });

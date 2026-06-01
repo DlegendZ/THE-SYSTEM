@@ -20,7 +20,6 @@ import SystemBackground from '../components/fx/SystemBackground';
 import { getRandomQuote } from '../data/quotes';
 
 const ORBIT_BY_RANK: Record<string, number> = { E: 0, D: 2, C: 3, B: 5, A: 7, S: 10 };
-import { playSound } from '../audio/sounds';
 import type { Rank } from '../types';
 import type { RootStackParamList } from '../navigation/types';
 import type { HeroClass } from '../components/avatar/avatarData';
@@ -96,7 +95,7 @@ function PresenceBar({ minutes, theme }: { minutes: number; theme: any }) {
           {Math.round(minutes)}m {overLimit ? '▲ EXCEEDED' : '✓ OK'}
         </Text>
       </View>
-      <View style={[styles.presenceBg, { backgroundColor: '#1a1a1a' }]}>
+      <View style={[styles.presenceBg, { backgroundColor: '#2A2725' }]}>
         <View style={[styles.presenceFill, { width: `${pct * 100}%`, backgroundColor: barColor }]} />
         <View style={[styles.presenceLimit, { left: '100%', backgroundColor: theme.textSecondary + '40' }]} />
       </View>
@@ -164,11 +163,9 @@ export default function CommandHall() {
   const mood = completionRate >= 0.9 ? 'radiant' : completionRate >= 0.6 ? 'steady' : completionRate >= 0.3 ? 'worn' : 'broken';
 
   const handleComplete = async (id: number) => {
-    await playSound('complete');
     const result = await completeDiscipline(id);
     if (result.levelUp) {
       if (result.levelUp.rankChanged && result.levelUp.newRank === 'S') {
-        await playSound('rankUp');
         navigation.navigate('LevelUpSplash', {
           level: result.levelUp.newLevel,
           xpGained: result.xpGained,
@@ -176,7 +173,6 @@ export default function CommandHall() {
           newRank: result.levelUp.newRank,
         });
       } else {
-        await playSound(result.levelUp.rankChanged ? 'rankUp' : 'levelUp');
         navigation.navigate('LevelUpSplash', {
           level: result.levelUp.newLevel,
           xpGained: result.xpGained,
@@ -199,7 +195,6 @@ export default function CommandHall() {
       );
     } else {
       await failDiscipline(id);
-      playSound('fail');
     }
   };
 
@@ -322,7 +317,7 @@ export default function CommandHall() {
         <Text style={[styles.questCount, { color: theme.textSecondary }]}>
           {completedToday}/{activeDisciplines.length} COMPLETE
         </Text>
-        <View style={[styles.questProgressBar, { backgroundColor: '#1a1a1a' }]}>
+        <View style={[styles.questProgressBar, { backgroundColor: '#2A2725' }]}>
           <View
             style={[
               styles.questProgressFill,

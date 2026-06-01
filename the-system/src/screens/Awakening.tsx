@@ -60,7 +60,7 @@ export default function Awakening() {
 
   return (
     <View style={styles.container}>
-      <SystemBackground color="#3bc9ff" background="#04080f" />
+      <SystemBackground color="#D97757" background="#262624" />
       {step === 'intro' && (
         <TouchableOpacity style={styles.fullScreen} onPress={() => setStep('name')}>
           <Animated.View style={{ opacity }}>
@@ -80,7 +80,7 @@ export default function Awakening() {
             value={name}
             onChangeText={setName}
             placeholderTextColor="#666"
-            selectionColor="#3bc9ff"
+            selectionColor="#D97757"
           />
           <TouchableOpacity
             style={styles.goldBtn}
@@ -157,15 +157,15 @@ export default function Awakening() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#000' },
+  container: { flex: 1, backgroundColor: '#262624' },
   fullScreen: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 32 },
   section: { flex: 1, justifyContent: 'center', padding: 32 },
-  introText: { color: '#3bc9ff', fontSize: 20, textAlign: 'center', fontWeight: 'bold' },
+  introText: { color: '#D97757', fontSize: 20, textAlign: 'center', fontWeight: 'bold' },
   tapHint: { color: '#666', fontSize: 10, textAlign: 'center', marginTop: 32 },
-  prompt: { color: '#3bc9ff', fontSize: 16, textAlign: 'center', marginBottom: 24, fontWeight: 'bold' },
+  prompt: { color: '#D97757', fontSize: 16, textAlign: 'center', marginBottom: 24, fontWeight: 'bold' },
   input: {
     borderWidth: 1,
-    borderColor: '#3bc9ff',
+    borderColor: '#D97757',
     color: '#fff',
     padding: 12,
     fontSize: 16,
@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   goldBtn: {
-    backgroundColor: '#3bc9ff',
+    backgroundColor: '#D97757',
     padding: 14,
     alignItems: 'center',
     borderRadius: 4,
@@ -186,8 +186,8 @@ const styles = StyleSheet.create({
     marginVertical: 6,
     borderRadius: 4,
   },
-  classCardSelected: { borderColor: '#3bc9ff', backgroundColor: '#06151f' },
-  className: { color: '#3bc9ff', fontSize: 14, fontWeight: 'bold' },
+  classCardSelected: { borderColor: '#D97757', backgroundColor: '#322E29' },
+  className: { color: '#D97757', fontSize: 14, fontWeight: 'bold' },
   classDesc: { color: '#999', fontSize: 11, marginTop: 4 },
   permBtn: {
     borderWidth: 1,
@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
     marginVertical: 6,
     borderRadius: 4,
   },
-  permBtnText: { color: '#3bc9ff', fontSize: 12, fontWeight: 'bold' },
+  permBtnText: { color: '#D97757', fontSize: 12, fontWeight: 'bold' },
   permDesc: { color: '#666', fontSize: 10, marginTop: 4 },
-  dateText: { color: '#3bc9ff', fontSize: 24, textAlign: 'center', marginBottom: 24, fontWeight: 'bold' },
+  dateText: { color: '#D97757', fontSize: 24, textAlign: 'center', marginBottom: 24, fontWeight: 'bold' },
 });
