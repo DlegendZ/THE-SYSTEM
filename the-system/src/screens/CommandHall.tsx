@@ -18,6 +18,7 @@ import SectionDivider from '../components/ui/SectionDivider';
 import AvatarDisplay from '../components/avatar/AvatarDisplay';
 import AvatarOrbit from '../components/avatar/AvatarOrbit';
 import SystemBackground from '../components/fx/SystemBackground';
+import AmbientEmbers from '../components/fx/AmbientEmbers';
 import { getRandomQuote } from '../data/quotes';
 import Glyph from '../components/icons/Glyph';
 import { FONTS } from '../theme/typography';
@@ -203,6 +204,7 @@ export default function CommandHall() {
   return (
     <View style={[styles.container, { backgroundColor: theme.background, paddingTop: insets.top }]}>
       <SystemBackground color={theme.accent} background={theme.background} />
+      <AmbientEmbers color={theme.auraColor ?? theme.accent} />
 
       {/* ── TOP HUD BAR ── */}
       <View style={[styles.hudBar, { borderBottomColor: theme.accent + '30' }]}>

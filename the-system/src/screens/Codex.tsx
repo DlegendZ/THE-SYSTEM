@@ -9,6 +9,7 @@ import {
 } from '../db/queries';
 import type { Discipline } from '../types';
 import SystemBackground from '../components/fx/SystemBackground';
+import AmbientEmbers from '../components/fx/AmbientEmbers';
 import { CornerBrackets } from '../components/ui/CornerBox';
 import DisciplineEmblem from '../components/icons/DisciplineEmblem';
 import Glyph from '../components/icons/Glyph';
@@ -93,6 +94,7 @@ export default function Codex() {
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       <SystemBackground color={theme.accent} background={theme.background} />
+      <AmbientEmbers color={theme.auraColor ?? theme.accent} />
       <View style={[styles.header, { paddingTop: insets.top + 14 }]}>
         <Text style={[styles.title, { color: theme.text }]}>The Codex</Text>
         <TouchableOpacity style={[styles.addBtn, { borderColor: theme.accent }]} onPress={() => setShowAdd(true)}>

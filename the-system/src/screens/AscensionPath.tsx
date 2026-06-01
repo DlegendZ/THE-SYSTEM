@@ -10,6 +10,7 @@ import { differenceInCalendarDays, parseISO } from 'date-fns';
 import CornerFrame from '../components/ui/CornerFrame';
 import { CornerBrackets } from '../components/ui/CornerBox';
 import SystemBackground from '../components/fx/SystemBackground';
+import AmbientEmbers from '../components/fx/AmbientEmbers';
 import ClaudeSpark from '../components/avatar/ClaudeSpark';
 import { FONTS } from '../theme/typography';
 
@@ -172,6 +173,7 @@ export default function AscensionPath() {
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       <SystemBackground color={theme.accent} background={theme.background} />
+      <AmbientEmbers color={theme.auraColor ?? theme.accent} />
       {/* Header */}
       <View style={[styles.header, { borderBottomColor: theme.accent + '30', paddingTop: insets.top + 10 }]}>
         <View style={styles.headerTop}>
