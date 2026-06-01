@@ -102,15 +102,15 @@ export default function RankPromotionSplash({ rank, title, onDismiss }: Props): 
       </Animated.Text>
 
       <Animated.Text style={[styles.rankLabel, { color: colors.secondary }]}>
-        RANK
+        Rank
       </Animated.Text>
 
       <Animated.Text style={[styles.title, { color: colors.primary, opacity: titleOpacity }]}>
-        {title.toUpperCase()}
+        {title}
       </Animated.Text>
 
       <Animated.Text style={[styles.tap, { opacity: titleOpacity }]}>
-        TAP TO CONTINUE
+        Tap to continue
       </Animated.Text>
     </Animated.View>
   );
@@ -125,16 +125,16 @@ const styles = StyleSheet.create({
     zIndex: 999,
   },
   rayContainer: { ...StyleSheet.absoluteFill },
-  rankLetter: { fontFamily: 'Lora_600SemiBold', fontSize: 120, fontWeight: 'bold', letterSpacing: 8 },
-  rankLabel: { fontFamily: 'Lora_600SemiBold', fontSize: 24, fontWeight: 'bold', letterSpacing: 12, marginTop: -16 },
+  rankLetter: { fontFamily: 'Lora_600SemiBold', fontSize: 120, fontWeight: 'bold', letterSpacing: 0.5 },
+  rankLabel: { fontFamily: 'Lora_600SemiBold', fontSize: 24, fontWeight: 'bold', letterSpacing: 0.5, marginTop: -16 },
   title: {
     fontFamily: 'Lora_600SemiBold',
     fontSize: 18,
     fontWeight: 'bold',
-    letterSpacing: 4,
+    letterSpacing: 0.3,
     marginTop: 32,
     textAlign: 'center',
     paddingHorizontal: 32,
   },
-  tap: { fontFamily: 'Lora_600SemiBold', fontSize: 10, color: '#666666', letterSpacing: 4, marginTop: 48 },
+  tap: { fontFamily: 'Lora_600SemiBold', fontSize: 10, color: '#666666', letterSpacing: 0.5, marginTop: 48 },
 });

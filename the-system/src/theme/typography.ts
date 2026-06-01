@@ -1,10 +1,12 @@
-// Claude typography: Lora (serif) for display/headers/big numerals,
-// Inter (sans) for body/UI. Family names match the keys registered in
-// App.tsx's useFonts so styles can reference them directly.
+// Single-typeface system: Lora (serif) everywhere — one font family across the
+// whole app, varied only by weight/italic. Family names match the keys
+// registered in App.tsx's useFonts so styles can reference them directly.
 export const FONTS = {
   display: 'Lora_600SemiBold',
   displayRegular: 'Lora_400Regular',
-  body: 'Inter_400Regular',
-  bodyMedium: 'Inter_500Medium',
-  bodySemibold: 'Inter_600SemiBold',
+  body: 'Lora_400Regular',
+  bodyMedium: 'Lora_500Medium',
+  bodySemibold: 'Lora_600SemiBold',
+  bold: 'Lora_700Bold',
+  italic: 'Lora_400Regular_Italic',
 } as const;

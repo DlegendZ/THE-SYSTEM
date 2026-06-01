@@ -1,3 +1,58 @@
+# Ascend Redesign + Font Sweep Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** Redesign the Ascend (`AscensionPath`) screen into a Claude "constellation spark trail" and finish the Claude typography system across every remaining text element.
+
+**Architecture:** Front-end only; no engine/data/store changes (`getWeekCompletionRate`, 24 nodes unchanged). `ClaudeSpark` gains a `glow` prop and is reused as the trail node. `AscensionPath.tsx` is rewritten: spark nodes by state, dotted warm trail, warm zone tints, Lora serif zone titles, warm modal, sentence case. A final pass sentence-cases + Lora-fies any leftover ALL-CAPS chrome app-wide (notably the Mirror nameplate).
+
+**Tech Stack:** React Native 0.85 / React 19, react-native-svg, react-navigation, Jest. Build: `expo prebuild` (no --clean) + JBR 21 release APK per `the-system-prebuild` memory.
+
+**Branch:** `ascend-redesign` (off `main`).
+
+---
+
+### Task 1: ClaudeSpark `glow` prop
+
+**Files:**
+- Modify: `the-system/src/components/avatar/ClaudeSpark.tsx`
+
+- [ ] **Step 1: Add `glow` to Props + render a soft halo**
+
+In `ClaudeSpark.tsx`, add `glow?: boolean;` to the `Props` interface. Destructure it (`glow = false`). The component already computes `cx`, `cy`, `maxR`, and resolves a color (`spec.tip`, or `tint` when provided). Add a soft halo disc as the FIRST child inside the `<AnimatedSvg>` (before the ray `<Path>`s), so it sits behind the rays:
+
+```tsx
+{glow && (
+  <Circle cx={cx} cy={cy} r={maxR} fill={tint ?? spec.tip} opacity={0.14} />
+)}
+```
+
+Ensure `Circle` is imported from `react-native-svg` (it already is, used for the core). If a `tint` prop exists, the halo uses it; otherwise `spec.tip`. Keep all existing behavior when `glow` is false/absent.
+
+- [ ] **Step 2: Run tests**
+
+Run: `cd the-system && npx jest avatar`
+Expected: PASS (existing avatar suites; glow is additive).
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add the-system/src/components/avatar/ClaudeSpark.tsx
+git commit -m "feat: ClaudeSpark glow halo prop"
+```
+
+---
+
+### Task 2: Ascend "constellation spark trail" redesign
+
+**Files:**
+- Modify (full rewrite): `the-system/src/screens/AscensionPath.tsx`
+
+- [ ] **Step 1: Replace the entire file with the redesigned screen**
+
+Overwrite `the-system/src/screens/AscensionPath.tsx` with exactly:
+
+```tsx
 import React, { useEffect, useState, useRef } from 'react';
 import {
   View, Text, ScrollView, StyleSheet, TouchableOpacity, Animated, Modal, Dimensions,
@@ -342,3 +397,99 @@ const styles = StyleSheet.create({
   modalClose: { borderWidth: 1, padding: 12, alignItems: 'center', borderRadius: 4 },
   modalCloseTxt: { fontSize: 13, letterSpacing: 0.3, fontFamily: FONTS.display },
 });
+```
+
+- [ ] **Step 2: Run tests**
+
+Run: `cd the-system && npx jest AscensionPath`
+Expected: PASS. If a test asserts the old uppercase modal strings (`'WEEK'`, `'NOW'`, `'LOCKED'`, `'DONE'`) or zone labels (`'THE ABYSS'`), update those expectations to the new strings (`'Week'`, `'Now'`, `'Locked'`, `'Done'`, `'The Abyss'`). Report which tests changed.
+
+- [ ] **Step 3: Run full suite**
+
+Run: `cd the-system && npx jest`
+Expected: 90 pass (or updated count if you adjusted assertions).
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add the-system/src/screens/AscensionPath.tsx the-system/__tests__
+git commit -m "feat: Ascend constellation spark-trail redesign (warm zones, spark nodes, Lora)"
+```
+
+---
+
+### Task 3: Font sweep — finish everywhere
+
+**Files:**
+- Modify: `the-system/src/screens/Mirror.tsx` (player nameplate) + any other screen/component with leftover ALL-CAPS chrome or missing Lora on a heading.
+
+- [ ] **Step 1: Audit leftovers**
+
+Run, from `the-system`:
+```bash
+grep -rnE "toUpperCase|letterSpacing: ?[2-9]|textTransform: ?'uppercase'" src
+grep -rnoE ">[A-Z][A-Z ]{3,}<" src/screens src/components
+```
+List every hit. For each, classify as **chrome** (title/label/section/button/stat/nameplate → fix) or **content** (discipline name, quote, lore body, user-entered value → leave).
+
+- [ ] **Step 2: Fix the Mirror nameplate**
+
+In `the-system/src/screens/Mirror.tsx`, the player name renders ALL-CAPS. Find the `heroName` Text + its style. Remove any `textTransform: 'uppercase'` from the style and any `.toUpperCase()` applied to the name value, so it renders in the player's natural case. Keep `fontFamily: FONTS.display` and a calm `letterSpacing` (≤0.5). Example: if the style has `heroName: { ..., letterSpacing: 2, textTransform: 'uppercase' }`, change to `heroName: { ..., letterSpacing: 0.3 }` and render `{hero.name}` (not `{hero.name.toUpperCase()}`).
+
+- [ ] **Step 3: Apply the rule to every other leftover from Step 1**
+
+For each remaining **chrome** hit:
+- Replace ALL-CAPS literal with sentence case (first word capitalized; keep acronyms like XP/JSON).
+- Remove `.toUpperCase()` / `textTransform: 'uppercase'` on chrome labels.
+- If it is a heading/title/section/stat-value/primary-button style missing `fontFamily: FONTS.display`, add it (import `FONTS` from the correct relative `../theme/typography`). Body/caption/description stay Inter.
+- Reduce any `letterSpacing` ≥ 2 on heading/label styles to 0.3 (titles) / 0.5 (small labels).
+Leave all **content** strings untouched.
+
+- [ ] **Step 4: Verify no chrome caps remain**
+
+Run: `grep -rnoE ">[A-Z][A-Z ]{3,}<" src/screens src/components`
+Expected: only matches that are content (e.g. an acronym, or a discipline-derived value) — report each remaining and why it's content. Run `grep -rn "toUpperCase\|textTransform: 'uppercase'" src` and confirm none apply to chrome/nameplate.
+
+- [ ] **Step 5: Run tests**
+
+Run: `cd the-system && npx jest`
+Expected: all pass; update any test asserting an exact uppercase chrome string you changed (report which).
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add the-system/src the-system/__tests__
+git commit -m "feat: finish Claude typography — sentence-case + Lora on all remaining chrome (incl. nameplate)"
+```
+
+---
+
+### Task 4: Build, install, verify on device
+
+**Files:** none (build/verify only).
+
+- [ ] **Step 1: Prebuild (NEVER --clean) — only if native config changed**
+
+These tasks are JS-only, so prebuild is not required. Skip unless `app.json`/native changed.
+
+- [ ] **Step 2: Release build (JBR 21)**
+
+Run (PowerShell): `$env:JAVA_HOME='C:\Program Files\Android\Android Studio\jbr'; cd the-system/android; .\gradlew.bat assembleRelease`
+Expected: BUILD SUCCESSFUL; APK at `the-system/android/app/build/outputs/apk/release/app-release.apk`.
+
+- [ ] **Step 3: Install + verify**
+
+```bash
+adb install -r the-system/android/app/build/outputs/apk/release/app-release.apk
+adb shell am force-stop com.thesystem
+adb shell monkey -p com.thesystem -c android.intent.category.LAUNCHER 1
+```
+Screenshot-verify: Ascend (warm zones, spark nodes, current-week glow, a zone title, tap a node → warm modal with italic lore), Mirror (nameplate natural case), and spot-check other screens for any missed caps. Capture with `adb exec-out screencap -p > /tmp/v.png` and Read it.
+
+---
+
+## Self-Review
+
+- **Spec coverage:** ClaudeSpark glow (T1), Ascend nodes/trail/zones/modal/header + sentence case (T2), font finish-everywhere incl. nameplate (T3), build+verify (T4). All spec sections mapped.
+- **Placeholders:** none — full file provided in T2; T3 rules are concrete with grep anchors.
+- **Type consistency:** `NodeState` union used in `TrailNode`/`NodeRow`; `ClaudeSpark` props `rank`/`size`/`tint`/`glow` match Task 1's added `glow` + existing `tint`. `FONTS.display`/`FONTS.displayRegular` exist in `src/theme/typography.ts`.

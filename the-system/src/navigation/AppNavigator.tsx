@@ -96,6 +96,7 @@ function MainTabs() {
       screenOptions={{
         headerShown: false,
         animation: 'fade',
+        lazy: false,
         tabBarStyle: {
           backgroundColor: theme.primary,
           borderTopColor: theme.accent + '40',

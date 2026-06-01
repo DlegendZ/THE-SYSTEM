@@ -18,10 +18,10 @@ import { FONTS } from '../theme/typography';
 type MoodState = 'radiant' | 'steady' | 'worn' | 'broken';
 
 const STAT_DISCIPLINES: Array<{ label: string; code: string; icon: string }> = [
-  { label: 'WILLPOWER', code: 'SILENCE', icon: '⚡' },
-  { label: 'STRENGTH', code: 'FORGE', icon: '⚔' },
-  { label: 'VITALITY', code: 'NOURISH', icon: '♥' },
-  { label: 'KNOWLEDGE', code: 'KNOWLEDGE', icon: '◈' },
+  { label: 'Willpower', code: 'SILENCE', icon: '⚡' },
+  { label: 'Strength', code: 'FORGE', icon: '⚔' },
+  { label: 'Vitality', code: 'NOURISH', icon: '♥' },
+  { label: 'Knowledge', code: 'KNOWLEDGE', icon: '◈' },
 ];
 
 function computeMood(rate: number): MoodState {
@@ -112,7 +112,7 @@ export default function Mirror() {
       {/* Header */}
       <View style={[styles.header, { borderBottomColor: theme.accent + '30' }]}>
         <View style={styles.nameRow}>
-          <Text style={[styles.heroName, { color: theme.text }]}>{hero.name.toUpperCase()}</Text>
+          <Text style={[styles.heroName, { color: theme.text }]}>{hero.name}</Text>
           <View style={[styles.rankPill, { borderColor: theme.accent + '80', backgroundColor: theme.accent + '15' }]}>
             <Text style={[styles.rankLetter, { color: theme.accent }]}>{hero.rank}</Text>
           </View>
