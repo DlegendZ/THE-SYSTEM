@@ -360,7 +360,8 @@ export default function CommandHall() {
               <CornerBrackets color="#ff4444" thickness={1.5} length={10} />
               <View style={styles.shieldTitleRow}>
                 <Glyph name="shield" color="#ff4444" size={18} />
-                <Text style={styles.shieldText}>Shield protocol</Text>
+                <Text style={styles.shieldText}>Shield Protocol</Text>
+                <Glyph name="shield" color="#ff4444" size={18} />
               </View>
               <Text style={styles.shieldSub}>Engage digital fortress</Text>
             </View>

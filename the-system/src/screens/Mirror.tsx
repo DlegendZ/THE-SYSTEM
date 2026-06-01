@@ -11,6 +11,7 @@ import type { Cosmetic, Rank } from '../types';
 import AvatarDisplay from '../components/avatar/AvatarDisplay';
 import SectionDivider from '../components/ui/SectionDivider';
 import SystemBackground from '../components/fx/SystemBackground';
+import AmbientEmbers from '../components/fx/AmbientEmbers';
 import CornerFrame from '../components/ui/CornerFrame';
 import { CornerBrackets } from '../components/ui/CornerBox';
 import Glyph, { GlyphName } from '../components/icons/Glyph';
@@ -111,6 +112,7 @@ export default function Mirror() {
   return (
     <View style={[styles.container, { backgroundColor: theme.background, paddingTop: insets.top }]}>
       <SystemBackground color={theme.accent} background={theme.background} />
+      <AmbientEmbers color={theme.auraColor ?? theme.accent} />
       {/* Header */}
       <View style={[styles.header, { borderBottomColor: theme.accent + '30' }]}>
         <View style={styles.nameRow}>
@@ -205,13 +207,14 @@ const styles = StyleSheet.create({
     paddingBottom: 14,
     borderBottomWidth: 1,
   },
-  nameRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  nameRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' },
   heroName: { fontSize: 18, letterSpacing: 0.3, fontFamily: FONTS.display },
   rankPill: {
     borderWidth: 1.5,
     paddingHorizontal: 10,
     paddingVertical: 3,
     position: 'relative',
+    marginTop: 10,
   },
   rankLetter: { fontSize: 20, fontFamily: FONTS.display },
   rankTitle: { fontSize: 11, letterSpacing: 0.5, marginTop: 4, fontFamily: FONTS.body },

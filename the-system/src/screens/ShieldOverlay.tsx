@@ -96,7 +96,7 @@ export default function ShieldOverlay() {
     <View style={styles.overlay}>
       <View style={[styles.container, { backgroundColor: theme.background, borderColor: DANGER }]}>
         <CornerBrackets color={DANGER} />
-        <Text style={[styles.title, { color: DANGER }]}>Shield protocol</Text>
+        <Text style={[styles.title, { color: DANGER }]}>Shield Protocol</Text>
 
         {phase === 'select' && (
           <>
