@@ -49,7 +49,7 @@ function Ring({ color, radius, count, period, size, opacity }: { color: string }
 /** Large, slow, low-opacity concentric orbit for the onboarding background. */
 export default function OnboardingOrbit({ color }: Props) {
   return (
-    <View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.center]}>
+    <View pointerEvents="none" style={StyleSheet.absoluteFill}>
       <View style={{ position: 'absolute', left: width / 2, top: height * 0.42 }}>
         {RINGS.map((r, i) => <Ring key={i} color={color} {...r} />)}
       </View>
@@ -58,6 +58,5 @@ export default function OnboardingOrbit({ color }: Props) {
 }
 
 const styles = StyleSheet.create({
-  center: { alignItems: 'center', justifyContent: 'center' },
   ring: { position: 'absolute' },
 });
