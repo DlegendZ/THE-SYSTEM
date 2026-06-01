@@ -24,13 +24,13 @@ const TIER_BG: Record<string, string> = {
 };
 
 const LOOT_TYPE_LABELS: Record<string, string> = {
-  scroll: 'SYSTEM SCROLL',
-  title: 'TITLE UNLOCKED',
-  accessory: 'ACCESSORY',
-  cosmetic_variant: 'COSMETIC VARIANT',
-  background: 'BACKGROUND UNLOCKED',
-  equipment_tier: 'EQUIPMENT UPGRADE',
-  aura_variant: 'AURA VARIANT',
+  scroll: 'System scroll',
+  title: 'Title unlocked',
+  accessory: 'Accessory',
+  cosmetic_variant: 'Cosmetic variant',
+  background: 'Background unlocked',
+  equipment_tier: 'Equipment upgrade',
+  aura_variant: 'Aura variant',
 };
 
 function ChestSvg({ color, opened }: { color: string; opened: boolean }) {
@@ -178,7 +178,7 @@ export default function MandateReveal() {
           <>
             <TouchableOpacity style={styles.tapArea} onPress={handleTapChest}>
               <View style={[styles.tapBtn, { borderColor: tierColor + '70', backgroundColor: tierColor + '15' }]}>
-                <Text style={[styles.tapText, { color: tierColor }]}>▶ OPEN MANDATE</Text>
+                <Text style={[styles.tapText, { color: tierColor }]}>▶ Open mandate</Text>
               </View>
             </TouchableOpacity>
           </>
@@ -190,7 +190,7 @@ export default function MandateReveal() {
           >
             <View style={[styles.lootInner, { borderColor: tierColor + '60', backgroundColor: tierColor + '10' }]}>
               <Text style={[styles.lootCategory, { color: tierColor }]}>
-                {LOOT_TYPE_LABELS[loot.type] ?? loot.type.toUpperCase()}
+                {LOOT_TYPE_LABELS[loot.type] ?? loot.type}
               </Text>
               <View style={[styles.lootDivider, { backgroundColor: tierColor }]} />
               <Text style={[styles.lootName, { color: '#ffffff' }]}>{loot.name}</Text>
@@ -257,7 +257,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 28,
     paddingVertical: 12,
   },
-  tapText: { fontSize: 13, fontWeight: 'bold', letterSpacing: 2 },
+  tapText: { fontSize: 13, fontWeight: 'bold', letterSpacing: 0.3, fontFamily: FONTS.display },
   lootBox: { width: '100%', alignItems: 'center', gap: 16 },
   lootInner: {
     borderWidth: 1,

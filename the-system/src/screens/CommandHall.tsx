@@ -209,11 +209,11 @@ export default function CommandHall() {
 
         <View style={styles.hudCenter}>
           <PixelText size={10} color={theme.textSecondary}>
-            {hero.name.toUpperCase()}
+            {hero.name}
           </PixelText>
           <View style={styles.dayRow}>
             <View style={[styles.dayDot, { backgroundColor: theme.accent }]} />
-            <Text style={[styles.dayText, { color: theme.accent }]}>DAY {dayNumber}</Text>
+            <Text style={[styles.dayText, { color: theme.accent }]}>Day {dayNumber}</Text>
             <Text style={[styles.dayOf, { color: theme.textSecondary }]}> / 180</Text>
           </View>
           <Text style={[styles.rankTitle, { color: theme.textSecondary }]}>

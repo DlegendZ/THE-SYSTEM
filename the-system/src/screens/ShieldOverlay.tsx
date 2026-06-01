@@ -163,7 +163,7 @@ export default function ShieldOverlay() {
               <Text style={styles.lockBtnText}>Try again</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.cancelBtn} onPress={close}>
-              <Text style={[styles.cancelText, { color: theme.textSecondary }]}>RETREAT</Text>
+              <Text style={[styles.cancelText, { color: theme.textSecondary }]}>Retreat</Text>
             </TouchableOpacity>
           </>
         )}
@@ -185,6 +185,6 @@ const styles = StyleSheet.create({
   lockBtnText: { color: '#ffffff', fontSize: 13, fontWeight: 'bold', letterSpacing: 0.3, fontFamily: FONTS.display },
   cancelBtn: { padding: 8 },
   cancelText: { fontSize: 11, letterSpacing: 1 },
-  countdown: { fontFamily: 'Lora_600SemiBold', fontSize: 64, fontWeight: 'bold', marginBottom: 12, letterSpacing: 2 },
+  countdown: { fontFamily: 'Lora_600SemiBold', fontSize: 64, fontWeight: 'bold', marginBottom: 12, letterSpacing: 0.5 },
   resultBig: { fontSize: 24, fontWeight: 'bold', letterSpacing: 0.3, marginBottom: 16, textAlign: 'center', fontFamily: FONTS.display },
 });

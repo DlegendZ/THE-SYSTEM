@@ -163,7 +163,7 @@ export default function SRankCutscene() {
           {'RAYNALD ARVAN LIM.\nTHE SYSTEM HAS RENDERED ITS VERDICT.\nYOU ARE TRANSCENDENT.'}
         </Text>
         <TouchableOpacity style={styles.completeBtn} onPress={handleComplete}>
-          <Text style={styles.completeBtnText}>ACCEPT YOUR DESTINY</Text>
+          <Text style={styles.completeBtnText}>Accept your destiny</Text>
         </TouchableOpacity>
       </View>
     );
@@ -178,7 +178,7 @@ export default function SRankCutscene() {
         </View>
         <Text style={styles.frameText}>{frame.text}</Text>
         <Text style={styles.tapHint}>
-          {frameIndex < FRAMES.length - 1 ? 'TAP TO CONTINUE' : 'TAP TO FINISH'}
+          {frameIndex < FRAMES.length - 1 ? 'Tap to continue' : 'Tap to finish'}
         </Text>
         <View style={styles.dotRow}>
           {FRAMES.map((_, i) => (
@@ -193,15 +193,15 @@ export default function SRankCutscene() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#000000', justifyContent: 'center', alignItems: 'center', padding: 32 },
   content: { alignItems: 'center', width: '100%' },
-  frameLabel: { color: '#444444', fontSize: 10, letterSpacing: 4, marginBottom: 32 },
+  frameLabel: { color: '#444444', fontSize: 10, letterSpacing: 0.5, marginBottom: 32 },
   sceneArea: { alignItems: 'center', justifyContent: 'center', marginBottom: 48, minHeight: 180 },
   frameText: { color: '#ffffff', fontSize: 12, textAlign: 'center', lineHeight: 22, letterSpacing: 1, marginBottom: 32 },
-  tapHint: { color: '#555555', fontSize: 9, letterSpacing: 2, marginBottom: 20 },
+  tapHint: { color: '#555555', fontSize: 9, letterSpacing: 0.5, marginBottom: 20 },
   dotRow: { flexDirection: 'row', gap: 8 },
   dot: { width: 8, height: 8, borderRadius: 4 },
-  finalTitle: { color: '#ffd700', fontSize: 40, fontWeight: 'bold', letterSpacing: 8, textAlign: 'center' },
-  finalSubtitle: { color: '#ffffff', fontSize: 12, letterSpacing: 4, textAlign: 'center', marginTop: 12 },
+  finalTitle: { color: '#ffd700', fontSize: 40, fontWeight: 'bold', letterSpacing: 0.3, textAlign: 'center', fontFamily: 'Lora_600SemiBold' },
+  finalSubtitle: { color: '#ffffff', fontSize: 12, letterSpacing: 0.5, textAlign: 'center', marginTop: 12 },
   finalText: { color: '#aaaaaa', fontSize: 11, textAlign: 'center', lineHeight: 22, marginVertical: 40, letterSpacing: 0.5 },
   completeBtn: { borderWidth: 2, borderColor: '#ffd700', paddingHorizontal: 24, paddingVertical: 16 },
-  completeBtnText: { color: '#ffd700', fontSize: 11, letterSpacing: 2 },
+  completeBtnText: { color: '#ffd700', fontSize: 11, letterSpacing: 0.3, fontFamily: 'Lora_600SemiBold' },
 });
