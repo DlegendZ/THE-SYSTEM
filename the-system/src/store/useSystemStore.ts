@@ -4,6 +4,7 @@ import {
   getHero,
   createHero,
   getAllDisciplines,
+  getActiveDisciplines,
   getLogsForDate,
   getSilenceStreak,
   getPendingMandate,
@@ -17,9 +18,10 @@ import {
 } from '../engine/xpEngine';
 import { openCurrentMandate, requestManualMandate } from '../engine/mandateEngine';
 import { getThemeForRank } from '../theme/rankThemes';
+import { runMissedMidnights } from '../engine/midnightEngine';
 import { initNotifications } from '../notifications/setup';
 import { scheduleNotifications } from '../notifications/scheduler';
-import { format } from 'date-fns';
+import { format, differenceInCalendarDays, parseISO } from 'date-fns';
 import type {
   Hero,
   Discipline,
@@ -82,6 +84,9 @@ export const useSystemStore = create<SystemState>((set, get) => ({
     });
 
     if (hero) {
+      // Catch up any days that elapsed while the app was closed (auto-fail
+      // missed trials, advance the silence streak) before showing state.
+      await runMissedMidnights();
       await get().refresh();
     }
 
@@ -117,17 +122,20 @@ export const useSystemStore = create<SystemState>((set, get) => ({
   completeDiscipline: async (id: number) => {
     const result = await xpComplete(id, today());
     await get().refresh();
+    await get().syncNotifications();
     return result;
   },
 
   failDiscipline: async (id: number) => {
     await xpFail(id, today());
     await get().refresh();
+    await get().syncNotifications();
   },
 
   triggerRelapse: async () => {
     await xpRelapse(today());
     await get().refresh();
+    await get().syncNotifications();
   },
 
   openMandate: async () => {
@@ -157,11 +165,28 @@ export const useSystemStore = create<SystemState>((set, get) => ({
     const quietStart = qs ? parseInt(qs.split(':')[0], 10) : 0;
     const quietEnd = qe ? parseInt(qe.split(':')[0], 10) : 7;
     const streak = get().silenceStreak?.current_streak ?? 0;
+
+    // Snapshot today's progress so each scheduled notification reports how many
+    // trials are still undone. Disciplines only change while the app is open
+    // (and we reschedule on every change), so the baked count stays accurate
+    // during the app-closed window when notifications actually fire.
+    const active = await getActiveDisciplines();
+    const logs = await getLogsForDate(today());
+    const resolved = new Set(
+      logs.filter((l) => l.completed || l.failed).map((l) => l.discipline_id)
+    );
+    const total = active.length;
+    const undone = active.filter((d) => !resolved.has(d.id)).length;
+    const day = differenceInCalendarDays(new Date(), parseISO(hero.journey_start_date)) + 1;
+
     await scheduleNotifications(interval, quietStart, quietEnd, {
       streak,
       level: hero.global_level,
       rank: hero.rank as Rank,
       heroClass: hero.hero_class,
+      total,
+      undone,
+      day,
     });
   },
 

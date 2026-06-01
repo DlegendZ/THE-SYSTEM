@@ -1,26 +1,58 @@
 import React from 'react';
-import { Text } from 'react-native';
 
 /**
- * Globally default every <Text> to the Cinzel fantasy font by patching the
- * Text host component's render. Cinzel is injected as the *base* style so any
- * explicit `style` a component passes still wins — in particular PixelText,
- * which sets `fontFamily: 'PressStart2P'`, keeps its pixel font.
+ * Default every <Text> / <TextInput> to the Cinzel fantasy font.
  *
- * This runs as a side effect on import; keep the import at the top of App.tsx.
+ * Under React 19 + RN 0.85 the `Text` export is a plain function component —
+ * the old `Text.render` forwardRef field no longer exists, so the previous
+ * render-monkeypatch silently did nothing and everything rendered in the
+ * system sans-serif. Instead we override the lazy `Text`/`TextInput` getters on
+ * the react-native module with thin wrappers that inject `{ fontFamily:
+ * 'Cinzel' }` as the *base* style. Any explicit `style` a caller passes still
+ * wins (so PixelText's `fontFamily: 'PressStart2P'` keeps its pixel font).
+ *
+ * Imported for its side effect at the top of App.tsx, before AppNavigator, so
+ * the override is in place before any screen renders. Consumers reference the
+ * live `_reactNative.Text` binding, so redefining the property propagates.
  */
-const TextAny = Text as unknown as {
-  render?: (...args: unknown[]) => React.ReactElement<{ style?: unknown }>;
-  __cinzelPatched?: boolean;
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const RN = require('react-native');
+
+type AnyComponent = React.ComponentType<{ style?: unknown }> & {
+  displayName?: string;
+  name?: string;
+  __cinzelWrapped?: boolean;
 };
 
-if (TextAny.render && !TextAny.__cinzelPatched) {
-  const baseRender = TextAny.render;
-  TextAny.render = function patchedRender(...args: unknown[]) {
-    const element = baseRender.apply(this, args);
-    return React.cloneElement(element, {
-      style: [{ fontFamily: 'Cinzel' }, element.props.style],
-    } as Partial<{ style?: unknown }>);
-  };
-  TextAny.__cinzelPatched = true;
+function wrapWithFont(Original: AnyComponent, fontFamily: string): AnyComponent {
+  // React 19 passes `ref` as a normal prop to function components, so spreading
+  // `props` forwards it to the wrapped native component (e.g. TextInput.focus).
+  const Wrapped = ((props: { style?: unknown }) =>
+    React.createElement(Original, {
+      ...props,
+      style: [{ fontFamily }, props.style],
+    })) as AnyComponent;
+  Wrapped.displayName = `Cinzel(${Original.displayName || Original.name || 'Component'})`;
+  Wrapped.__cinzelWrapped = true;
+  return Wrapped;
 }
+
+function overrideFont(name: 'Text' | 'TextInput'): void {
+  const Original = RN[name] as AnyComponent | undefined;
+  if (!Original || Original.__cinzelWrapped) return;
+  const Wrapped = wrapWithFont(Original, 'Cinzel');
+  try {
+    Object.defineProperty(RN, name, {
+      configurable: true,
+      enumerable: true,
+      get() {
+        return Wrapped;
+      },
+    });
+  } catch {
+    // Property not configurable — leave the default font rather than crash.
+  }
+}
+
+overrideFont('Text');
+overrideFont('TextInput');

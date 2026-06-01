@@ -60,30 +60,24 @@ public class RichNotificationReceiver extends BroadcastReceiver {
                 .setPriority(NotificationCompat.PRIORITY_MAX)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setContentIntent(contentPi)
-                .addAction(0, "ENTER THE SYSTEM", contentPi)
-                .addAction(0, "I'M ON IT", contentPi);
+                .addAction(0, "Enter the System", contentPi)
+                .addAction(0, "I'm on it", contentPi);
 
-        // Large icon = app launcher icon.
-        int launcherId = res.getIdentifier("ic_launcher", "mipmap", pkg);
-        Bitmap largeIcon = launcherId != 0 ? BitmapFactory.decodeResource(res, launcherId) : null;
-
-        // Big picture = the player's avatar banner.
-        Bitmap banner = null;
+        // Large icon = the player's transparent avatar (system masks it into the
+        // round large-icon slot). Falls back to the launcher icon.
+        Bitmap largeIcon = null;
         if (bigPicName != null) {
             int picId = res.getIdentifier(bigPicName, "drawable", pkg);
-            if (picId != 0) banner = BitmapFactory.decodeResource(res, picId);
+            if (picId != 0) largeIcon = BitmapFactory.decodeResource(res, picId);
         }
+        if (largeIcon == null) {
+            int launcherId = res.getIdentifier("ic_launcher", "mipmap", pkg);
+            if (launcherId != 0) largeIcon = BitmapFactory.decodeResource(res, launcherId);
+        }
+        if (largeIcon != null) b.setLargeIcon(largeIcon);
 
-        if (banner != null) {
-            b.setLargeIcon(banner);
-            b.setStyle(new NotificationCompat.BigPictureStyle()
-                    .bigPicture(banner)
-                    .bigLargeIcon((Bitmap) null)
-                    .setSummaryText(body));
-        } else {
-            if (largeIcon != null) b.setLargeIcon(largeIcon);
-            if (body != null) b.setStyle(new NotificationCompat.BigTextStyle().bigText(body));
-        }
+        // Expanded view: elegant full-text message (no dark picture box).
+        if (body != null) b.setStyle(new NotificationCompat.BigTextStyle().bigText(body));
 
         try {
             NotificationManagerCompat.from(context).notify(id, b.build());

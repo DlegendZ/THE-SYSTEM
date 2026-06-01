@@ -50,7 +50,19 @@ public class RichNotificationModule extends ReactContextBaseJavaModule {
             if (am == null) { promise.reject("NO_ALARM", "AlarmManager unavailable"); return; }
             PendingIntent pi = alarmIntent(id, title, body, bigPic);
             long when = (long) fireAtMs;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            // Exact alarms need SCHEDULE_EXACT_ALARM on Android 12+, which is
+            // denied by default on Android 13/14. Motivational reminders don't
+            // need exact timing, so fall back to an inexact (no-permission)
+            // alarm when exact scheduling isn't permitted — otherwise
+            // setExactAndAllowWhileIdle throws SecurityException and the
+            // notification is never scheduled.
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                if (am.canScheduleExactAlarms()) {
+                    am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, when, pi);
+                } else {
+                    am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, when, pi);
+                }
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, when, pi);
             } else {
                 am.setExact(AlarmManager.RTC_WAKEUP, when, pi);

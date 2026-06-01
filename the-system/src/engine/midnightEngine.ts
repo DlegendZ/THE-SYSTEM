@@ -4,32 +4,84 @@ import {
   getSilenceStreak,
   updateSilenceStreak,
   getHero,
+  getSystemState,
+  setSystemState,
 } from '../db/queries';
 import { failDiscipline } from './xpEngine';
-import { format, subDays, parseISO, differenceInCalendarDays, getDay } from 'date-fns';
+import {
+  format,
+  subDays,
+  addDays,
+  parseISO,
+  differenceInCalendarDays,
+} from 'date-fns';
 import UsageStatsModule from '../native/UsageStatsModule';
 
-export async function runMidnightCheck(): Promise<void> {
-  const yesterday = format(subDays(new Date(), 1), 'yyyy-MM-dd');
+const LAST_SETTLED_KEY = 'last_midnight_date';
+const fmt = (d: Date) => format(d, 'yyyy-MM-dd');
+
+/**
+ * Settle every day that has elapsed since the last time we ran, up to and
+ * including yesterday. Called once on app launch (store.initialize) so missed
+ * days are caught up — there is no real background scheduler.
+ *
+ * Today is never settled: its disciplines are still in play until midnight.
+ */
+export async function runMissedMidnights(): Promise<void> {
+  const hero = await getHero();
+  if (!hero) return;
+
+  const yesterday = fmt(subDays(new Date(), 1));
+  const last = await getSystemState(LAST_SETTLED_KEY);
+
+  // First run on a device with no marker: don't retroactively punish days we
+  // were never tracking. Anchor at yesterday and start settling from tomorrow.
+  if (!last) {
+    await setSystemState(LAST_SETTLED_KEY, yesterday);
+    return;
+  }
+
+  const end = parseISO(yesterday);
+  let cursor = addDays(parseISO(last), 1);
+
+  const pending: string[] = [];
+  while (cursor <= end) {
+    pending.push(fmt(cursor));
+    cursor = addDays(cursor, 1);
+  }
+  if (pending.length === 0) return; // already settled through yesterday
+
+  for (const date of pending) {
+    // Screen-time auto-check only works for the most recent day (UsageStats
+    // reports today's totals); older missed days skip the Veil auto-fail.
+    await settleDay(date, date === yesterday);
+  }
+
+  await setSystemState(LAST_SETTLED_KEY, yesterday);
+  await checkWeeklyMilestone();
+}
+
+/** Auto-fail unresolved trials, auto-check screen time, advance silence streak. */
+async function settleDay(date: string, canCheckPresence: boolean): Promise<void> {
   const disciplines = await getActiveDisciplines();
 
   for (const discipline of disciplines) {
     if (discipline.code === 'SILENCE') continue;
     if (discipline.code === 'PRESENCE') continue;
 
-    const log = await getLog(discipline.id, yesterday);
+    const log = await getLog(discipline.id, date);
     if (log && (log.completed || log.failed)) continue;
 
-    await failDiscipline(discipline.id, yesterday);
+    await failDiscipline(discipline.id, date);
   }
 
-  await checkPresenceDiscipline(yesterday);
-  await incrementSilenceStreak(yesterday);
+  if (canCheckPresence) await checkPresenceDiscipline(date);
+  await incrementSilenceStreak(date);
+}
 
-  const dayOfWeek = getDay(new Date());
-  if (dayOfWeek === 1) {
-    await checkWeeklyMilestone();
-  }
+/** Backwards-compatible single-day entry point (settles the given/last day). */
+export async function runMidnightCheck(): Promise<void> {
+  await runMissedMidnights();
 }
 
 async function checkPresenceDiscipline(date: string): Promise<void> {

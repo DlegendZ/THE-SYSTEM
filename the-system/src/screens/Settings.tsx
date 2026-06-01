@@ -182,7 +182,7 @@ export default function Settings() {
             const banner = hero ? `notif_${hero.hero_class.toLowerCase()}_${hero.rank.toLowerCase()}` : undefined;
             const ok = await RichNotification.presentNow(
               'THE SYSTEM',
-              'THE SYSTEM TESTS YOUR RESOLVE. ANSWER THE CALL.',
+              'The System tests your resolve. Answer the call.',
               banner
             );
             if (!ok) Alert.alert('NOTIFICATION', 'Rich notifications need the latest native build. Rebuild the app.');

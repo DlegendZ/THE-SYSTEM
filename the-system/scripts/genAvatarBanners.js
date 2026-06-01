@@ -53,8 +53,18 @@ function applyRegalia(rows, rank){
 }
 
 const W=16,H=18, PX=14, BW=W*PX, BH=H*PX; // 224 x 252 avatar
-const PAD=40, CANVAS_W=BW+PAD*2, CANVAS_H=BH+PAD*2; // ~304 x 332
-const BG=[6,10,20];
+// Square canvas so the system's circular large-icon mask centers the avatar
+// cleanly. Avatar is centered; background is fully transparent with a soft
+// rank-colored radial aura baked behind the figure.
+const SIDE=360;
+const CANVAS_W=SIDE, CANVAS_H=SIDE;
+const OFF_X=Math.round((SIDE-BW)/2), OFF_Y=Math.round((SIDE-BH)/2);
+
+// Rank accent (matches src/theme/rankThemes.ts) used for the aura glow.
+const RANK_AURA = {
+  E:[74,163,224], D:[47,147,255], C:[24,180,255],
+  B:[31,212,255], A:[143,155,255], S:[174,242,255],
+};
 
 function setPx(png,x,y,r,g,b,a){ if(x<0||y<0||x>=png.width||y>=png.height) return; const i=(png.width*y+x)<<2; png.data[i]=r;png.data[i+1]=g;png.data[i+2]=b;png.data[i+3]=a; }
 
@@ -63,15 +73,24 @@ let count=0;
 for(const cls of ['Warrior','Mage','Rogue']){
   for(const rank of ['E','D','C','B','A','S']){
     const png=new PNG({width:CANVAS_W,height:CANVAS_H});
-    // navy bg
-    for(let y=0;y<CANVAS_H;y++)for(let x=0;x<CANVAS_W;x++) setPx(png,x,y,BG[0],BG[1],BG[2],255);
+    // Transparent background + soft radial aura in the rank accent. Alpha falls
+    // off with a gaussian from the centre so higher ranks glow brighter.
+    const [ar,ag,ab]=RANK_AURA[rank];
+    const peak = 70 + RANK_TIER[rank]*22; // E dim -> S bright
+    const cx=SIDE/2, cy=SIDE/2, R=SIDE*0.46;
+    for(let y=0;y<CANVAS_H;y++)for(let x=0;x<CANVAS_W;x++){
+      const d=Math.hypot(x-cx,y-cy);
+      const t=d/R;
+      const a = t>=1 ? 0 : Math.round(peak*Math.exp(-2.4*t*t));
+      setPx(png,x,y,ar,ag,ab,a);
+    }
     const pal=PAL[cls](RANK_TIER[rank]);
     pal.R = REG_COLOR[rank]||'#ffffff';
     const rows=applyRegalia(BASE[cls],rank);
     for(let gy=0;gy<H;gy++)for(let gx=0;gx<W;gx++){
       const ch=rows[gy][gx]; if(ch==='.'||!pal[ch]) continue;
       const [r,g,b]=hex(pal[ch]);
-      for(let py=0;py<PX;py++)for(let px=0;px<PX;px++) setPx(png,PAD+gx*PX+px,PAD+gy*PX+py,r,g,b,255);
+      for(let py=0;py<PX;py++)for(let px=0;px<PX;px++) setPx(png,OFF_X+gx*PX+px,OFF_Y+gy*PX+py,r,g,b,255);
     }
     const name=`notif_${cls.toLowerCase()}_${rank.toLowerCase()}.png`;
     fs.writeFileSync(path.join(OUT,name),PNG.sync.write(png));

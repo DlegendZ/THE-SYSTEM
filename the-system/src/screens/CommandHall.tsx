@@ -17,6 +17,7 @@ import SectionDivider from '../components/ui/SectionDivider';
 import AvatarDisplay from '../components/avatar/AvatarDisplay';
 import AvatarOrbit from '../components/avatar/AvatarOrbit';
 import SystemBackground from '../components/fx/SystemBackground';
+import { getRandomQuote } from '../data/quotes';
 
 const ORBIT_BY_RANK: Record<string, number> = { E: 0, D: 2, C: 3, B: 5, A: 7, S: 10 };
 import { playSound } from '../audio/sounds';
@@ -114,6 +115,9 @@ export default function CommandHall() {
   const floatAnim = React.useRef(new Animated.Value(0)).current;
   const glowAnim = React.useRef(new Animated.Value(0.4)).current;
   const avatarFloat = React.useRef(new Animated.Value(0)).current;
+
+  // Reroll on every mount (i.e. each time the app lands on home).
+  const quote = React.useRef(getRandomQuote()).current;
 
   React.useEffect(() => {
     const loop = Animated.loop(
@@ -228,6 +232,18 @@ export default function CommandHall() {
         >
           <SettingsIcon color={theme.textSecondary} />
         </TouchableOpacity>
+      </View>
+
+      {/* ── DAILY QUOTE (rerolls each open) ── */}
+      <View style={[styles.quoteBox, { borderLeftColor: theme.accent }]}>
+        <Text style={[styles.quoteText, { color: theme.text }]}>
+          “{quote.text}”
+        </Text>
+        {quote.author && (
+          <Text style={[styles.quoteAuthor, { color: theme.accent }]}>
+            — {quote.author}
+          </Text>
+        )}
       </View>
 
       {/* ── AVATAR AREA ── */}
@@ -368,6 +384,25 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
     borderBottomWidth: 1,
     gap: 10,
+  },
+  quoteBox: {
+    marginHorizontal: 16,
+    marginTop: 12,
+    paddingLeft: 12,
+    paddingVertical: 4,
+    borderLeftWidth: 2,
+  },
+  quoteText: {
+    fontSize: 13,
+    fontStyle: 'italic',
+    lineHeight: 19,
+    letterSpacing: 0.3,
+  },
+  quoteAuthor: {
+    fontSize: 11,
+    marginTop: 4,
+    letterSpacing: 1,
+    textAlign: 'right',
   },
   rankBadgeOuter: {
     borderWidth: 1,
