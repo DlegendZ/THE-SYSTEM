@@ -54,8 +54,20 @@ const Animated = {
   loop: () => mockAnimation,
   parallel: () => mockAnimation,
   delay: () => mockAnimation,
+  createAnimatedComponent: (Component) => Component,
   View,
   Text,
+};
+
+const Easing = {
+  linear: (t) => t,
+  ease: (t) => t,
+  in: (easing) => easing,
+  out: (easing) => easing,
+  inOut: (easing) => easing,
+  quad: (t) => t,
+  cubic: (t) => t,
+  bezier: () => (t) => t,
 };
 
 const Image = ({ style, source, ...props }) =>
@@ -81,6 +93,7 @@ module.exports = {
   Platform,
   Alert,
   Animated,
+  Easing,
   Image,
   TextInput,
   Modal,
