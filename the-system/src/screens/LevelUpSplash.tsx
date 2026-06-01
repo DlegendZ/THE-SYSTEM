@@ -232,7 +232,7 @@ const styles = StyleSheet.create({
   rankLetterBg: {
     fontFamily: 'Lora_600SemiBold',
     position: 'absolute',
-    fontSize: 122,
+    fontSize: 120,
     fontWeight: 'bold',
     lineHeight: 120,
   },
