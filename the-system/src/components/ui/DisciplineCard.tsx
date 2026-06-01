@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Svg, { Polygon } from 'react-native-svg';
 import type { Discipline, DisciplineLog } from '../../types';
 import type { RankTheme } from '../../theme/rankThemes';
+import { FONTS } from '../../theme/typography';
 import CornerFrame from './CornerFrame';
 import FadeInView from '../fx/FadeInView';
 
@@ -176,6 +177,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: 'bold',
     letterSpacing: 0,
+    fontFamily: FONTS.bold,
   },
   info: {
     flex: 1,
@@ -185,10 +187,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 'bold',
     letterSpacing: 0.5,
+    fontFamily: FONTS.bold,
   },
   desc: {
     fontSize: 12,
     lineHeight: 15,
+    fontFamily: FONTS.body,
   },
   metaRow: {
     flexDirection: 'row',
@@ -199,10 +203,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: 'bold',
     color: '#4caf50',
+    fontFamily: FONTS.bold,
   },
   xpLoss: {
     fontSize: 12,
     color: '#f44336',
+    fontFamily: FONTS.body,
   },
   diffPill: {
     borderWidth: 1,
@@ -213,9 +219,11 @@ const styles = StyleSheet.create({
     fontSize: 9,
     fontWeight: 'bold',
     letterSpacing: 0.5,
+    fontFamily: FONTS.bold,
   },
   deadline: {
     fontSize: 11,
+    fontFamily: FONTS.body,
   },
   action: {
     alignItems: 'center',
@@ -232,6 +240,7 @@ const styles = StyleSheet.create({
   statusGlyph: {
     fontSize: 18,
     fontWeight: 'bold',
+    fontFamily: FONTS.bold,
   },
   btnStack: {
     gap: 5,
@@ -255,5 +264,6 @@ const styles = StyleSheet.create({
   btnGlyph: {
     fontSize: 16,
     fontWeight: 'bold',
+    fontFamily: FONTS.bold,
   },
 });

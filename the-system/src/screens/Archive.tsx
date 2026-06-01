@@ -71,7 +71,7 @@ const bigStatStyles = StyleSheet.create({
   wrap: { flex: 1 },
   inner: { padding: 14, alignItems: 'center', gap: 4 },
   value: { fontSize: 22, fontWeight: 'bold', textAlign: 'center', fontFamily: FONTS.display },
-  label: { fontSize: 10, letterSpacing: 0.5, textAlign: 'center' },
+  label: { fontSize: 10, letterSpacing: 0.5, textAlign: 'center', fontFamily: FONTS.body },
 });
 
 export default function Archive() {
@@ -282,13 +282,13 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   header: { paddingHorizontal: 16, paddingBottom: 12, borderBottomWidth: 1 },
   title: { fontSize: 17, fontWeight: 'bold', letterSpacing: 0.3, fontFamily: FONTS.display },
-  subtitle: { fontSize: 10, letterSpacing: 0.5, marginTop: 3 },
+  subtitle: { fontSize: 10, letterSpacing: 0.5, marginTop: 3, fontFamily: FONTS.body },
 
   tabBar: { flexDirection: 'row', borderBottomWidth: 1 },
   tabBtn: { flex: 1, paddingVertical: 10, alignItems: 'center', position: 'relative' },
   tabBtnActive: { borderBottomWidth: 2 },
   tabGem: { position: 'absolute', top: 4 },
-  tabTxt: { fontSize: 9, fontWeight: 'bold', letterSpacing: 0.3 },
+  tabTxt: { fontSize: 9, fontWeight: 'bold', letterSpacing: 0.3, fontFamily: FONTS.bold },
 
   scroll: { flex: 1 },
   section: { padding: 14 },
@@ -297,12 +297,12 @@ const styles = StyleSheet.create({
   journeyWrap: { marginBottom: 8 },
   journeyInner: { padding: 16, gap: 8 },
   journeyTopRow: { flexDirection: 'row', alignItems: 'baseline', gap: 6 },
-  journeyDay: { fontSize: 30, fontWeight: 'bold' },
-  journeyOf: { fontSize: 13 },
+  journeyDay: { fontSize: 30, fontWeight: 'bold', fontFamily: FONTS.display },
+  journeyOf: { fontSize: 13, fontFamily: FONTS.body },
   journeyBg: { height: 8, overflow: 'hidden', position: 'relative' },
   journeyFill: { height: 8, position: 'absolute', left: 0, top: 0, bottom: 0 },
   journeyTick: { position: 'absolute', top: 1, bottom: 1, width: 1, backgroundColor: '#000' },
-  journeyPct: { fontSize: 11, letterSpacing: 0.3 },
+  journeyPct: { fontSize: 11, letterSpacing: 0.3, fontFamily: FONTS.body },
 
   statsGrid: { flexDirection: 'row', gap: 8, marginBottom: 8 },
   silenceGrid: { flexDirection: 'row', gap: 8, marginBottom: 8 },
@@ -314,10 +314,10 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   disciplineTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  disciplineName: { fontSize: 14, fontWeight: 'bold' },
-  disciplineRate: { fontSize: 16, fontWeight: 'bold' },
+  disciplineName: { fontSize: 14, fontWeight: 'bold', fontFamily: FONTS.bold },
+  disciplineRate: { fontSize: 16, fontWeight: 'bold', fontFamily: FONTS.display },
   disciplineStats: { flexDirection: 'row', gap: 16 },
-  dStat: { fontSize: 13 },
+  dStat: { fontSize: 13, fontFamily: FONTS.display },
 
   streakRow: {
     flexDirection: 'row',
@@ -326,11 +326,11 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     gap: 12,
   },
-  streakName: { fontSize: 13, flex: 1 },
+  streakName: { fontSize: 13, flex: 1, fontFamily: FONTS.body },
   streakRight: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   streakBarBg: { width: 80, height: 6, overflow: 'hidden' },
   streakBarFill: { height: 6, position: 'absolute', left: 0, top: 0 },
-  streakCount: { fontSize: 14, fontWeight: 'bold', minWidth: 28, textAlign: 'right' },
+  streakCount: { fontSize: 14, fontWeight: 'bold', minWidth: 28, textAlign: 'right', fontFamily: FONTS.bold },
 
   histRow: {
     flexDirection: 'row',
@@ -340,9 +340,9 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   histLeft: { flex: 1, gap: 3 },
-  histDate: { fontSize: 12 },
+  histDate: { fontSize: 12, fontFamily: FONTS.body },
   histBarBg: { height: 3, overflow: 'hidden' },
   histBarFill: { height: 3, position: 'absolute', left: 0, top: 0 },
-  histComp: { fontSize: 13, fontWeight: 'bold', minWidth: 40, textAlign: 'center' },
-  histXP: { fontSize: 13, fontWeight: 'bold', minWidth: 50, textAlign: 'right' },
+  histComp: { fontSize: 13, fontWeight: 'bold', minWidth: 40, textAlign: 'center', fontFamily: FONTS.bold },
+  histXP: { fontSize: 13, fontWeight: 'bold', minWidth: 50, textAlign: 'right', fontFamily: FONTS.bold },
 });

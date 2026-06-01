@@ -162,8 +162,8 @@ const styles = StyleSheet.create({
   fullScreen: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 32 },
   section: { flex: 1, justifyContent: 'center', padding: 32 },
   introText: { color: '#D97757', fontSize: 20, textAlign: 'center', fontWeight: 'bold', fontFamily: FONTS.display },
-  tapHint: { color: '#666', fontSize: 10, textAlign: 'center', marginTop: 32 },
-  prompt: { color: '#D97757', fontSize: 16, textAlign: 'center', marginBottom: 24, fontWeight: 'bold' },
+  tapHint: { color: '#666', fontSize: 10, textAlign: 'center', marginTop: 32, fontFamily: FONTS.body },
+  prompt: { color: '#D97757', fontSize: 16, textAlign: 'center', marginBottom: 24, fontWeight: 'bold', fontFamily: FONTS.bold },
   input: {
     borderWidth: 1,
     borderColor: '#D97757',
@@ -172,6 +172,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: 'center',
     marginBottom: 24,
+    fontFamily: FONTS.body,
   },
   goldBtn: {
     backgroundColor: '#D97757',
@@ -188,8 +189,8 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   classCardSelected: { borderColor: '#D97757', backgroundColor: '#322E29' },
-  className: { color: '#D97757', fontSize: 14, fontWeight: 'bold' },
-  classDesc: { color: '#999', fontSize: 11, marginTop: 4 },
+  className: { color: '#D97757', fontSize: 14, fontWeight: 'bold', fontFamily: FONTS.bold },
+  classDesc: { color: '#999', fontSize: 11, marginTop: 4, fontFamily: FONTS.body },
   permBtn: {
     borderWidth: 1,
     borderColor: '#333',
@@ -197,7 +198,7 @@ const styles = StyleSheet.create({
     marginVertical: 6,
     borderRadius: 4,
   },
-  permBtnText: { color: '#D97757', fontSize: 12, fontWeight: 'bold' },
-  permDesc: { color: '#666', fontSize: 10, marginTop: 4 },
-  dateText: { color: '#D97757', fontSize: 24, textAlign: 'center', marginBottom: 24, fontWeight: 'bold' },
+  permBtnText: { color: '#D97757', fontSize: 12, fontWeight: 'bold', fontFamily: FONTS.bold },
+  permDesc: { color: '#666', fontSize: 10, marginTop: 4, fontFamily: FONTS.body },
+  dateText: { color: '#D97757', fontSize: 24, textAlign: 'center', marginBottom: 24, fontWeight: 'bold', fontFamily: FONTS.display },
 });

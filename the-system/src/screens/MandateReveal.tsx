@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
   },
   titleLine: { flex: 1, height: 1 },
   tier: { fontSize: 17, fontWeight: 'bold', letterSpacing: 0.3, fontFamily: FONTS.display },
-  mandateWord: { fontSize: 12, letterSpacing: 0.5 },
+  mandateWord: { fontSize: 12, letterSpacing: 0.5, fontFamily: FONTS.body },
   chestWrap: {
     width: 100,
     height: 80,
@@ -266,9 +266,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
   },
-  lootCategory: { fontSize: 11, fontWeight: 'bold', letterSpacing: 0.5 },
+  lootCategory: { fontSize: 11, fontWeight: 'bold', letterSpacing: 0.5, fontFamily: FONTS.bold },
   lootDivider: { width: 40, height: 1 },
-  lootName: { fontSize: 22, fontWeight: 'bold', textAlign: 'center', letterSpacing: 1 },
+  lootName: { fontSize: 22, fontWeight: 'bold', textAlign: 'center', letterSpacing: 1, fontFamily: FONTS.display },
   dismissBtn: {
     borderWidth: 1.5,
     paddingHorizontal: 24,
@@ -278,5 +278,5 @@ const styles = StyleSheet.create({
   },
   dismissTxt: { fontSize: 13, fontWeight: 'bold', letterSpacing: 0.3, fontFamily: FONTS.display },
   closeBtn: { marginTop: 8 },
-  closeTxt: { fontSize: 12, letterSpacing: 1 },
+  closeTxt: { fontSize: 12, letterSpacing: 1, fontFamily: FONTS.body },
 });

@@ -4,7 +4,7 @@ module.exports = {
   testEnvironment: 'node',
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
   transform: {
-    '^.+\\.(ts|tsx)$': ['ts-jest', { tsconfig: { strict: true, types: ['jest'] } }],
+    '^.+\\.(ts|tsx)$': ['ts-jest', { tsconfig: { strict: true, types: ['jest', 'node'] } }],
     '^.+\\.(js|jsx)$': ['babel-jest', { configFile: false, presets: ['babel-preset-expo'] }],
   },
   moduleNameMapper: {

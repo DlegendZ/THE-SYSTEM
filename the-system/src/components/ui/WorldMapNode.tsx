@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, TouchableOpacity, StyleSheet } from 'react-native';
 import Svg, { Circle, Rect, Text as SvgText } from 'react-native-svg';
+import { FONTS } from '../../theme/typography';
 
 interface Props {
   weekNumber: number;
@@ -53,6 +54,7 @@ export default function WorldMapNode({ weekNumber, status, completionPct = 0, on
           <SvgText
             x={NODE_SIZE / 2} y={NODE_SIZE / 2 + 5}
             fontSize={14} fontWeight="bold"
+            fontFamily={FONTS.display}
             fill={c.text} textAnchor="middle"
           >
             {weekNumber}
@@ -60,7 +62,7 @@ export default function WorldMapNode({ weekNumber, status, completionPct = 0, on
           {status === 'completed' && (
             <SvgText
               x={NODE_SIZE / 2} y={NODE_SIZE / 2 + 16}
-              fontSize={8} fill="#ffd700" textAnchor="middle"
+              fontSize={8} fontFamily={FONTS.display} fill="#ffd700" textAnchor="middle"
             >
               {completionPct}%
             </SvgText>

@@ -2,6 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
 import { useSystemStore } from '../../store/useSystemStore';
 import { getXpForLevel, XP_TABLE } from '../../engine/xpConstants';
+import { FONTS } from '../../theme/typography';
 
 export default function XPBar() {
   const hero = useSystemStore((s) => s.hero);
@@ -94,8 +95,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     minWidth: 44,
   },
-  lvlLabel: { fontSize: 9, fontWeight: 'bold', letterSpacing: 1 },
-  lvlNum: { fontSize: 20, fontWeight: 'bold', lineHeight: 24 },
+  lvlLabel: { fontSize: 9, fontWeight: 'bold', letterSpacing: 1, fontFamily: FONTS.bold },
+  lvlNum: { fontSize: 20, fontWeight: 'bold', lineHeight: 24, fontFamily: FONTS.display },
   barWrap: {
     flex: 1,
     height: 18,
@@ -133,5 +134,5 @@ const styles = StyleSheet.create({
     bottom: 0,
     width: 1,
   },
-  xpText: { fontSize: 11, letterSpacing: 0.5, minWidth: 110, textAlign: 'right' },
+  xpText: { fontSize: 11, letterSpacing: 0.5, minWidth: 110, textAlign: 'right', fontFamily: FONTS.body },
 });

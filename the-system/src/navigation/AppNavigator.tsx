@@ -250,5 +250,6 @@ const styles = StyleSheet.create({
     color: '#9A968B',
     fontSize: 10,
     letterSpacing: 0.5,
+    fontFamily: FONTS.body,
   },
 });

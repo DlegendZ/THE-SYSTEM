@@ -393,12 +393,14 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     lineHeight: 19,
     letterSpacing: 0.3,
+    fontFamily: FONTS.italic,
   },
   quoteAuthor: {
     fontSize: 11,
     marginTop: 4,
     letterSpacing: 1,
     textAlign: 'right',
+    fontFamily: FONTS.body,
   },
   rankBadgeOuter: {
     borderWidth: 1,
@@ -434,15 +436,18 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: 'bold',
     letterSpacing: 1,
+    fontFamily: FONTS.display,
   },
   dayOf: {
     fontSize: 14,
     fontWeight: 'bold',
+    fontFamily: FONTS.bold,
   },
   rankTitle: {
     fontSize: 10,
     letterSpacing: 0.5,
     marginTop: 2,
+    fontFamily: FONTS.body,
   },
   settingsBtn: { padding: 4 },
 
@@ -478,6 +483,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
     letterSpacing: 0.5,
     marginTop: 2,
+    fontFamily: FONTS.body,
   },
   chestFloat: {
     alignItems: 'center',
@@ -493,6 +499,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginTop: 2,
     letterSpacing: 1,
+    fontFamily: FONTS.bold,
   },
 
   // Presence
@@ -508,11 +515,13 @@ const styles = StyleSheet.create({
   presenceLabel: {
     fontSize: 10,
     letterSpacing: 0.5,
+    fontFamily: FONTS.body,
   },
   presenceTime: {
     fontSize: 11,
     fontWeight: 'bold',
     letterSpacing: 1,
+    fontFamily: FONTS.bold,
   },
   presenceBg: {
     height: 3,
@@ -544,6 +553,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
     letterSpacing: 1,
     minWidth: 110,
+    fontFamily: FONTS.body,
   },
   questProgressBar: {
     flex: 1,
@@ -584,5 +594,6 @@ const styles = StyleSheet.create({
     fontSize: 10,
     letterSpacing: 0.5,
     marginTop: 4,
+    fontFamily: FONTS.body,
   },
 });

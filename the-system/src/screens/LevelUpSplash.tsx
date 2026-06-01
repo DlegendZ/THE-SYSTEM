@@ -246,6 +246,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     letterSpacing: 0.3,
     marginBottom: 28,
+    fontFamily: FONTS.body,
   },
   xpRow: {
     marginBottom: 28,
@@ -259,6 +260,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: 'bold',
     letterSpacing: 0.5,
+    fontFamily: FONTS.bold,
   },
   continueBtn: {
     borderWidth: 1,
