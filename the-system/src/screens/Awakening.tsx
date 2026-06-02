@@ -16,16 +16,17 @@ import { format } from 'date-fns';
 import SystemBackground from '../components/fx/SystemBackground';
 import OnboardingOrbit from '../components/fx/OnboardingOrbit';
 import type { HeroClass } from '../types';
+import { STAR_LABELS } from '../types';
 import { FONTS } from '../theme/typography';
 
 const { width } = Dimensions.get('window');
 
 type Step = 'intro' | 'name' | 'class' | 'permissions' | 'accept';
 
-const CLASSES: { name: HeroClass; desc: string }[] = [
-  { name: 'Warrior', desc: 'Heavy armor, sword & shield, strong stance' },
-  { name: 'Mage', desc: 'Robes, staff, arcane symbols' },
-  { name: 'Rogue', desc: 'Light armor, dual blades, crouched stance' },
+const CLASSES: { name: HeroClass; label: string; desc: string }[] = [
+  { name: 'Warrior', label: STAR_LABELS.Warrior, desc: 'Brightest in the night — a relentless, burning force' },
+  { name: 'Mage', label: STAR_LABELS.Mage, desc: 'The fixed north — steady guidance through any dark' },
+  { name: 'Rogue', label: STAR_LABELS.Rogue, desc: 'Swift-flying eagle star — quick, sharp, untethered' },
 ];
 
 export default function Awakening() {
@@ -92,7 +93,7 @@ export default function Awakening() {
 
       {step === 'class' && (
         <View style={styles.section}>
-          <Text style={styles.prompt}>SELECT YOUR CLASS.</Text>
+          <Text style={styles.prompt}>SELECT YOUR STAR.</Text>
           {CLASSES.map((c) => (
             <TouchableOpacity
               key={c.name}
@@ -103,7 +104,7 @@ export default function Awakening() {
               onPress={() => setHeroClass(c.name)}
             >
               <CornerBrackets color={heroClass === c.name ? '#D97757' : '#333'} />
-              <Text style={styles.className}>{c.name}</Text>
+              <Text style={styles.className}>{c.label}</Text>
               <Text style={styles.classDesc}>{c.desc}</Text>
             </TouchableOpacity>
           ))}

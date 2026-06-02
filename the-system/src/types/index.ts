@@ -14,6 +14,14 @@ export type DisciplineCode =
 
 export type HeroClass = 'Warrior' | 'Mage' | 'Rogue';
 
+// Display labels — internal class values stay Warrior/Mage/Rogue (avatar art,
+// palettes, notif banners keyed off them); UI shows star names instead.
+export const STAR_LABELS: Record<HeroClass, string> = {
+  Warrior: 'Antares',
+  Mage: 'Polaris',
+  Rogue: 'Altair',
+};
+
 export type MandateTier = 'BRONZE' | 'SILVER' | 'GOLD';
 
 export type CosmeticType =

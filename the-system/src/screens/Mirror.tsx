@@ -7,7 +7,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSystemStore } from '../store/useSystemStore';
 import { getCosmetics } from '../db/queries';
 import { RANK_TITLES } from '../engine/xpConstants';
-import type { Cosmetic, Rank } from '../types';
+import type { Cosmetic, Rank, HeroClass as HeroClassType } from '../types';
+import { STAR_LABELS } from '../types';
 import AvatarDisplay from '../components/avatar/AvatarDisplay';
 import SectionDivider from '../components/ui/SectionDivider';
 import SystemBackground from '../components/fx/SystemBackground';
@@ -123,7 +124,7 @@ export default function Mirror() {
           </View>
         </View>
         <Text style={[styles.rankTitle, { color: theme.textSecondary }]}>
-          {RANK_TITLES[hero.rank as Rank]} · {hero.hero_class}
+          {RANK_TITLES[hero.rank as Rank]} · {STAR_LABELS[hero.hero_class as HeroClassType] ?? hero.hero_class}
         </Text>
       </View>
 

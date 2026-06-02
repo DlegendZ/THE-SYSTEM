@@ -96,6 +96,7 @@ function MainTabs() {
       screenOptions={{
         headerShown: false,
         animation: 'fade',
+        sceneStyle: { backgroundColor: theme.background },
         lazy: false,
         tabBarStyle: {
           backgroundColor: theme.primary,
@@ -161,6 +162,7 @@ function MainTabs() {
 
 export default function AppNavigator() {
   const { initialized, onboardingComplete } = useSystemStore();
+  const theme = useSystemStore((s) => s.currentTheme);
 
   if (!initialized) {
     return (
@@ -179,6 +181,7 @@ export default function AppNavigator() {
       <Stack.Navigator
         screenOptions={{
           headerShown: false,
+          cardStyle: { backgroundColor: theme.background },
           ...TransitionPresets.FadeFromBottomAndroid,
         }}
       >
