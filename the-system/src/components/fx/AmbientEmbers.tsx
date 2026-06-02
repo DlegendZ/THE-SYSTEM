@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Animated, Easing, StyleSheet, View, Dimensions } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
@@ -21,6 +21,8 @@ interface EmberSpec {
 interface SharedEmbers {
   specs: EmberSpec[];
   values: Animated.Value[];
+  loops: Animated.CompositeAnimation[];
+  mounted: number;
 }
 const CACHE = new Map<number, SharedEmbers>();
 
@@ -35,21 +37,44 @@ function getShared(count: number): SharedEmbers {
       size: 2 + Math.random() * 2.5,
     }));
     const values = specs.map(() => new Animated.Value(0));
-    values.forEach((v, i) => {
-      Animated.loop(
-        Animated.timing(v, {
-          toValue: 1,
-          duration: specs[i].duration,
-          delay: specs[i].delay,
-          easing: Easing.linear,
-          useNativeDriver: true,
-        })
-      ).start();
-    });
-    shared = { specs, values };
+    shared = { specs, values, loops: [], mounted: 0 };
     CACHE.set(count, shared);
   }
   return shared;
+}
+
+// Build fresh loops bound to the shared values and start them. Native-driven
+// animations are torn down once every view bound to a value unmounts (e.g. a
+// full nav-tree teardown on reset), so the loop objects must be rebuilt — not
+// merely re-started — when ember layers come back.
+function startLoops(shared: SharedEmbers) {
+  shared.loops.forEach((l) => l.stop());
+  shared.loops = shared.values.map((v, i) => {
+    v.setValue(0);
+    const loop = Animated.loop(
+      Animated.timing(v, {
+        toValue: 1,
+        duration: shared.specs[i].duration,
+        delay: shared.specs[i].delay,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      })
+    );
+    loop.start();
+    return loop;
+  });
+}
+
+// Ref-count mounted ember layers. While at least one is mounted the loops run;
+// the first mount after the count drops to zero rebuilds + restarts them, so
+// the embers survive a full teardown (reset) instead of freezing.
+function acquire(shared: SharedEmbers) {
+  if (shared.mounted === 0) startLoops(shared);
+  shared.mounted += 1;
+}
+function release(shared: SharedEmbers) {
+  shared.mounted = Math.max(0, shared.mounted - 1);
+  if (shared.mounted === 0) shared.loops.forEach((l) => l.stop());
 }
 
 function Ember({ color, spec, value }: { color: string; spec: EmberSpec; value: Animated.Value }) {
@@ -82,7 +107,13 @@ function Ember({ color, spec, value }: { color: string; spec: EmberSpec; value: 
  * keep moving everywhere and never freeze after a modal closes.
  */
 export default function AmbientEmbers({ color, count = 14 }: { color: string; count?: number }) {
-  const { specs, values } = getShared(count);
+  const shared = getShared(count);
+  const { specs, values } = shared;
+
+  useEffect(() => {
+    acquire(shared);
+    return () => release(shared);
+  }, [shared]);
 
   return (
     <View pointerEvents="none" style={StyleSheet.absoluteFill}>
