@@ -173,7 +173,6 @@ export default function AscensionPath() {
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       <SystemBackground color={theme.accent} background={theme.background} />
-      <AmbientEmbers color={theme.auraColor ?? theme.accent} />
       {/* Header */}
       <View style={[styles.header, { borderBottomColor: theme.accent + '30', paddingTop: insets.top + 10 }]}>
         <View style={styles.headerTop}>
@@ -201,6 +200,8 @@ export default function AscensionPath() {
         style={styles.scroll}
         contentContainerStyle={styles.pathWrap}
         showsVerticalScrollIndicator={false}
+        overScrollMode="never"
+        bounces={false}
       >
         {Array.from({ length: TOTAL_NODES }, (_, i) => {
           const nodeNum = TOTAL_NODES - i;
@@ -238,8 +239,12 @@ export default function AscensionPath() {
             </View>
           );
         })}
-        <View style={{ height: 32 }} />
+        <View style={[styles.zoneSection, { backgroundColor: ZONE_TINTS[0], flexGrow: 1, minHeight: 32 }]} />
       </ScrollView>
+
+      {/* Embers drift OVER the opaque zone map so they're visible across the
+          whole page, not just the transparent header. */}
+      <AmbientEmbers color={theme.auraColor ?? theme.accent} />
 
       {/* Node detail modal */}
       <Modal
@@ -321,10 +326,10 @@ const styles = StyleSheet.create({
   headerBarFill: { height: 4, borderRadius: 2 },
   headerPct: { fontSize: 11, letterSpacing: 0.5, fontFamily: FONTS.body },
 
-  scroll: { flex: 1 },
-  pathWrap: { paddingBottom: 16 },
+  scroll: { flex: 1, backgroundColor: ZONE_TINTS[0] },
+  pathWrap: { flexGrow: 1, paddingBottom: 16 },
 
-  zoneSection: { paddingVertical: 2 },
+  zoneSection: { paddingVertical: 0 },
   zoneLabelWrap: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, paddingVertical: 10, gap: 8 },
   zoneLabelLine: { flex: 1, height: 1 },
   zoneGem: {},

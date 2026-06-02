@@ -1,6 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Easing, StyleSheet, View, Dimensions, InteractionManager } from 'react-native';
-import { useIsFocused } from '@react-navigation/native';
+import React from 'react';
+import { Animated, Easing, StyleSheet, View, Dimensions } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
 
@@ -12,31 +11,51 @@ interface EmberSpec {
   size: number;
 }
 
-function Ember({ color, spec }: { color: string; spec: EmberSpec }) {
-  const p = useRef(new Animated.Value(0)).current;
-  useEffect(() => {
-    const loop = Animated.loop(
-      Animated.timing(p, {
-        toValue: 1,
-        duration: spec.duration,
-        delay: spec.delay,
-        easing: Easing.linear,
-        useNativeDriver: true,
-      })
-    );
-    // Defer loop start until the screen transition has settled. Starting 14
-    // loops synchronously on focus stutters the tail of the modal close
-    // animation; runAfterInteractions keeps those frames free.
-    const handle = InteractionManager.runAfterInteractions(() => loop.start());
-    return () => {
-      handle.cancel();
-      loop.stop();
-    };
-  }, [p, spec.duration, spec.delay]);
+// Specs AND their driving animated values are created ONCE at module load and
+// shared by every screen. Sharing the values (not just the specs) keeps every
+// page at the same point in the cycle, so the ember layout is identical
+// everywhere instead of drifting out of phase per screen. The loops are started
+// once and NEVER stopped — and the views are never unmounted (see below) — so
+// the native animation always has a live view bound to it and can't be torn
+// down (which is what previously froze the embers after closing a modal).
+interface SharedEmbers {
+  specs: EmberSpec[];
+  values: Animated.Value[];
+}
+const CACHE = new Map<number, SharedEmbers>();
 
-  const translateY = p.interpolate({ inputRange: [0, 1], outputRange: [height * 0.92, -40] });
-  const translateX = p.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0, spec.drift, 0] });
-  const opacity = p.interpolate({ inputRange: [0, 0.12, 0.85, 1], outputRange: [0, 0.55, 0.45, 0] });
+function getShared(count: number): SharedEmbers {
+  let shared = CACHE.get(count);
+  if (!shared) {
+    const specs: EmberSpec[] = Array.from({ length: count }).map(() => ({
+      x: Math.random() * width,
+      duration: 13000 + Math.random() * 13000,
+      delay: Math.random() * 14000,
+      drift: (Math.random() - 0.5) * 44,
+      size: 2 + Math.random() * 2.5,
+    }));
+    const values = specs.map(() => new Animated.Value(0));
+    values.forEach((v, i) => {
+      Animated.loop(
+        Animated.timing(v, {
+          toValue: 1,
+          duration: specs[i].duration,
+          delay: specs[i].delay,
+          easing: Easing.linear,
+          useNativeDriver: true,
+        })
+      ).start();
+    });
+    shared = { specs, values };
+    CACHE.set(count, shared);
+  }
+  return shared;
+}
+
+function Ember({ color, spec, value }: { color: string; spec: EmberSpec; value: Animated.Value }) {
+  const translateY = value.interpolate({ inputRange: [0, 1], outputRange: [height * 0.92, -40] });
+  const translateX = value.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0, spec.drift, 0] });
+  const opacity = value.interpolate({ inputRange: [0, 0.12, 0.85, 1], outputRange: [0, 0.55, 0.45, 0] });
 
   return (
     <Animated.View
@@ -57,42 +76,18 @@ function Ember({ color, spec }: { color: string; spec: EmberSpec }) {
 /**
  * Slow warm embers drifting up the screen — an ambient background layer that
  * fills the empty space with gentle motion. Non-interactive, low-opacity.
+ *
+ * Renders on every screen (incl. modals) and never unmounts on blur: keeping a
+ * live view bound to each shared, always-running native value means the embers
+ * keep moving everywhere and never freeze after a modal closes.
  */
 export default function AmbientEmbers({ color, count = 14 }: { color: string; count?: number }) {
-  // Pause the whole layer while its screen is off-screen: the looping
-  // animations stop, freeing the main thread so tab transitions stay smooth
-  // without freezing the screen itself (which can blank on Android).
-  const isFocused = useIsFocused();
-  const specs = useRef<EmberSpec[]>(
-    Array.from({ length: count }).map(() => ({
-      x: Math.random() * width,
-      duration: 13000 + Math.random() * 13000,
-      delay: Math.random() * 14000,
-      drift: (Math.random() - 0.5) * 44,
-      size: 2 + Math.random() * 2.5,
-    }))
-  ).current;
-
-  // Mounting 14 animated views the instant focus returns stutters the FIRST
-  // frame of a screen transition (e.g. closing the Settings modal). Defer the
-  // mount until interactions settle so the transition's opening frames stay
-  // on the UI thread alone; unmount immediately on blur.
-  const [show, setShow] = useState(false);
-  useEffect(() => {
-    if (!isFocused) {
-      setShow(false);
-      return;
-    }
-    const handle = InteractionManager.runAfterInteractions(() => setShow(true));
-    return () => handle.cancel();
-  }, [isFocused]);
-
-  if (!isFocused || !show) return null;
+  const { specs, values } = getShared(count);
 
   return (
     <View pointerEvents="none" style={StyleSheet.absoluteFill}>
       {specs.map((spec, i) => (
-        <Ember key={i} color={color} spec={spec} />
+        <Ember key={i} color={color} spec={spec} value={values[i]} />
       ))}
     </View>
   );

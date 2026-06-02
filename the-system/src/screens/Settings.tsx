@@ -15,6 +15,7 @@ import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import { getDb } from '../db/database';
 import SystemBackground from '../components/fx/SystemBackground';
+import AmbientEmbers from '../components/fx/AmbientEmbers';
 import RichNotification from '../native/RichNotification';
 import { FONTS } from '../theme/typography';
 
@@ -121,6 +122,7 @@ export default function Settings() {
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       <SystemBackground color={theme.accent} background={theme.background} />
+      <AmbientEmbers color={theme.auraColor ?? theme.accent} />
       <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
         <Text style={[styles.title, { color: theme.text }]}>Settings</Text>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.closeBtn}>
