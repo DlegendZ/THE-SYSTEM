@@ -58,10 +58,6 @@ function Particle({ spec, color }: { spec: Spec; color: string }) {
         height: spec.size,
         borderRadius: spec.size / 2,
         backgroundColor: color,
-        shadowColor: color,
-        shadowOpacity: 0.9,
-        shadowRadius: spec.size * 1.6,
-        shadowOffset: { width: 0, height: 0 },
         opacity,
         transform: [{ translateY }, { translateX }],
       }}

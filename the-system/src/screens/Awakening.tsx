@@ -15,6 +15,7 @@ import { requestNotificationPermissions } from '../notifications/scheduler';
 import { format } from 'date-fns';
 import SystemBackground from '../components/fx/SystemBackground';
 import OnboardingOrbit from '../components/fx/OnboardingOrbit';
+import StarAvatar from '../components/avatar/StarAvatar';
 import type { HeroClass } from '../types';
 import { STAR_LABELS } from '../types';
 import { FONTS } from '../theme/typography';
@@ -104,8 +105,13 @@ export default function Awakening() {
               onPress={() => setHeroClass(c.name)}
             >
               <CornerBrackets color={heroClass === c.name ? '#D97757' : '#333'} />
-              <Text style={styles.className}>{c.label}</Text>
-              <Text style={styles.classDesc}>{c.desc}</Text>
+              <View style={styles.starPreview}>
+                <StarAvatar heroClass={c.name} rank="E" previewIntensity="C" size={52} />
+              </View>
+              <View style={styles.classText}>
+                <Text style={styles.className}>{c.label}</Text>
+                <Text style={styles.classDesc}>{c.desc}</Text>
+              </View>
             </TouchableOpacity>
           ))}
           {heroClass && (
@@ -183,6 +189,8 @@ const styles = StyleSheet.create({
   },
   goldBtnText: { color: '#000', fontSize: 14, fontFamily: FONTS.display },
   classCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
     borderWidth: 1,
     borderColor: '#333',
     padding: 16,
@@ -191,6 +199,8 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   classCardSelected: { borderColor: '#D97757', backgroundColor: '#322E29' },
+  starPreview: { width: 56, height: 56, marginRight: 14, alignItems: 'center', justifyContent: 'center' },
+  classText: { flex: 1 },
   className: { color: '#D97757', fontSize: 14, fontFamily: FONTS.bold },
   classDesc: { color: '#999', fontSize: 11, marginTop: 4, fontFamily: FONTS.body },
   permBtn: {

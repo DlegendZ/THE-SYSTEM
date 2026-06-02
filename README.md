@@ -2,11 +2,12 @@
 
 > *"You have acquired the qualifications to be a Player."*
 
-A **Solo-Leveling–themed self-improvement RPG** for Android. THE SYSTEM turns your
+A **star-themed self-improvement RPG** for Android. THE SYSTEM turns your
 real-life habits into an RPG progression loop: complete your daily **disciplines**,
 earn **XP**, climb the hunter **ranks** (E → D → C → B → A → S), open **mandate**
-loot chests, and watch your chibi avatar grow regalia (crown, halo, wings, orbiting
-motes) as you ascend.
+loot chests, and watch your chosen **star** brighten — gaining a glow halo, ring,
+orbiting motes, and finally a full corona — as you ascend. The interface wears a
+warm charcoal-and-coral "System" aura with constellation iconography throughout.
 
 It is a single-player, fully offline app — all data lives in a local SQLite database
 on the device. No account, no server, no cloud.
@@ -23,8 +24,11 @@ on the device. No account, no server, no cloud.
 - **Ranks (E → S)** — Hitting level milestones promotes your hunter rank. Each rank
   re-themes the whole app (color aura escalates) and triggers a **rank promotion
   splash**; reaching **S-Rank** plays a full cutscene.
-- **Hero class** — Pick Warrior, Mage, or Rogue at awakening; class drives your
-  avatar art and notification banner.
+- **Your star** — At awakening you **select your star**: **Antares** (red supergiant —
+  relentless), **Polaris** (the fixed north — steady), or **Altair** (swift eagle star).
+  Your star is your avatar, and it visibly evolves with your rank: an E-rank star is a
+  dim ember; by S-rank it pulses/spins with a glow halo, ring, orbiting motes, and a
+  full corona. The star also drives your notification banner.
 - **Mandates** — Bronze/Silver/Gold loot chests granted for milestones. Open them to
   reveal cosmetic loot (weapons, armor, crowns, titles, backgrounds, accessories).
 - **Shield** — A no-admin focus session that locks you into a deep-work overlay with
@@ -41,7 +45,7 @@ on the device. No account, no server, no cloud.
 |-----|---------|
 | **Command** | Today's disciplines — log completions and failures |
 | **Ascend** | Rank/level progression, the path to S-Rank |
-| **Mirror** | Your avatar, class, equipped cosmetics, mood state |
+| **Mirror** | Your star avatar, equipped cosmetics, mood state |
 | **Codex** | Lore, discipline reference, unlock catalogue |
 | **Archive** | History and stats of past performance |
 
@@ -52,10 +56,10 @@ on the device. No account, no server, no cloud.
 - **React Native 0.85** + **React 19** on **Expo SDK 56** (bare workflow — the
   native `android/` project is committed to git)
 - **Zustand** state, **expo-sqlite** persistence
-- **react-native-reanimated** + **react-native-svg** for FX (particles, scanlines,
-  grid glow, the blue/cyan System aura)
+- **react-native-reanimated** + **react-native-svg** for FX (ambient embers, grid
+  glow, radial aura, the SVG star avatars and constellation tab icons)
 - Custom native Android modules (rich notifications, usage stats, shield)
-- **Cinzel** display font applied globally
+- **Lora** serif applied as the single typeface app-wide
 
 ---
 
@@ -138,6 +142,18 @@ project's debug keystore, so it installs on any phone without extra signing setu
 
 > The app requests notification and exact-alarm permissions on first run — grant them
 > so scheduled discipline reminders fire on time.
+
+> **Updating without losing progress:** all builds (debug and release) are signed with
+> the same project debug keystore, so reinstalling over an existing install with
+> `adb install -r ...` (or tapping a newer APK) **keeps your SQLite data** — hero,
+> XP, rank, streaks, and history all persist across updates. Only a full
+> **uninstall** or **Clear data** wipes progress.
+
+> **Note for live development:** a **debug** build (Path A) loads its JS from the
+> Metro dev server, so it needs your computer running Metro (USB + `adb reverse
+> tcp:8081 tcp:8081`) on every launch — unplugged, it hangs on the splash. For a
+> phone you use normally, install a **release** APK (Path B): the JS is bundled into
+> the APK, so it runs standalone.
 
 ---
 

@@ -11,6 +11,7 @@ import type { Discipline } from '../types';
 import SystemBackground from '../components/fx/SystemBackground';
 import AmbientEmbers from '../components/fx/AmbientEmbers';
 import { CornerBrackets } from '../components/ui/CornerBox';
+import ConfirmModal from '../components/ui/ConfirmModal';
 import DisciplineEmblem from '../components/icons/DisciplineEmblem';
 import Glyph from '../components/icons/Glyph';
 import { FONTS } from '../theme/typography';
@@ -40,17 +41,18 @@ export default function Codex() {
   const { disciplines, refresh, currentTheme: theme } = useSystemStore();
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState<AddForm>(BLANK_FORM);
+  const [confirm, setConfirm] = useState<{
+    title: string; message: string; confirmText: string; onConfirm: () => void;
+  } | null>(null);
 
   const handleToggleActive = async (d: Discipline) => {
     if (d.code === 'SILENCE' && d.is_active) {
-      Alert.alert(
-        'DISABLE SILENCE?',
-        'Disabling SILENCE Protocol removes streak tracking.',
-        [
-          { text: 'CANCEL', style: 'cancel' },
-          { text: 'DISABLE', style: 'destructive', onPress: async () => { await setDisciplineActive(d.id, !d.is_active); await refresh(); } },
-        ]
-      );
+      setConfirm({
+        title: 'DISABLE SILENCE?',
+        message: 'Disabling SILENCE Protocol removes streak tracking.',
+        confirmText: 'DISABLE',
+        onConfirm: async () => { await setDisciplineActive(d.id, !d.is_active); await refresh(); },
+      });
     } else {
       await setDisciplineActive(d.id, !d.is_active);
       await refresh();
@@ -62,14 +64,12 @@ export default function Codex() {
       Alert.alert('CANNOT DELETE', 'Core disciplines cannot be deleted. You can disable them.');
       return;
     }
-    Alert.alert(
-      'DELETE DISCIPLINE',
-      `Delete "${d.name}"? All logs will also be deleted.`,
-      [
-        { text: 'CANCEL', style: 'cancel' },
-        { text: 'DELETE', style: 'destructive', onPress: async () => { await deleteDiscipline(d.id); await refresh(); } },
-      ]
-    );
+    setConfirm({
+      title: 'DELETE DISCIPLINE',
+      message: `Delete "${d.name}"? All logs will also be deleted.`,
+      confirmText: 'DELETE',
+      onConfirm: async () => { await deleteDiscipline(d.id); await refresh(); },
+    });
   };
 
   const handleAddSubmit = async () => {
@@ -219,6 +219,20 @@ export default function Codex() {
           </View>
         </View>
       </Modal>
+
+      <ConfirmModal
+        visible={confirm !== null}
+        destructive
+        title={confirm?.title ?? ''}
+        message={confirm?.message ?? ''}
+        confirmText={confirm?.confirmText ?? 'CONFIRM'}
+        cancelText="CANCEL"
+        onCancel={() => setConfirm(null)}
+        onConfirm={() => {
+          confirm?.onConfirm();
+          setConfirm(null);
+        }}
+      />
     </View>
   );
 }

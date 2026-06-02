@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  View, Text, ScrollView, StyleSheet, TouchableOpacity, Animated, Alert, Dimensions,
+  View, Text, ScrollView, StyleSheet, TouchableOpacity, Animated, Dimensions,
 } from 'react-native';
 import Svg, { Polygon, Line, Rect } from 'react-native-svg';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -13,6 +13,7 @@ import { differenceInCalendarDays, parseISO } from 'date-fns';
 import XPBar from '../components/ui/XPBar';
 import { CornerBrackets } from '../components/ui/CornerBox';
 import DisciplineCard from '../components/ui/DisciplineCard';
+import ConfirmModal from '../components/ui/ConfirmModal';
 import PixelText from '../components/ui/PixelText';
 import SectionDivider from '../components/ui/SectionDivider';
 import AvatarDisplay from '../components/avatar/AvatarDisplay';
@@ -121,6 +122,9 @@ export default function CommandHall() {
   // Reroll on every mount (i.e. each time the app lands on home).
   const quote = React.useRef(getRandomQuote()).current;
 
+  // Themed confirm panel for breaking the Silence Protocol (full reset).
+  const [silenceConfirm, setSilenceConfirm] = React.useState(false);
+
   React.useEffect(() => {
     const loop = Animated.loop(
       Animated.sequence([
@@ -188,14 +192,7 @@ export default function CommandHall() {
 
   const handleFail = async (id: number, code: string) => {
     if (code === 'SILENCE') {
-      Alert.alert(
-        'SILENCE PROTOCOL BROKEN',
-        'This will reset ALL progress. XP to 0. Level to 1. Rank to E. All streaks reset. There is no undo.',
-        [
-          { text: 'CANCEL', style: 'cancel' },
-          { text: 'I HAVE FALLEN', style: 'destructive', onPress: () => triggerRelapse() },
-        ]
-      );
+      setSilenceConfirm(true);
     } else {
       await failDiscipline(id);
     }
@@ -370,6 +367,20 @@ export default function CommandHall() {
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      <ConfirmModal
+        visible={silenceConfirm}
+        destructive
+        title="SILENCE PROTOCOL BROKEN"
+        message="This will reset ALL progress. XP to 0. Level to 1. Rank to E. All streaks reset. There is no undo."
+        cancelText="CANCEL"
+        confirmText="I HAVE FALLEN"
+        onCancel={() => setSilenceConfirm(false)}
+        onConfirm={() => {
+          setSilenceConfirm(false);
+          triggerRelapse();
+        }}
+      />
     </View>
   );
 }

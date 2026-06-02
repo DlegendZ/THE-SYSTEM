@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useSystemStore } from '../store/useSystemStore';
 import { CornerBrackets } from '../components/ui/CornerBox';
+import ConfirmModal from '../components/ui/ConfirmModal';
 import Glyph from '../components/icons/Glyph';
 import { getSystemState, setSystemState } from '../db/queries';
 import { differenceInCalendarDays, parseISO } from 'date-fns';
@@ -30,6 +31,8 @@ export default function Settings() {
   const [quietStart, setQuietStart] = useState('00:00');
   const [quietEnd, setQuietEnd] = useState('07:00');
   const [resetConfirm, setResetConfirm] = useState('');
+  const [resetModal, setResetModal] = useState(false);
+  const [info, setInfo] = useState<{ title: string; message: string } | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -95,28 +98,20 @@ export default function Settings() {
 
   const handleResetJourney = async () => {
     if (resetConfirm.trim() !== 'I ACCEPT THE RESET') {
-      Alert.alert('TYPE THE PHRASE', 'Type exactly: I ACCEPT THE RESET');
+      setInfo({ title: 'TYPE THE PHRASE', message: 'Type exactly: I ACCEPT THE RESET' });
       return;
     }
-    Alert.alert(
-      'FINAL WARNING',
-      'This will wipe ALL data. There is no undo.',
-      [
-        { text: 'CANCEL', style: 'cancel' },
-        {
-          text: 'RESET',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              setResetConfirm('');
-              await resetJourney();
-            } catch (err) {
-              Alert.alert('RESET ERROR', String(err));
-            }
-          },
-        },
-      ]
-    );
+    setResetModal(true);
+  };
+
+  const performReset = async () => {
+    setResetModal(false);
+    try {
+      setResetConfirm('');
+      await resetJourney();
+    } catch (err) {
+      setInfo({ title: 'RESET ERROR', message: String(err) });
+    }
   };
 
   const journeyDays = hero
@@ -221,6 +216,27 @@ export default function Settings() {
 
         <View style={styles.bottomPadding} />
       </ScrollView>
+
+      <ConfirmModal
+        visible={resetModal}
+        destructive
+        title="FINAL WARNING"
+        message="This will wipe ALL data. There is no undo."
+        cancelText="CANCEL"
+        confirmText="RESET"
+        onCancel={() => setResetModal(false)}
+        onConfirm={performReset}
+      />
+
+      <ConfirmModal
+        visible={info !== null}
+        singleButton
+        title={info?.title ?? ''}
+        message={info?.message ?? ''}
+        confirmText="OK"
+        onCancel={() => setInfo(null)}
+        onConfirm={() => setInfo(null)}
+      />
     </View>
   );
 }

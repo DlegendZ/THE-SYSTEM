@@ -3,6 +3,7 @@ import renderer from 'react-test-renderer';
 
 jest.mock('@react-navigation/native', () => ({
   useNavigation: () => ({ navigate: jest.fn() }),
+  useIsFocused: () => true,
 }));
 
 jest.mock('../../src/store/useSystemStore', () => ({

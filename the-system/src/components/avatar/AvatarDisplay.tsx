@@ -1,6 +1,6 @@
 import React from 'react';
 import { View } from 'react-native';
-import ClaudeSpark from './ClaudeSpark';
+import StarAvatar from './StarAvatar';
 import type { HeroClass, ArmorTier } from './avatarData';
 
 interface Props {
@@ -24,7 +24,7 @@ export default function AvatarDisplay({ heroClass, rank, mood = 'steady', pixelS
 
   return (
     <View style={[styles.container, { opacity }]}>
-      <ClaudeSpark rank={rank} heroClass={heroClass} size={size} />
+      <StarAvatar rank={rank} heroClass={heroClass} size={size} />
     </View>
   );
 }

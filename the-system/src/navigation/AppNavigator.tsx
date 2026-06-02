@@ -4,7 +4,7 @@ import { createStackNavigator, TransitionPresets } from '@react-navigation/stack
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { View, Text, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Polygon, Line, Rect, Circle, Path } from 'react-native-svg';
+import Svg, { Line, Circle } from 'react-native-svg';
 import { useSystemStore } from '../store/useSystemStore';
 import type { RootStackParamList } from './types';
 import { FONTS } from '../theme/typography';
@@ -24,65 +24,121 @@ import SRankCutscene from '../screens/SRankCutscene';
 const Stack = createStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator();
 
-// SVG Tab Icons
+// Constellation tab icons — star dots joined by faint lines.
+// Star = small circle. Focused → brighter/larger stars + brighter lines.
+function Star({ x, y, color, focused, big }: { x: number; y: number; color: string; focused: boolean; big?: boolean }) {
+  const r = (big ? 1.7 : 1.2) * (focused ? 1.15 : 1);
+  return (
+    <>
+      {focused && <Circle cx={x} cy={y} r={r + 1.4} fill={color} opacity={0.18} />}
+      <Circle cx={x} cy={y} r={r} fill={color} />
+    </>
+  );
+}
+
+function constLine(x1: number, y1: number, x2: number, y2: number, color: string, focused: boolean, key: string) {
+  return (
+    <Line
+      key={key}
+      x1={x1}
+      y1={y1}
+      x2={x2}
+      y2={y2}
+      stroke={color}
+      strokeWidth={focused ? 1 : 0.8}
+      opacity={focused ? 0.6 : 0.4}
+    />
+  );
+}
+
+// Command — Orion / warrior constellation
 function IconCommand({ color, focused }: { color: string; focused: boolean }) {
   return (
     <Svg width={22} height={22} viewBox="0 0 22 22">
-      {/* Crossed swords */}
-      <Line x1="4" y1="4" x2="18" y2="18" stroke={color} strokeWidth={focused ? 2 : 1.5} />
-      <Line x1="18" y1="4" x2="4" y2="18" stroke={color} strokeWidth={focused ? 2 : 1.5} />
-      <Rect x="9" y="2" width="4" height="3" fill={color} />
-      <Rect x="9" y="17" width="4" height="3" fill={color} />
+      {constLine(5, 4, 11, 10, color, focused, 'a')}
+      {constLine(17, 5, 11, 10, color, focused, 'b')}
+      {constLine(11, 10, 9, 13, color, focused, 'c')}
+      {constLine(9, 13, 13, 12, color, focused, 'd')}
+      {constLine(9, 13, 7, 18, color, focused, 'e')}
+      {constLine(13, 12, 16, 17, color, focused, 'f')}
+      <Star x={5} y={4} color={color} focused={focused} />
+      <Star x={17} y={5} color={color} focused={focused} />
+      <Star x={11} y={10} color={color} focused={focused} big />
+      <Star x={9} y={13} color={color} focused={focused} />
+      <Star x={13} y={12} color={color} focused={focused} />
+      <Star x={7} y={18} color={color} focused={focused} />
+      <Star x={16} y={17} color={color} focused={focused} />
     </Svg>
   );
 }
 
+// Ascend — rising diagonal constellation
 function IconAscend({ color, focused }: { color: string; focused: boolean }) {
   return (
     <Svg width={22} height={22} viewBox="0 0 22 22">
-      {/* Mountain + arrow */}
-      <Polygon points="11,2 20,20 2,20" fill="none" stroke={color} strokeWidth={focused ? 2 : 1.5} />
-      <Line x1="11" y1="6" x2="11" y2="17" stroke={color} strokeWidth="1.5" />
-      <Polygon points="11,2 8,8 14,8" fill={color} />
+      {constLine(4, 18, 8, 14, color, focused, 'a')}
+      {constLine(8, 14, 11, 11, color, focused, 'b')}
+      {constLine(11, 11, 15, 7, color, focused, 'c')}
+      {constLine(15, 7, 19, 3, color, focused, 'd')}
+      <Star x={4} y={18} color={color} focused={focused} />
+      <Star x={8} y={14} color={color} focused={focused} />
+      <Star x={11} y={11} color={color} focused={focused} />
+      <Star x={15} y={7} color={color} focused={focused} />
+      <Star x={19} y={3} color={color} focused={focused} big />
     </Svg>
   );
 }
 
+// Mirror — symmetric diamond constellation
 function IconMirror({ color, focused }: { color: string; focused: boolean }) {
   return (
     <Svg width={22} height={22} viewBox="0 0 22 22">
-      {/* Diamond */}
-      <Polygon
-        points="11,2 20,11 11,20 2,11"
-        fill={focused ? color + '30' : 'none'}
-        stroke={color}
-        strokeWidth={focused ? 2 : 1.5}
-      />
-      <Polygon points="11,7 15,11 11,15 7,11" fill={color} />
+      {constLine(11, 3, 19, 11, color, focused, 'a')}
+      {constLine(19, 11, 11, 19, color, focused, 'b')}
+      {constLine(11, 19, 3, 11, color, focused, 'c')}
+      {constLine(3, 11, 11, 3, color, focused, 'd')}
+      <Star x={11} y={3} color={color} focused={focused} />
+      <Star x={19} y={11} color={color} focused={focused} />
+      <Star x={11} y={19} color={color} focused={focused} />
+      <Star x={3} y={11} color={color} focused={focused} />
+      <Star x={11} y={11} color={color} focused={focused} big />
     </Svg>
   );
 }
 
+// Codex — crown / arc constellation (Corona Borealis)
 function IconCodex({ color, focused }: { color: string; focused: boolean }) {
   return (
     <Svg width={22} height={22} viewBox="0 0 22 22">
-      {/* Book/scroll */}
-      <Rect x="4" y="3" width="14" height="16" rx="1" fill="none" stroke={color} strokeWidth={focused ? 2 : 1.5} />
-      <Line x1="7" y1="8" x2="15" y2="8" stroke={color} strokeWidth="1.5" />
-      <Line x1="7" y1="11" x2="15" y2="11" stroke={color} strokeWidth="1.5" />
-      <Line x1="7" y1="14" x2="12" y2="14" stroke={color} strokeWidth="1.5" />
+      {constLine(3, 15, 6, 9, color, focused, 'a')}
+      {constLine(6, 9, 11, 6, color, focused, 'b')}
+      {constLine(11, 6, 16, 9, color, focused, 'c')}
+      {constLine(16, 9, 19, 15, color, focused, 'd')}
+      <Star x={3} y={15} color={color} focused={focused} />
+      <Star x={6} y={9} color={color} focused={focused} />
+      <Star x={11} y={6} color={color} focused={focused} big />
+      <Star x={16} y={9} color={color} focused={focused} />
+      <Star x={19} y={15} color={color} focused={focused} />
     </Svg>
   );
 }
 
+// Archive — star cluster (Pleiades)
 function IconArchive({ color, focused }: { color: string; focused: boolean }) {
   return (
     <Svg width={22} height={22} viewBox="0 0 22 22">
-      {/* Grid chart */}
-      <Rect x="3" y="3" width="6" height="6" fill={focused ? color + '50' : 'none'} stroke={color} strokeWidth={focused ? 2 : 1.5} />
-      <Rect x="13" y="3" width="6" height="6" fill="none" stroke={color} strokeWidth={focused ? 2 : 1.5} />
-      <Rect x="3" y="13" width="6" height="6" fill="none" stroke={color} strokeWidth={focused ? 2 : 1.5} />
-      <Rect x="13" y="13" width="6" height="6" fill={focused ? color + '50' : 'none'} stroke={color} strokeWidth={focused ? 2 : 1.5} />
+      {constLine(5, 6, 10, 4, color, focused, 'a')}
+      {constLine(10, 4, 16, 7, color, focused, 'b')}
+      {constLine(5, 6, 8, 12, color, focused, 'c')}
+      {constLine(8, 12, 14, 13, color, focused, 'd')}
+      {constLine(16, 7, 14, 13, color, focused, 'e')}
+      {constLine(8, 12, 10, 18, color, focused, 'f')}
+      <Star x={5} y={6} color={color} focused={focused} />
+      <Star x={10} y={4} color={color} focused={focused} />
+      <Star x={16} y={7} color={color} focused={focused} />
+      <Star x={8} y={12} color={color} focused={focused} big />
+      <Star x={14} y={13} color={color} focused={focused} />
+      <Star x={10} y={18} color={color} focused={focused} />
     </Svg>
   );
 }
@@ -93,6 +149,7 @@ function MainTabs() {
 
   return (
     <Tab.Navigator
+      detachInactiveScreens={false}
       screenOptions={{
         headerShown: false,
         animation: 'fade',
@@ -193,12 +250,12 @@ export default function AppNavigator() {
             <Stack.Screen
               name="MandateReveal"
               component={MandateReveal}
-              options={{ presentation: 'transparentModal', cardStyle: { backgroundColor: 'transparent' } }}
+              options={{ presentation: 'transparentModal', detachPreviousScreen: false, cardStyle: { backgroundColor: 'transparent' } }}
             />
             <Stack.Screen
               name="LevelUpSplash"
               component={LevelUpSplash}
-              options={{ presentation: 'transparentModal', cardStyle: { backgroundColor: 'transparent' } }}
+              options={{ presentation: 'transparentModal', detachPreviousScreen: false, cardStyle: { backgroundColor: 'transparent' } }}
             />
             <Stack.Screen
               name="Settings"
@@ -208,7 +265,7 @@ export default function AppNavigator() {
             <Stack.Screen
               name="ShieldOverlay"
               component={ShieldOverlay}
-              options={{ presentation: 'transparentModal', cardStyle: { backgroundColor: 'transparent' } }}
+              options={{ presentation: 'transparentModal', detachPreviousScreen: false, cardStyle: { backgroundColor: 'transparent' } }}
             />
             <Stack.Screen
               name="SRankCutscene"

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, Easing, StyleSheet, View, Dimensions } from 'react-native';
+import { useIsFocused } from '@react-navigation/native';
 
 const { width, height } = Dimensions.get('window');
 
@@ -42,10 +43,6 @@ function Ember({ color, spec }: { color: string; spec: EmberSpec }) {
         backgroundColor: color,
         opacity,
         transform: [{ translateY }, { translateX }],
-        shadowColor: color,
-        shadowOpacity: 0.8,
-        shadowRadius: spec.size * 1.6,
-        shadowOffset: { width: 0, height: 0 },
       }}
     />
   );
@@ -56,6 +53,10 @@ function Ember({ color, spec }: { color: string; spec: EmberSpec }) {
  * fills the empty space with gentle motion. Non-interactive, low-opacity.
  */
 export default function AmbientEmbers({ color, count = 14 }: { color: string; count?: number }) {
+  // Pause the whole layer while its screen is off-screen: the looping
+  // animations stop, freeing the main thread so tab transitions stay smooth
+  // without freezing the screen itself (which can blank on Android).
+  const isFocused = useIsFocused();
   const specs = useRef<EmberSpec[]>(
     Array.from({ length: count }).map(() => ({
       x: Math.random() * width,
@@ -65,6 +66,8 @@ export default function AmbientEmbers({ color, count = 14 }: { color: string; co
       size: 2 + Math.random() * 2.5,
     }))
   ).current;
+
+  if (!isFocused) return null;
 
   return (
     <View pointerEvents="none" style={StyleSheet.absoluteFill}>
