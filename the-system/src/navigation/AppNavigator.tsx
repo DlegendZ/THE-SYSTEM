@@ -260,7 +260,12 @@ export default function AppNavigator() {
             <Stack.Screen
               name="Settings"
               component={Settings}
-              options={{ presentation: 'modal' }}
+              options={{
+                presentation: 'modal',
+                ...TransitionPresets.ModalSlideFromBottomIOS,
+                gestureEnabled: true,
+                gestureDirection: 'vertical',
+              }}
             />
             <Stack.Screen
               name="ShieldOverlay"

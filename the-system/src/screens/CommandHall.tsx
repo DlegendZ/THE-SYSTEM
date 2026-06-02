@@ -406,7 +406,6 @@ const styles = StyleSheet.create({
   },
   quoteText: {
     fontSize: 13,
-    fontStyle: 'italic',
     lineHeight: 19,
     letterSpacing: 0.3,
     fontFamily: FONTS.italic,

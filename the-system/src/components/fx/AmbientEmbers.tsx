@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react';
-import { Animated, Easing, StyleSheet, View, Dimensions } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { Animated, Easing, StyleSheet, View, Dimensions, InteractionManager } from 'react-native';
 import { useIsFocused } from '@react-navigation/native';
 
 const { width, height } = Dimensions.get('window');
@@ -24,8 +24,14 @@ function Ember({ color, spec }: { color: string; spec: EmberSpec }) {
         useNativeDriver: true,
       })
     );
-    loop.start();
-    return () => loop.stop();
+    // Defer loop start until the screen transition has settled. Starting 14
+    // loops synchronously on focus stutters the tail of the modal close
+    // animation; runAfterInteractions keeps those frames free.
+    const handle = InteractionManager.runAfterInteractions(() => loop.start());
+    return () => {
+      handle.cancel();
+      loop.stop();
+    };
   }, [p, spec.duration, spec.delay]);
 
   const translateY = p.interpolate({ inputRange: [0, 1], outputRange: [height * 0.92, -40] });
@@ -67,7 +73,21 @@ export default function AmbientEmbers({ color, count = 14 }: { color: string; co
     }))
   ).current;
 
-  if (!isFocused) return null;
+  // Mounting 14 animated views the instant focus returns stutters the FIRST
+  // frame of a screen transition (e.g. closing the Settings modal). Defer the
+  // mount until interactions settle so the transition's opening frames stay
+  // on the UI thread alone; unmount immediately on blur.
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    if (!isFocused) {
+      setShow(false);
+      return;
+    }
+    const handle = InteractionManager.runAfterInteractions(() => setShow(true));
+    return () => handle.cancel();
+  }, [isFocused]);
+
+  if (!isFocused || !show) return null;
 
   return (
     <View pointerEvents="none" style={StyleSheet.absoluteFill}>
