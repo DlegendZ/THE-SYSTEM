@@ -5,9 +5,12 @@ import {
 import Svg, { Polygon, Line, Rect, Circle } from 'react-native-svg';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSystemStore } from '../store/useSystemStore';
-import { getCosmetics } from '../db/queries';
+import { getCosmetics, getAllLogs } from '../db/queries';
 import { RANK_TITLES } from '../engine/xpConstants';
-import type { Cosmetic, Rank, HeroClass as HeroClassType } from '../types';
+import {
+  computeAttributes, ATTRIBUTES, type Attribute, type AttributeProgress,
+} from '../engine/attributeEngine';
+import type { Cosmetic, Rank, HeroClass as HeroClassType, DisciplineLog } from '../types';
 import { STAR_LABELS } from '../types';
 import AvatarDisplay from '../components/avatar/AvatarDisplay';
 import SectionDivider from '../components/ui/SectionDivider';
@@ -21,12 +24,12 @@ import { FONTS } from '../theme/typography';
 
 type MoodState = 'radiant' | 'steady' | 'worn' | 'broken';
 
-const STAT_DISCIPLINES: Array<{ label: string; code: string; glyph: GlyphName }> = [
-  { label: 'Willpower', code: 'SILENCE', glyph: 'bolt' },
-  { label: 'Strength', code: 'FORGE', glyph: 'sword' },
-  { label: 'Vitality', code: 'NOURISH', glyph: 'heart' },
-  { label: 'Knowledge', code: 'KNOWLEDGE', glyph: 'gem' },
-];
+const ATTRIBUTE_GLYPHS: Record<Attribute, GlyphName> = {
+  Willpower: 'bolt',
+  Strength: 'sword',
+  Vitality: 'heart',
+  Knowledge: 'gem',
+};
 
 function computeMood(rate: number): MoodState {
   if (rate >= 0.9) return 'radiant';
@@ -35,33 +38,40 @@ function computeMood(rate: number): MoodState {
   return 'broken';
 }
 
-function StatBar({ label, glyph, completed, level, color }: {
-  label: string; glyph: GlyphName; completed: boolean; level: number; color: string;
+function StatBar({ label, glyph, progress, color }: {
+  label: string; glyph: GlyphName; progress: AttributeProgress; color: string;
 }) {
-  const val = completed ? 100 : 30;
+  const pctWidth = Math.max(progress.pct * 100, progress.xp > 0 ? 4 : 0);
   return (
     <View style={statStyles.row}>
       <View style={statStyles.iconWrap}><Glyph name={glyph} color={color} size={16} /></View>
       <Text style={[statStyles.label, { color: '#888' }]}>{label}</Text>
-      <View style={[statStyles.barBg, { backgroundColor: '#111' }]}>
-        <View style={[statStyles.barFill, { width: `${val}%`, backgroundColor: color }]} />
-        {/* Tick marks */}
-        {[25, 50, 75].map((p) => (
-          <View key={p} style={[statStyles.tick, { left: `${p}%` as `${number}%` }]} />
-        ))}
+      <View style={statStyles.barCol}>
+        <View style={[statStyles.barBg, { backgroundColor: '#111' }]}>
+          <View style={[statStyles.barFill, { width: `${pctWidth}%`, backgroundColor: color }]} />
+          {/* Tick marks */}
+          {[25, 50, 75].map((p) => (
+            <View key={p} style={[statStyles.tick, { left: `${p}%` as `${number}%` }]} />
+          ))}
+        </View>
+        <Text style={[statStyles.xpHint, { color: '#666' }]}>
+          {progress.xpIntoLevel}/{progress.xpForLevel} XP
+        </Text>
       </View>
-      <Text style={[statStyles.lvl, { color }]}>L{level}</Text>
+      <Text style={[statStyles.lvl, { color }]}>L{progress.level}</Text>
     </View>
   );
 }
 
 const statStyles = StyleSheet.create({
-  row: { flexDirection: 'row', alignItems: 'center', marginBottom: 10, gap: 8 },
+  row: { flexDirection: 'row', alignItems: 'center', marginBottom: 12, gap: 8 },
   iconWrap: { width: 22, alignItems: 'center' },
   label: { fontSize: 11, letterSpacing: 0.3, width: 90, fontFamily: FONTS.body },
-  barBg: { flex: 1, height: 12, overflow: 'hidden', position: 'relative' },
+  barCol: { flex: 1, gap: 3 },
+  barBg: { height: 12, overflow: 'hidden', position: 'relative' },
   barFill: { height: 12, position: 'absolute', left: 0, top: 0, bottom: 0 },
   tick: { position: 'absolute', top: 2, bottom: 2, width: 1, backgroundColor: '#000' },
+  xpHint: { fontSize: 8, letterSpacing: 0.3, fontFamily: FONTS.body },
   lvl: { fontSize: 12, width: 28, textAlign: 'right', fontFamily: FONTS.display },
 });
 
@@ -89,12 +99,28 @@ const equipStyles = StyleSheet.create({
 
 export default function Mirror() {
   const insets = useSafeAreaInsets();
-  const { hero, todayLogs, disciplines, currentTheme: theme } = useSystemStore();
+  const { hero, todayLogs, disciplines, silenceStreak, currentTheme: theme } = useSystemStore();
   const [cosmetics, setCosmetics] = useState<Cosmetic[]>([]);
+  const [allLogs, setAllLogs] = useState<DisciplineLog[]>([]);
 
   useEffect(() => {
     getCosmetics().then(setCosmetics);
   }, []);
+
+  // Reload attribute source logs whenever today's logs change (i.e. after the
+  // user completes/fails a trial and the store refreshes).
+  useEffect(() => {
+    getAllLogs().then(setAllLogs);
+  }, [todayLogs]);
+
+  // Attributes are derived from logs. After a relapse, only count logs from the
+  // relapse day onward so attributes honour the "all progress reset" promise
+  // without destroying the heatmap history.
+  const relapseDate = silenceStreak?.last_relapse_date ?? null;
+  const attrLogs = relapseDate
+    ? allLogs.filter((l) => l.log_date >= relapseDate)
+    : allLogs;
+  const attributes = computeAttributes(attrLogs, disciplines);
 
   if (!hero) return null;
 
@@ -163,21 +189,15 @@ export default function Mirror() {
         {/* Stats */}
         <SectionDivider title="Attributes" color={theme.accent} />
         <View style={styles.statsSection}>
-          {STAT_DISCIPLINES.map(({ label, code, glyph }) => {
-            const discipline = disciplines.find((d) => d.code === code);
-            const log = todayLogs.find((l) => l.discipline_id === discipline?.id);
-            const completed = log?.completed === 1;
-            return (
-              <StatBar
-                key={code}
-                label={label}
-                glyph={glyph}
-                completed={completed}
-                level={hero.global_level}
-                color={theme.accent}
-              />
-            );
-          })}
+          {ATTRIBUTES.map((attr) => (
+            <StatBar
+              key={attr}
+              label={attr}
+              glyph={ATTRIBUTE_GLYPHS[attr]}
+              progress={attributes[attr]}
+              color={theme.accent}
+            />
+          ))}
         </View>
 
         {/* Titles */}

@@ -1,4 +1,5 @@
 import { getDb } from './database';
+import { parseISO, subDays, format } from 'date-fns';
 import type {
   Hero,
   Discipline,
@@ -94,13 +95,16 @@ export async function getStreak(disciplineId: number, beforeDate: string): Promi
     [disciplineId, beforeDate]
   );
 
+  // Walk backwards day-by-day from beforeDate. Use date-fns throughout so the
+  // arithmetic stays in local calendar days — mixing `new Date(str)` (UTC) with
+  // local getters previously dropped a day in timezones behind UTC.
   let streak = 0;
-  const date = new Date(beforeDate);
+  let cursor = subDays(parseISO(beforeDate), 1);
   for (let i = 0; i < logs.length; i++) {
-    date.setDate(date.getDate() - 1);
-    const expected = date.toISOString().slice(0, 10);
+    const expected = format(cursor, 'yyyy-MM-dd');
     if (logs[i].log_date === expected) {
       streak++;
+      cursor = subDays(cursor, 1);
     } else {
       break;
     }
@@ -274,6 +278,12 @@ export async function deleteDiscipline(id: number): Promise<void> {
   await getDb().runAsync(
     'DELETE FROM discipline_logs WHERE discipline_id = ?',
     [id]
+  );
+}
+
+export async function getAllLogs(): Promise<DisciplineLog[]> {
+  return getDb().getAllAsync<DisciplineLog>(
+    'SELECT * FROM discipline_logs ORDER BY log_date'
   );
 }
 

@@ -19,6 +19,7 @@ jest.mock('../../src/store/useSystemStore', () => ({
 
 jest.mock('../../src/db/queries', () => ({
   getCosmetics: jest.fn().mockResolvedValue([]),
+  getAllLogs: jest.fn().mockResolvedValue([]),
 }));
 
 import Mirror from '../../src/screens/Mirror';

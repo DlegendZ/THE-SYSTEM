@@ -8,8 +8,8 @@ import { useSystemStore } from '../store/useSystemStore';
 import {
   getLogsForRange, getAllMandates, getDisciplineLogsAll, getSilenceStreak,
 } from '../db/queries';
-import { differenceInCalendarDays, parseISO, format, subDays } from 'date-fns';
-import type { DisciplineLog, Discipline, Mandate, Rank } from '../types';
+import { differenceInCalendarDays, parseISO, format, subDays, addDays } from 'date-fns';
+import type { DisciplineLog, Mandate, Rank } from '../types';
 import SystemBackground from '../components/fx/SystemBackground';
 import AmbientEmbers from '../components/fx/AmbientEmbers';
 import { RANK_TITLES } from '../engine/xpConstants';
@@ -28,14 +28,16 @@ const TAB_LABELS: Record<Tab, string> = {
   history: 'History',
 };
 
-function HeatCell({ completed, failed }: { completed: boolean; failed: boolean }) {
+function HeatCell({ completed, failed, future }: { completed: boolean; failed: boolean; future: boolean }) {
   return (
     <View style={[
       heatStyles.cell,
-      {
-        backgroundColor: completed ? '#1a4a1a' : failed ? '#4a1a1a' : '#1a1a1a',
-        borderColor: completed ? '#4caf50' : failed ? '#f44336' : '#2a2a2a',
-      },
+      future
+        ? { backgroundColor: '#141414', borderColor: '#1e1e1e' }
+        : {
+            backgroundColor: completed ? '#1a4a1a' : failed ? '#4a1a1a' : '#1a1a1a',
+            borderColor: completed ? '#4caf50' : failed ? '#f44336' : '#2a2a2a',
+          },
     ]} />
   );
 }
@@ -44,17 +46,24 @@ const heatStyles = StyleSheet.create({
   cell: { width: 11, height: 11, borderRadius: 1, borderWidth: 1 },
 });
 
-function HeatmapRow({ discipline, logs }: { discipline: Discipline; logs: DisciplineLog[] }) {
-  const today = new Date();
-  const days = Array.from({ length: 28 }, (_, i) => {
-    const d = subDays(today, 27 - i);
-    const dateStr = format(d, 'yyyy-MM-dd');
+const HEAT_WINDOW = 28;
+
+// Journey-anchored heatmap: cell 1 == journey day 1, cell 2 == day 2, and so on.
+// Once the journey passes HEAT_WINDOW days the window slides forward so it always
+// ends on today. Cells past today render as "future" (dim, never as a miss).
+function HeatmapRow({ logs, journeyStartDate }: { logs: DisciplineLog[]; journeyStartDate: string }) {
+  const start = parseISO(journeyStartDate);
+  const todayIdx = differenceInCalendarDays(new Date(), start); // 0-based day index
+  const offset = Math.max(0, todayIdx - (HEAT_WINDOW - 1));
+  const days = Array.from({ length: HEAT_WINDOW }, (_, i) => {
+    const dayIndex = offset + i;
+    const dateStr = format(addDays(start, dayIndex), 'yyyy-MM-dd');
     const log = logs.find((l) => l.log_date === dateStr);
-    return { completed: !!log?.completed, failed: !!log?.failed };
+    return { completed: !!log?.completed, failed: !!log?.failed, future: dayIndex > todayIdx };
   });
   return (
     <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 2 }}>
-      {days.map((d, i) => <HeatCell key={i} completed={d.completed} failed={d.failed} />)}
+      {days.map((d, i) => <HeatCell key={i} completed={d.completed} failed={d.failed} future={d.future} />)}
     </View>
   );
 }
@@ -205,7 +214,7 @@ export default function Archive() {
                       {Math.round(rate * 100)}%
                     </Text>
                   </View>
-                  <HeatmapRow discipline={d} logs={recentForThis} />
+                  <HeatmapRow logs={recentForThis} journeyStartDate={hero.journey_start_date} />
                   <View style={styles.disciplineStats}>
                     <View style={styles.dStatItem}>
                       <Glyph name="check" color="#4caf50" size={12} />
@@ -263,7 +272,8 @@ export default function Archive() {
             {[...new Set(recentLogs.map((l) => l.log_date))].sort().reverse().map((date) => {
               const dayLogs = recentLogs.filter((l) => l.log_date === date);
               const comp = dayLogs.filter((l) => l.completed).length;
-              const xp = dayLogs.reduce((s, l) => s + (l.xp_delta > 0 ? l.xp_delta : 0), 0);
+              // Net XP for the day: gains minus losses (auto-fails included).
+              const xp = dayLogs.reduce((s, l) => s + l.xp_delta, 0);
               const pct = disciplines.length > 0 ? comp / disciplines.length : 0;
               return (
                 <View key={date} style={[styles.histRow, { borderBottomColor: '#1a1a1a' }]}>
@@ -276,7 +286,9 @@ export default function Archive() {
                   <Text style={[styles.histComp, { color: comp > 0 ? '#4caf50' : '#444' }]}>
                     {comp}/{disciplines.length}
                   </Text>
-                  <Text style={[styles.histXP, { color: theme.accent }]}>+{xp}</Text>
+                  <Text style={[styles.histXP, { color: xp >= 0 ? theme.accent : '#f44336' }]}>
+                    {xp >= 0 ? '+' : ''}{xp}
+                  </Text>
                 </View>
               );
             })}

@@ -21,7 +21,7 @@ import { getThemeForRank } from '../theme/rankThemes';
 import { runMissedMidnights } from '../engine/midnightEngine';
 import { initNotifications } from '../notifications/setup';
 import { scheduleNotifications } from '../notifications/scheduler';
-import { format, differenceInCalendarDays, parseISO } from 'date-fns';
+import { format, differenceInCalendarDays, parseISO, subDays } from 'date-fns';
 import type {
   Hero,
   Discipline,
@@ -115,6 +115,11 @@ export const useSystemStore = create<SystemState>((set, get) => ({
     // Use the local calendar date, not UTC — toISOString() can roll back a day
     // for users east of UTC late at night.
     await createHero(name, heroClass, today());
+    // Anchor the midnight settler at yesterday so the FIRST day in play
+    // (today) gets settled on the next launch. Without this, runMissedMidnights
+    // sees a null marker on its first real run, treats it as a brand-new device,
+    // and silently skips settling day 1 — the bug where day-1 losses never apply.
+    await setSystemState('last_midnight_date', format(subDays(new Date(), 1), 'yyyy-MM-dd'));
     await get().refresh();
     await get().syncNotifications();
   },

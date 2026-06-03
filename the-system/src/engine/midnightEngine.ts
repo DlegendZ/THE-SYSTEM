@@ -7,7 +7,7 @@ import {
   getSystemState,
   setSystemState,
 } from '../db/queries';
-import { failDiscipline } from './xpEngine';
+import { failDiscipline, completeDiscipline } from './xpEngine';
 import {
   format,
   subDays,
@@ -67,7 +67,7 @@ async function settleDay(date: string, canCheckPresence: boolean): Promise<void>
 
   for (const discipline of disciplines) {
     if (discipline.code === 'SILENCE') continue;
-    if (discipline.code === 'PRESENCE') continue;
+    if (discipline.code === 'PRESENCE') continue; // resolved separately below
 
     const log = await getLog(discipline.id, date);
     if (log && (log.completed || log.failed)) continue;
@@ -75,7 +75,7 @@ async function settleDay(date: string, canCheckPresence: boolean): Promise<void>
     await failDiscipline(discipline.id, date);
   }
 
-  if (canCheckPresence) await checkPresenceDiscipline(date);
+  await settlePresenceDiscipline(date, canCheckPresence);
   await incrementSilenceStreak(date);
 }
 
@@ -84,7 +84,16 @@ export async function runMidnightCheck(): Promise<void> {
   await runMissedMidnights();
 }
 
-async function checkPresenceDiscipline(date: string): Promise<void> {
+/**
+ * Resolve The Veil (PRESENCE) for a settled day. It behaves like any other
+ * trial — it must end the day either completed or failed:
+ *   - usage confirmed ≤ 30 min  → complete (award XP)
+ *   - usage over the limit       → fail (deduct XP)
+ *   - usage unknowable (no perms, or an older missed day UsageStats can't
+ *     report) → fail, same as leaving any trial undone
+ * A day the user already resolved by hand is left untouched.
+ */
+async function settlePresenceDiscipline(date: string, canCheckPresence: boolean): Promise<void> {
   const disciplines = await getActiveDisciplines();
   const presence = disciplines.find((d) => d.code === 'PRESENCE');
   if (!presence) return;
@@ -92,13 +101,17 @@ async function checkPresenceDiscipline(date: string): Promise<void> {
   const log = await getLog(presence.id, date);
   if (log && (log.completed || log.failed)) return;
 
-  // PRESENCE: auto-check via UsageStats (skip generic auto-fail)
-  const minutesToday = await UsageStatsModule.getScrollingTimeToday();
-  if (minutesToday >= 0 && minutesToday > 30) {
-    // Over 30-min limit — auto-fail
-    await failDiscipline(presence.id, date);
+  if (canCheckPresence) {
+    const minutesToday = await UsageStatsModule.getScrollingTimeToday();
+    if (minutesToday >= 0 && minutesToday <= 30) {
+      // Confirmed under the limit — the trial is passed.
+      await completeDiscipline(presence.id, date);
+      return;
+    }
+    // Over the limit, or permission denied (-1): fall through to fail.
   }
-  // If permission not granted (-1) or under limit, skip auto-fail
+
+  await failDiscipline(presence.id, date);
 }
 
 async function incrementSilenceStreak(date: string): Promise<void> {
