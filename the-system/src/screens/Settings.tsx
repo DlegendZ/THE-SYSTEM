@@ -8,11 +8,12 @@ import { useSystemStore } from '../store/useSystemStore';
 import { CornerBrackets } from '../components/ui/CornerBox';
 import ConfirmModal from '../components/ui/ConfirmModal';
 import Glyph from '../components/icons/Glyph';
-import { getSystemState, setSystemState } from '../db/queries';
+import { getSystemState, setSystemState, validateImport, type ExportBundle } from '../db/queries';
 import { differenceInCalendarDays, parseISO } from 'date-fns';
 // expo-file-system v18+ moved legacy APIs to expo-file-system/legacy
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
+import * as DocumentPicker from 'expo-document-picker';
 import { getDb } from '../db/database';
 import SystemBackground from '../components/fx/SystemBackground';
 import AmbientEmbers from '../components/fx/AmbientEmbers';
@@ -26,7 +27,7 @@ const INTERVALS = [1, 2, 3, 4, 6];
 export default function Settings() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<Nav>();
-  const { hero, currentTheme: theme, resetJourney, syncNotifications } = useSystemStore();
+  const { hero, currentTheme: theme, resetJourney, importJourney, syncNotifications } = useSystemStore();
 
   const [notifInterval, setNotifInterval] = useState(3);
   const [quietStart, setQuietStart] = useState('00:00');
@@ -34,6 +35,7 @@ export default function Settings() {
   const [resetConfirm, setResetConfirm] = useState('');
   const [resetModal, setResetModal] = useState(false);
   const [info, setInfo] = useState<{ title: string; message: string } | null>(null);
+  const [pendingImport, setPendingImport] = useState<ExportBundle | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -94,6 +96,51 @@ export default function Settings() {
       }
     } catch (err) {
       Alert.alert('EXPORT ERROR', String(err));
+    }
+  };
+
+  const handleImport = async () => {
+    try {
+      const res = await DocumentPicker.getDocumentAsync({
+        type: 'application/json',
+        copyToCacheDirectory: true,
+      });
+      if (res.canceled || !res.assets?.[0]) return;
+
+      const content = await FileSystem.readAsStringAsync(res.assets[0].uri, {
+        encoding: FileSystem.EncodingType.UTF8,
+      });
+
+      let data: unknown;
+      try {
+        data = JSON.parse(content);
+      } catch {
+        setInfo({ title: 'IMPORT ERROR', message: 'File is not valid JSON.' });
+        return;
+      }
+
+      const check = validateImport(data);
+      if (!check.ok) {
+        setInfo({ title: 'IMPORT ERROR', message: check.error ?? 'Invalid export file.' });
+        return;
+      }
+
+      // Stage it; the confirm modal guards the destructive overwrite.
+      setPendingImport(data as ExportBundle);
+    } catch (err) {
+      setInfo({ title: 'IMPORT ERROR', message: String(err) });
+    }
+  };
+
+  const performImport = async () => {
+    const bundle = pendingImport;
+    setPendingImport(null);
+    if (!bundle) return;
+    try {
+      await importJourney(bundle);
+      setInfo({ title: 'IMPORTED', message: 'Progress restored from backup.' });
+    } catch (err) {
+      setInfo({ title: 'IMPORT ERROR', message: String(err) });
     }
   };
 
@@ -180,6 +227,19 @@ export default function Settings() {
 
         <TouchableOpacity
           style={[styles.exportButton, { borderColor: theme.accent, marginTop: 8 }]}
+          onPress={handleImport}
+        >
+          <CornerBrackets color={theme.accent} />
+          <Text style={[styles.exportText, { color: theme.accent }]}>
+            Import data (JSON)
+          </Text>
+        </TouchableOpacity>
+        <Text style={[styles.label, { color: theme.textSecondary }]}>
+          Restores progress from an export file. Overwrites ALL current data.
+        </Text>
+
+        <TouchableOpacity
+          style={[styles.exportButton, { borderColor: theme.accent, marginTop: 8 }]}
           onPress={async () => {
             const banner = hero ? `notif_${hero.hero_class.toLowerCase()}_${hero.rank.toLowerCase()}` : undefined;
             const ok = await RichNotification.presentNow(
@@ -228,6 +288,17 @@ export default function Settings() {
         confirmText="RESET"
         onCancel={() => setResetModal(false)}
         onConfirm={performReset}
+      />
+
+      <ConfirmModal
+        visible={pendingImport !== null}
+        destructive
+        title="OVERWRITE ALL DATA?"
+        message="Importing replaces your hero, logs, streaks, and everything else with the backup file. There is no undo."
+        cancelText="CANCEL"
+        confirmText="IMPORT"
+        onCancel={() => setPendingImport(null)}
+        onConfirm={performImport}
       />
 
       <ConfirmModal

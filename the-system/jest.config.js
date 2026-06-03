@@ -15,6 +15,7 @@ module.exports = {
     '^expo-file-system/legacy$': '<rootDir>/__mocks__/expo-file-system.js',
     '^expo-file-system$': '<rootDir>/__mocks__/expo-file-system.js',
     '^expo-sharing$': '<rootDir>/__mocks__/expo-sharing.js',
+    '^expo-document-picker$': '<rootDir>/__mocks__/expo-document-picker.js',
     '^react-native-svg$': '<rootDir>/__mocks__/react-native-svg.js',
     '^react-native-safe-area-context$': '<rootDir>/__mocks__/react-native-safe-area-context.js',
     '^react-native$': '<rootDir>/__mocks__/react-native.js',

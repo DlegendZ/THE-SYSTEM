@@ -18,10 +18,18 @@ export async function createHero(
   heroClass: string,
   journeyStartDate: string
 ): Promise<void> {
-  await getDb().runAsync(
+  const db = getDb();
+  await db.runAsync(
     `INSERT OR REPLACE INTO hero (id, name, hero_class, global_xp, global_level, rank, journey_start_date, journey_complete)
      VALUES (1, ?, ?, 0, 1, 'E', ?, 0)`,
     [name, heroClass, journeyStartDate]
+  );
+  // Re-seed the silence streak row. resetJourney() deletes it and migrations
+  // only run once, so without this a hero created after a reset would have no
+  // streak row at all — silently killing streak counting and relapse tracking.
+  await db.runAsync(
+    `INSERT OR IGNORE INTO silence_streak (id, current_streak, longest_streak, total_relapses)
+     VALUES (1, 0, 0, 0)`
   );
 }
 
@@ -292,6 +300,75 @@ export async function getDisciplineLogsAll(disciplineId: number): Promise<Discip
     'SELECT * FROM discipline_logs WHERE discipline_id = ? ORDER BY log_date DESC',
     [disciplineId]
   );
+}
+
+/** Shape of the JSON produced by Settings → Export data. */
+export interface ExportBundle {
+  exportedAt?: string;
+  version?: number;
+  hero?: Record<string, unknown>[];
+  disciplines?: Record<string, unknown>[];
+  logs?: Record<string, unknown>[];
+  silenceStreak?: Record<string, unknown>[];
+  mandates?: Record<string, unknown>[];
+  cosmetics?: Record<string, unknown>[];
+  systemState?: Record<string, unknown>[];
+}
+
+// Export key → table name. Order matters: parents before children so foreign
+// keys (discipline_logs.discipline_id → disciplines.id) resolve on insert.
+const IMPORT_TABLES: { key: keyof ExportBundle; table: string }[] = [
+  { key: 'hero', table: 'hero' },
+  { key: 'disciplines', table: 'disciplines' },
+  { key: 'logs', table: 'discipline_logs' },
+  { key: 'silenceStreak', table: 'silence_streak' },
+  { key: 'mandates', table: 'mandates' },
+  { key: 'cosmetics', table: 'cosmetics' },
+  { key: 'systemState', table: 'system_state' },
+];
+
+/** Sanity-check a parsed export before wiping anything. */
+export function validateImport(data: unknown): { ok: boolean; error?: string } {
+  if (!data || typeof data !== 'object') return { ok: false, error: 'Not a valid export file.' };
+  const d = data as ExportBundle;
+  if (!Array.isArray(d.hero) || d.hero.length === 0) return { ok: false, error: 'Missing hero record.' };
+  if (!Array.isArray(d.disciplines)) return { ok: false, error: 'Missing disciplines.' };
+  if (!Array.isArray(d.logs)) return { ok: false, error: 'Missing logs.' };
+  return { ok: true };
+}
+
+/**
+ * Replace ALL local data with the contents of an export bundle. Destructive —
+ * the caller MUST confirm first. Runs in a transaction so a malformed row rolls
+ * the whole thing back instead of leaving a half-wiped database.
+ */
+export async function importData(data: ExportBundle): Promise<void> {
+  const db = getDb();
+  await db.withTransactionAsync(async () => {
+    // Wipe child-first so FK constraints never trip mid-delete.
+    await db.runAsync('DELETE FROM discipline_logs');
+    await db.runAsync('DELETE FROM mandates');
+    await db.runAsync('DELETE FROM cosmetics');
+    await db.runAsync('DELETE FROM silence_streak');
+    await db.runAsync('DELETE FROM system_state');
+    await db.runAsync('DELETE FROM disciplines');
+    await db.runAsync('DELETE FROM hero');
+
+    for (const { key, table } of IMPORT_TABLES) {
+      const rows = data[key];
+      if (!Array.isArray(rows)) continue;
+      for (const row of rows) {
+        const cols = Object.keys(row);
+        if (cols.length === 0) continue;
+        const placeholders = cols.map(() => '?').join(', ');
+        const values = cols.map((c) => (row as Record<string, unknown>)[c] ?? null);
+        await db.runAsync(
+          `INSERT INTO ${table} (${cols.join(', ')}) VALUES (${placeholders})`,
+          values as (string | number | null)[]
+        );
+      }
+    }
+  });
 }
 
 export async function get180DayConsistencyRate(): Promise<number> {

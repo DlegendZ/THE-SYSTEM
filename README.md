@@ -109,6 +109,16 @@ For developing on your own phone with live reload.
    First build takes a while (it compiles the native modules). The app installs and
    opens automatically, and the Metro dev server starts for live reload.
 
+   This default build is the **debug** variant — its JS loads from the Metro dev
+   server, so it only runs while your computer is running Metro (USB connected).
+   Unplugged, it hangs on the splash. To install a **standalone** build over USB that
+   runs on its own (JS bundled in, survives unplug/reboot), add `--variant release`:
+   ```powershell
+   npx expo run:android --variant release
+   ```
+   Use this when you want the real app on your phone for daily use but still prefer the
+   one-command USB install over building an APK by hand (Path B).
+
 > If you change the **icon or splash** assets or `app.json`, regenerate native
 > resources before rebuilding — run `npx expo prebuild --platform android`
 > (**never** `--clean`; it wipes the committed custom native modules), then
@@ -154,6 +164,30 @@ project's debug keystore, so it installs on any phone without extra signing setu
 > tcp:8081 tcp:8081`) on every launch — unplugged, it hangs on the splash. For a
 > phone you use normally, install a **release** APK (Path B): the JS is bundled into
 > the APK, so it runs standalone.
+
+---
+
+## Backup & restore your progress (Export / Import)
+
+All progress lives in a local SQLite database. **Settings → Data** has two JSON tools:
+
+- **Export data (JSON)** — dumps your full save (hero, disciplines, logs, streaks,
+  mandates, cosmetics, settings) to a `.json` file you can share off-device for backup.
+- **Import data (JSON)** — pick a previously exported file to restore. ⚠️ Import
+  **overwrites ALL current data** (a confirm dialog guards it). Runs in a transaction,
+  so a malformed file aborts cleanly and leaves your current save untouched.
+
+This is the supported way to **carry progress across a fresh install or repair bad
+data**. Typical recovery flow after updating a buggy build:
+
+1. In the old app: **Settings → Export data** → save the `.json` somewhere safe.
+2. (Optional) Edit the JSON on a PC — e.g. correct `hero[0].global_xp` or add a missing
+   log row — keeping the column names intact. Bad JSON is rejected on import.
+3. Install the new release build (Path B) and finish onboarding.
+4. **Settings → Import data** → pick the file → confirm. Done.
+
+> The exporter caps at the most recent **1000 log rows**. For a 180-day journey with a
+> handful of disciplines that's far more than enough.
 
 ---
 

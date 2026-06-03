@@ -10,6 +10,8 @@ import {
   getPendingMandate,
   getSystemState,
   setSystemState,
+  importData as dbImportData,
+  type ExportBundle,
 } from '../db/queries';
 import {
   completeDiscipline as xpComplete,
@@ -55,6 +57,7 @@ interface SystemState {
   requestMandate: () => Promise<boolean>;
   completeOnboarding: () => Promise<void>;
   resetJourney: () => Promise<void>;
+  importJourney: (bundle: ExportBundle) => Promise<void>;
   syncNotifications: () => Promise<void>;
 }
 
@@ -158,6 +161,16 @@ export const useSystemStore = create<SystemState>((set, get) => ({
   completeOnboarding: async () => {
     await setSystemState('onboarding_complete', '1');
     set({ onboardingComplete: true });
+  },
+
+  importJourney: async (bundle: ExportBundle) => {
+    await dbImportData(bundle);
+    // Reflect the imported onboarding flag so the navigator lands on the right
+    // screen, then reload all derived state from the freshly written DB.
+    const onboarding = await getSystemState('onboarding_complete');
+    set({ onboardingComplete: onboarding === '1' });
+    await get().refresh();
+    await get().syncNotifications();
   },
 
   syncNotifications: async () => {
