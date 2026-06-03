@@ -229,7 +229,11 @@ export const useSystemStore = create<SystemState>((set, get) => ({
       logs.filter((l) => l.completed || l.failed).map((l) => l.discipline_id)
     );
     const total = active.length;
-    const undone = active.filter((d) => !resolved.has(d.id)).length;
+    // On a relapse-locked day the trials are sealed — report 0 undone so the
+    // scheduler stays silent for the rest of today. Future days resume normally.
+    const undone = get().relapseLocked
+      ? 0
+      : active.filter((d) => !resolved.has(d.id)).length;
     const day = differenceInCalendarDays(new Date(), parseISO(hero.journey_start_date)) + 1;
 
     await scheduleNotifications(interval, quietStart, quietEnd, {
