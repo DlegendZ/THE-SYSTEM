@@ -263,8 +263,10 @@ export default function AppNavigator() {
               options={{
                 presentation: 'modal',
                 ...TransitionPresets.ModalSlideFromBottomIOS,
-                gestureEnabled: true,
-                gestureDirection: 'vertical',
+                // Swipe-to-dismiss disabled — it crashed on Android. Settings
+                // closes only via the X button.
+                gestureEnabled: false,
+                detachPreviousScreen: false,
               }}
             />
             <Stack.Screen

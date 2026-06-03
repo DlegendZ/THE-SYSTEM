@@ -17,6 +17,7 @@ import {
 import {
   completeDiscipline as xpComplete,
   failDiscipline as xpFail,
+  triggerRelapse as xpRelapse,
 } from '../engine/xpEngine';
 import { openCurrentMandate, requestManualMandate } from '../engine/mandateEngine';
 import { getThemeForRank } from '../theme/rankThemes';
@@ -48,6 +49,8 @@ interface SystemState {
   currentTheme: RankTheme;
   pendingMandate: Mandate | null;
   onboardingComplete: boolean;
+  /** True for the rest of the day after a relapse — trials are locked. */
+  relapseLocked: boolean;
 
   initialize: () => Promise<void>;
   refresh: () => Promise<void>;
@@ -75,6 +78,7 @@ export const useSystemStore = create<SystemState>((set, get) => ({
   currentTheme: getThemeForRank('E'),
   pendingMandate: null,
   onboardingComplete: false,
+  relapseLocked: false,
 
   initialize: async () => {
     if (get().initialized) return;
@@ -107,6 +111,7 @@ export const useSystemStore = create<SystemState>((set, get) => ({
     const silenceStreak = await getSilenceStreak();
     const pendingMandate = await getPendingMandate();
     const cosmetics = await getCosmetics();
+    const relapseLockDate = await getSystemState('relapse_lock_date');
 
     set({
       hero,
@@ -115,6 +120,7 @@ export const useSystemStore = create<SystemState>((set, get) => ({
       silenceStreak,
       pendingMandate,
       cosmetics,
+      relapseLocked: relapseLockDate === today(),
       currentTheme: getThemeForRank((hero?.rank as Rank) ?? 'E'),
     });
   },
@@ -133,6 +139,8 @@ export const useSystemStore = create<SystemState>((set, get) => ({
   },
 
   completeDiscipline: async (id: number) => {
+    // Trials are locked for the rest of the day after a relapse.
+    if (get().relapseLocked) return { xpGained: 0, levelUp: null };
     const result = await xpComplete(id, today());
     await get().refresh();
     await get().syncNotifications();
@@ -140,15 +148,18 @@ export const useSystemStore = create<SystemState>((set, get) => ({
   },
 
   failDiscipline: async (id: number) => {
+    if (get().relapseLocked) return;
     await xpFail(id, today());
     await get().refresh();
     await get().syncNotifications();
   },
 
   triggerRelapse: async () => {
-    // Breaking the Silence Protocol is total: wipe everything and drop back to
-    // the Awakening flow, exactly like a manual reset. No partial state kept.
-    await get().resetJourney();
+    // Soft reset: zero progress + wipe history, keep identity, bump the relapse
+    // record. Stays in the app (no re-onboarding).
+    await xpRelapse(today());
+    await get().refresh();
+    await get().syncNotifications();
   },
 
   openMandate: async () => {
@@ -158,6 +169,8 @@ export const useSystemStore = create<SystemState>((set, get) => ({
   },
 
   requestMandate: async () => {
+    // No petitions on a relapse-locked day.
+    if (get().relapseLocked) return false;
     const success = await requestManualMandate(today());
     if (success) await get().refresh();
     return success;
@@ -232,6 +245,7 @@ export const useSystemStore = create<SystemState>((set, get) => ({
       cosmetics: [],
       pendingMandate: null,
       onboardingComplete: false,
+      relapseLocked: false,
       currentTheme: getThemeForRank('E'),
     });
   },

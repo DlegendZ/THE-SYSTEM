@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  View, Text, ScrollView, StyleSheet, TouchableOpacity, Animated, Dimensions, Alert,
+  View, Text, ScrollView, StyleSheet, TouchableOpacity, Animated, Dimensions,
 } from 'react-native';
 import Svg, { Polygon, Line, Rect } from 'react-native-svg';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -112,7 +112,7 @@ export default function CommandHall() {
   const insets = useSafeAreaInsets();
   const {
     hero, disciplines, todayLogs, silenceStreak, pendingMandate, currentTheme: theme,
-    completeDiscipline, failDiscipline, triggerRelapse, requestMandate,
+    completeDiscipline, failDiscipline, triggerRelapse, requestMandate, relapseLocked,
   } = useSystemStore();
 
   const floatAnim = React.useRef(new Animated.Value(0)).current;
@@ -124,6 +124,8 @@ export default function CommandHall() {
 
   // Themed confirm panel for breaking the Silence Protocol (full reset).
   const [silenceConfirm, setSilenceConfirm] = React.useState(false);
+  // App-styled info panel (replaces the Android default alert).
+  const [petitionInfo, setPetitionInfo] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     const loop = Animated.loop(
@@ -189,10 +191,7 @@ export default function CommandHall() {
   const handlePetition = async () => {
     const granted = await requestMandate();
     if (!granted) {
-      Alert.alert(
-        'THE SYSTEM',
-        'No mandate to grant. Petition again 7 days after your last one.'
-      );
+      setPetitionInfo('The System grants no mandate yet. Petition again 7 days after your last one.');
     }
     // On success the chest appears via the refreshed pendingMandate.
   };
@@ -219,9 +218,15 @@ export default function CommandHall() {
             {hero.name}
           </PixelText>
           <View style={styles.dayRow}>
-            <View style={[styles.dayDot, { backgroundColor: theme.accent }]} />
-            <Text style={[styles.dayText, { color: theme.accent }]}>Day {dayNumber}</Text>
-            <Text style={[styles.dayOf, { color: theme.textSecondary }]}> / 180</Text>
+            <View style={[styles.dayDot, { backgroundColor: relapseLocked ? '#8a3b3b' : theme.accent }]} />
+            {relapseLocked ? (
+              <Text style={[styles.dayText, { color: '#c97b7b' }]}>Fallen</Text>
+            ) : (
+              <>
+                <Text style={[styles.dayText, { color: theme.accent }]}>Day {dayNumber}</Text>
+                <Text style={[styles.dayOf, { color: theme.textSecondary }]}> / 180</Text>
+              </>
+            )}
           </View>
           <Text style={[styles.rankTitle, { color: theme.textSecondary }]}>
             {RANK_TITLES[hero.rank as Rank]}
@@ -306,7 +311,7 @@ export default function CommandHall() {
               <Text style={[styles.chestTier, { color: theme.accent }]}>{pendingMandate.tier}</Text>
             </TouchableOpacity>
           </Animated.View>
-        ) : (
+        ) : relapseLocked ? null : (
           <View style={styles.chestFloat}>
             <TouchableOpacity
               onPress={handlePetition}
@@ -333,19 +338,26 @@ export default function CommandHall() {
         style={styles.sectionDivider}
       />
 
-      <View style={styles.questProgress}>
-        <Text style={[styles.questCount, { color: theme.textSecondary }]}>
-          {completedToday}/{activeDisciplines.length} complete
-        </Text>
-        <View style={[styles.questProgressBar, { backgroundColor: '#2A2725' }]}>
-          <View
-            style={[
-              styles.questProgressFill,
-              { width: `${completionRate * 100}%`, backgroundColor: theme.accent },
-            ]}
-          />
+      {relapseLocked ? (
+        <View style={[styles.fallenBanner, { borderColor: '#8a3b3b', backgroundColor: '#1a0d0d' }]}>
+          <CornerBrackets color="#8a3b3b" length={8} />
+          <Text style={styles.fallenText}>You fell. Trials locked until tomorrow.</Text>
         </View>
-      </View>
+      ) : (
+        <View style={styles.questProgress}>
+          <Text style={[styles.questCount, { color: theme.textSecondary }]}>
+            {completedToday}/{activeDisciplines.length} complete
+          </Text>
+          <View style={[styles.questProgressBar, { backgroundColor: '#2A2725' }]}>
+            <View
+              style={[
+                styles.questProgressFill,
+                { width: `${completionRate * 100}%`, backgroundColor: theme.accent },
+              ]}
+            />
+          </View>
+        </View>
+      )}
 
       <ScrollView
         style={styles.scroll}
@@ -360,6 +372,7 @@ export default function CommandHall() {
               discipline={discipline}
               log={log}
               theme={theme}
+              locked={relapseLocked}
               onComplete={() => handleComplete(discipline.id)}
               onFail={() => handleFail(discipline.id, discipline.code)}
             />
@@ -390,7 +403,7 @@ export default function CommandHall() {
         visible={silenceConfirm}
         destructive
         title="SILENCE PROTOCOL BROKEN"
-        message="This wipes EVERYTHING — XP, level, rank, streaks, history, mandates, cosmetics — and returns you to the Awakening. There is no undo."
+        message="Your progress resets to zero — XP, level, rank, history, mandates, and loot all erased, the journey restarts at Day 1. Your name and star remain, and the relapse is etched into your record. There is no undo."
         cancelText="CANCEL"
         confirmText="I HAVE FALLEN"
         onCancel={() => setSilenceConfirm(false)}
@@ -398,6 +411,16 @@ export default function CommandHall() {
           setSilenceConfirm(false);
           triggerRelapse();
         }}
+      />
+
+      <ConfirmModal
+        visible={petitionInfo !== null}
+        singleButton
+        title="THE SYSTEM"
+        message={petitionInfo ?? ''}
+        confirmText="OK"
+        onCancel={() => setPetitionInfo(null)}
+        onConfirm={() => setPetitionInfo(null)}
       />
     </View>
   );
@@ -592,6 +615,21 @@ const styles = StyleSheet.create({
   },
   questProgressFill: {
     height: 3,
+  },
+  fallenBanner: {
+    marginHorizontal: 14,
+    marginBottom: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    alignItems: 'center',
+    position: 'relative',
+  },
+  fallenText: {
+    color: '#c97b7b',
+    fontSize: 11,
+    letterSpacing: 0.5,
+    fontFamily: FONTS.bold,
   },
 
   // Scroll

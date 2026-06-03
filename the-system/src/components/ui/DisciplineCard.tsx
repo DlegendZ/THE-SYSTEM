@@ -15,6 +15,8 @@ interface Props {
   theme: RankTheme;
   onComplete: () => void;
   onFail: () => void;
+  /** Locked for the rest of the day after a relapse — hide the action buttons. */
+  locked?: boolean;
 }
 
 const DIFFICULTY_COLORS: Record<string, string> = {
@@ -50,7 +52,7 @@ function StatusMark({ type }: { type: 'complete' | 'fail' }) {
   );
 }
 
-export default function DisciplineCard({ discipline, log, theme, onComplete, onFail }: Props) {
+export default function DisciplineCard({ discipline, log, theme, onComplete, onFail, locked }: Props) {
   const isCompleted = log?.completed === 1;
   const isFailed = log?.failed === 1;
   const diffColor = DIFFICULTY_COLORS[discipline.difficulty] ?? theme.accent;
@@ -123,7 +125,13 @@ export default function DisciplineCard({ discipline, log, theme, onComplete, onF
         <View style={styles.action}>
           {isCompleted && <StatusMark type="complete" />}
           {isFailed && <StatusMark type="fail" />}
-          {!isCompleted && !isFailed && (
+          {!isCompleted && !isFailed && locked && (
+            <View style={[styles.statusBox, { borderColor: '#555', backgroundColor: '#161616' }]}>
+              <CornerBrackets color="#555" length={9} />
+              <Glyph name="shield" color="#777" size={16} />
+            </View>
+          )}
+          {!isCompleted && !isFailed && !locked && (
             <View style={styles.btnStack}>
               <TouchableOpacity
                 style={[styles.btn, styles.btnComplete]}

@@ -7,10 +7,12 @@ import {
   updateHero,
   getSilenceStreak,
   updateSilenceStreak,
+  setSystemState,
   createMandate,
   getPendingMandate,
 } from '../db/queries';
 import { getStreakMultiplier, getRankForLevel, getXpForLevel } from './xpConstants';
+import { format, addDays, parseISO } from 'date-fns';
 import type { Hero, Rank } from '../types';
 
 export interface LevelUpEvent {
@@ -54,32 +56,45 @@ export async function failDiscipline(
   await deductGlobalXP(xpLost);
 }
 
+/**
+ * Break the Silence Protocol. Keeps the hero's identity (name, star/class) but
+ * resets all progress to zero and erases history: XP/level/rank reset, every
+ * log, mandate, and cosmetic wiped, and the journey restarts today. The ONLY
+ * thing preserved is the silence streak record — current streak resets to 0 and
+ * the lifetime relapse count ticks up, so the Archive streak page reflects it.
+ */
 export async function triggerRelapse(date: string): Promise<void> {
   const db = getDb();
 
+  // Erase progress + history (identity row stays).
+  await db.runAsync('DELETE FROM discipline_logs');
+  await db.runAsync('DELETE FROM mandates');
+  await db.runAsync('DELETE FROM cosmetics');
+  // Clear the petition cooldown so a fresh start can request a mandate again.
+  await db.runAsync("DELETE FROM system_state WHERE key = 'last_manual_mandate_date'");
+
+  // Zero the hero but keep name/class. The fresh journey's Day 1 is TOMORROW —
+  // today is the fall (shown as "Fallen", not counted), so no Day 1 is wasted.
+  const tomorrow = format(addDays(parseISO(date), 1), 'yyyy-MM-dd');
   await db.runAsync(
-    "UPDATE hero SET global_xp = 0, global_level = 1, rank = 'E' WHERE id = 1"
+    "UPDATE hero SET global_xp = 0, global_level = 1, rank = 'E', journey_start_date = ?, journey_complete = 0 WHERE id = 1",
+    [tomorrow]
   );
 
-  await updateSilenceStreak({
-    current_streak: 0,
-    last_relapse_date: date,
-  });
-
+  // Silence streak: reset current run, record the relapse (count + date).
+  await updateSilenceStreak({ current_streak: 0, last_relapse_date: date });
   await db.runAsync(
-    `UPDATE silence_streak SET total_relapses = total_relapses + 1 WHERE id = 1`
+    'UPDATE silence_streak SET total_relapses = total_relapses + 1 WHERE id = 1'
   );
 
-  await db.runAsync(
-    "UPDATE cosmetics SET equipped = 0 WHERE type = 'weapon'"
-  );
+  // Lock the rest of today: while relapse_lock_date == today, every trial's
+  // check buttons are disabled (no fake logs, no re-farming). Tomorrow the date
+  // no longer matches and trials open normally.
+  await setSystemState('relapse_lock_date', date);
 
-  const silenceDiscipline = await db.getFirstAsync<{ id: number }>(
-    "SELECT id FROM disciplines WHERE code = 'SILENCE'"
-  );
-  if (silenceDiscipline) {
-    await insertLog(silenceDiscipline.id, date, false, true, 0);
-  }
+  // Anchor the settler at today so the relapse day is NOT auto-failed (it's
+  // pre-journey) and Day 1 (tomorrow) settles on the day after.
+  await setSystemState('last_midnight_date', date);
 }
 
 async function addGlobalXP(amount: number): Promise<void> {

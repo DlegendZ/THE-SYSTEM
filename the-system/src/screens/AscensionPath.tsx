@@ -164,7 +164,9 @@ export default function AscensionPath() {
   if (!hero) return null;
 
   const daysElapsed = differenceInCalendarDays(new Date(), parseISO(hero.journey_start_date));
-  const currentWeek = Math.min(Math.floor(daysElapsed / 7) + 1, TOTAL_NODES);
+  // Clamp to 1 so a pre-journey day (e.g. the relapse "Fallen" day, when the
+  // journey starts tomorrow) still highlights Week 1 instead of nothing.
+  const currentWeek = Math.min(Math.max(Math.floor(daysElapsed / 7) + 1, 1), TOTAL_NODES);
   const overallRate = completionRates.slice(0, currentWeek).reduce((s, r) => s + r, 0) / Math.max(currentWeek, 1);
 
   const selectedRate = selectedNode ? (completionRates[selectedNode - 1] ?? 0) : 0;
