@@ -96,7 +96,7 @@ export const migration001: Migration = {
       ['SILENCE', 'The Silence Protocol', 'The war against the mind\'s weakest impulse. Streak is sacred.', 'LEGENDARY', 100, 0, null],
       ['FORGE', 'Iron Temple', 'Lifting or cardio. The Iron Temple does not close.', 'HARD', 60, 35, '23:59'],
       ['KNOWLEDGE', 'The Scroll', 'Minimum 10 pages of a real book read today.', 'NORMAL', 25, 15, '23:59'],
-      ['PRESENCE', 'The Veil', 'Screen scrolling under 30 minutes. Auto-tracked via UsageStats.', 'NORMAL', 25, 15, '23:59'],
+      ['PRESENCE', 'The Veil', 'Instagram & TikTok under 30 minutes today. Auto-tracked.', 'NORMAL', 25, 15, '23:59'],
       ['RITUAL', 'The Ritual', 'Daily skincare routine completed. Discipline in small things.', 'EASY', 10, 5, '23:59'],
     ];
 

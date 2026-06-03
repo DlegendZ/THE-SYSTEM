@@ -2,6 +2,7 @@ jest.mock('../../src/native/UsageStatsModule', () => ({
   __esModule: true,
   default: {
     getScrollingTimeToday: jest.fn().mockResolvedValue(-1),
+    getScrollingTimeForDay: jest.fn().mockResolvedValue(-1),
     hasPermission: jest.fn().mockResolvedValue(false),
     openUsageAccessSettings: jest.fn(),
   },
@@ -60,7 +61,7 @@ describe('settleDay auto-fails undone PRESENCE', () => {
 
 describe('settleDay auto-completes PRESENCE under the limit', () => {
   it('awards PRESENCE when usage is confirmed under 30 min', async () => {
-    (UsageStatsModule.getScrollingTimeToday as jest.Mock).mockResolvedValue(12);
+    (UsageStatsModule.getScrollingTimeForDay as jest.Mock).mockResolvedValue(12);
     await setSystemState('last_midnight_date', fmt(subDays(new Date(), 2)));
     const presence = await getDisciplineByCode('PRESENCE');
 

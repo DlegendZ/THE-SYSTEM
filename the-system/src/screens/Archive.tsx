@@ -6,7 +6,7 @@ import Svg, { Polygon } from 'react-native-svg';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSystemStore } from '../store/useSystemStore';
 import {
-  getLogsForRange, getAllMandates, getDisciplineLogsAll, getSilenceStreak,
+  getLogsForRange, getAllMandates, getAllLogs, getSilenceStreak,
 } from '../db/queries';
 import { differenceInCalendarDays, parseISO, format, subDays, addDays } from 'date-fns';
 import type { DisciplineLog, Mandate, Rank } from '../types';
@@ -47,15 +47,20 @@ const heatStyles = StyleSheet.create({
 });
 
 const HEAT_WINDOW = 28;
+const JOURNEY_DAYS = 180;
 
-// Journey-anchored heatmap: cell 1 == journey day 1, cell 2 == day 2, and so on.
-// Once the journey passes HEAT_WINDOW days the window slides forward so it always
-// ends on today. Cells past today render as "future" (dim, never as a miss).
+// Journey-anchored heatmap: up to 28 cells ending at today, with upcoming days
+// shown as dim "future" cells. The right edge is capped at Day 180 — so once the
+// window would reach the journey's end the cell count SHRINKS to the days left
+// instead of forcing 28 (it can never show days beyond 180).
 function HeatmapRow({ logs, journeyStartDate }: { logs: DisciplineLog[]; journeyStartDate: string }) {
   const start = parseISO(journeyStartDate);
-  const todayIdx = differenceInCalendarDays(new Date(), start); // 0-based day index
+  const todayIdx = Math.max(differenceInCalendarDays(new Date(), start), 0); // 0-based
   const offset = Math.max(0, todayIdx - (HEAT_WINDOW - 1));
-  const days = Array.from({ length: HEAT_WINDOW }, (_, i) => {
+  const rightEdge = Math.min(offset + HEAT_WINDOW - 1, JOURNEY_DAYS - 1); // cap at Day 180
+  const count = rightEdge - offset + 1; // 28 normally, fewer once it hits Day 180
+
+  const days = Array.from({ length: count }, (_, i) => {
     const dayIndex = offset + i;
     const dateStr = format(addDays(start, dayIndex), 'yyyy-MM-dd');
     const log = logs.find((l) => l.log_date === dateStr);
@@ -106,15 +111,20 @@ export default function Archive() {
     getLogsForRange(start, today).then(setRecentLogs);
   }, [hero]);
 
+  // Load per-discipline logs for the Missions/Streaks tabs in ONE query, then
+  // group in JS — the old per-discipline sequential queries caused the lag.
   useEffect(() => {
     if (activeTab !== 'disciplines' && activeTab !== 'streaks') return;
-    (async () => {
-      const result: Record<number, DisciplineLog[]> = {};
-      for (const d of disciplines) {
-        result[d.id] = await getDisciplineLogsAll(d.id);
+    let cancelled = false;
+    getAllLogs().then((all) => {
+      if (cancelled) return;
+      const grouped: Record<number, DisciplineLog[]> = {};
+      for (const log of all) {
+        (grouped[log.discipline_id] ??= []).push(log);
       }
-      setDisciplineLogs(result);
-    })();
+      setDisciplineLogs(grouped);
+    });
+    return () => { cancelled = true; };
   }, [activeTab, disciplines]);
 
   if (!hero) return null;

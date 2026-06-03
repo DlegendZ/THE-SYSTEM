@@ -18,6 +18,7 @@ import { getDb } from '../db/database';
 import SystemBackground from '../components/fx/SystemBackground';
 import AmbientEmbers from '../components/fx/AmbientEmbers';
 import RichNotification from '../native/RichNotification';
+import UsageStatsModule from '../native/UsageStatsModule';
 import { FONTS } from '../theme/typography';
 
 type Nav = { goBack: () => void };
@@ -36,6 +37,7 @@ export default function Settings() {
   const [resetModal, setResetModal] = useState(false);
   const [info, setInfo] = useState<{ title: string; message: string } | null>(null);
   const [pendingImport, setPendingImport] = useState<ExportBundle | null>(null);
+  const [usageGranted, setUsageGranted] = useState<boolean | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -45,6 +47,7 @@ export default function Settings() {
       if (interval) setNotifInterval(parseInt(interval, 10));
       if (qs) setQuietStart(qs);
       if (qe) setQuietEnd(qe);
+      try { setUsageGranted(await UsageStatsModule.hasPermission()); } catch { setUsageGranted(false); }
     })();
   }, []);
 
@@ -52,6 +55,21 @@ export default function Settings() {
     setNotifInterval(v);
     await setSystemState('notification_interval', String(v));
     await syncNotifications();
+  };
+
+  // Persist quiet hours (HH:MM). Re-sync so the next reminders honour the window.
+  const saveQuietHours = async () => {
+    await setSystemState('quiet_start', quietStart);
+    await setSystemState('quiet_end', quietEnd);
+    await syncNotifications();
+  };
+
+  const handleGrantUsage = async () => {
+    try {
+      await UsageStatsModule.openUsageAccessSettings();
+    } catch {
+      setInfo({ title: 'UNAVAILABLE', message: 'Social media tracking needs the native build.' });
+    }
   };
 
   const handleExport = async () => {
@@ -202,8 +220,52 @@ export default function Settings() {
         </View>
 
         <Text style={[styles.label, { color: theme.textSecondary }]}>
-          Quiet hours: {quietStart} – {quietEnd}
+          Quiet hours (no reminders) — HH:MM
         </Text>
+        <View style={styles.quietRow}>
+          <View style={styles.quietField}>
+            <TextInput
+              style={[styles.input, { color: theme.text, borderColor: theme.accent }]}
+              value={quietStart}
+              onChangeText={setQuietStart}
+              onEndEditing={saveQuietHours}
+              placeholder="00:00"
+              placeholderTextColor={theme.textSecondary}
+              maxLength={5}
+              keyboardType="numbers-and-punctuation"
+            />
+            <CornerBrackets color={theme.accent} length={8} />
+          </View>
+          <Text style={[styles.label, { color: theme.textSecondary, marginBottom: 0 }]}>to</Text>
+          <View style={styles.quietField}>
+            <TextInput
+              style={[styles.input, { color: theme.text, borderColor: theme.accent }]}
+              value={quietEnd}
+              onChangeText={setQuietEnd}
+              onEndEditing={saveQuietHours}
+              placeholder="07:00"
+              placeholderTextColor={theme.textSecondary}
+              maxLength={5}
+              keyboardType="numbers-and-punctuation"
+            />
+            <CornerBrackets color={theme.accent} length={8} />
+          </View>
+        </View>
+
+        <Text style={[styles.sectionHeader, { color: theme.accent }]}>Permissions</Text>
+        <Text style={[styles.label, { color: theme.textSecondary }]}>
+          Social media access — lets The Veil auto-track Instagram & TikTok time.
+          {usageGranted === null ? '' : usageGranted ? '  ✓ Granted' : '  ✗ Not granted'}
+        </Text>
+        <TouchableOpacity
+          style={[styles.exportButton, { borderColor: theme.accent }]}
+          onPress={handleGrantUsage}
+        >
+          <CornerBrackets color={theme.accent} />
+          <Text style={[styles.exportText, { color: theme.accent }]}>
+            {usageGranted ? 'Manage social media access' : 'Grant social media access'}
+          </Text>
+        </TouchableOpacity>
 
         <Text style={[styles.sectionHeader, { color: theme.accent }]}>About</Text>
         <Text style={[styles.infoText, { color: theme.text }]}>Player: {hero?.name ?? 'Unknown'}</Text>
@@ -330,6 +392,8 @@ const styles = StyleSheet.create({
   intervalText: { fontSize: 13, fontFamily: FONTS.bold },
   infoText: { fontSize: 14, marginBottom: 6, fontFamily: FONTS.body },
   inputWrap: { position: 'relative', marginBottom: 12 },
+  quietRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 },
+  quietField: { position: 'relative', flex: 1 },
   input: { borderWidth: 1, borderRadius: 2, padding: 10, fontSize: 14, fontFamily: FONTS.body },
   resetButton: { padding: 14, alignItems: 'center', borderRadius: 2, marginBottom: 16 },
   resetText: { color: '#fff', fontSize: 14, letterSpacing: 0.3, fontFamily: FONTS.bold },

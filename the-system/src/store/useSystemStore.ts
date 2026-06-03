@@ -9,11 +9,13 @@ import {
   getSilenceStreak,
   getPendingMandate,
   getCosmetics,
+  equipCosmetic as dbEquipCosmetic,
   getSystemState,
   setSystemState,
   importData as dbImportData,
   type ExportBundle,
 } from '../db/queries';
+import { applyCosmeticTheme } from '../engine/cosmeticEffects';
 import {
   completeDiscipline as xpComplete,
   failDiscipline as xpFail,
@@ -60,6 +62,7 @@ interface SystemState {
   triggerRelapse: () => Promise<void>;
   openMandate: () => Promise<LootResult | null>;
   requestMandate: () => Promise<boolean>;
+  equipCosmetic: (id: number, type: string) => Promise<void>;
   completeOnboarding: () => Promise<void>;
   resetJourney: () => Promise<void>;
   importJourney: (bundle: ExportBundle) => Promise<void>;
@@ -105,13 +108,18 @@ export const useSystemStore = create<SystemState>((set, get) => ({
   },
 
   refresh: async () => {
-    const hero = await getHero();
-    const disciplines = await getAllDisciplines();
-    const todayLogs = await getLogsForDate(today());
-    const silenceStreak = await getSilenceStreak();
-    const pendingMandate = await getPendingMandate();
-    const cosmetics = await getCosmetics();
-    const relapseLockDate = await getSystemState('relapse_lock_date');
+    // Parallel — these are independent reads; sequential awaits made every
+    // refresh (after each complete/fail/equip) feel sluggish.
+    const [hero, disciplines, todayLogs, silenceStreak, pendingMandate, cosmetics, relapseLockDate] =
+      await Promise.all([
+        getHero(),
+        getAllDisciplines(),
+        getLogsForDate(today()),
+        getSilenceStreak(),
+        getPendingMandate(),
+        getCosmetics(),
+        getSystemState('relapse_lock_date'),
+      ]);
 
     set({
       hero,
@@ -121,7 +129,7 @@ export const useSystemStore = create<SystemState>((set, get) => ({
       pendingMandate,
       cosmetics,
       relapseLocked: relapseLockDate === today(),
-      currentTheme: getThemeForRank((hero?.rank as Rank) ?? 'E'),
+      currentTheme: applyCosmeticTheme(getThemeForRank((hero?.rank as Rank) ?? 'E'), cosmetics),
     });
   },
 
@@ -176,6 +184,11 @@ export const useSystemStore = create<SystemState>((set, get) => ({
     return success;
   },
 
+  equipCosmetic: async (id: number, type: string) => {
+    await dbEquipCosmetic(id, type);
+    await get().refresh();
+  },
+
   completeOnboarding: async () => {
     await setSystemState('onboarding_complete', '1');
     set({ onboardingComplete: true });
@@ -183,6 +196,10 @@ export const useSystemStore = create<SystemState>((set, get) => ({
 
   importJourney: async (bundle: ExportBundle) => {
     await dbImportData(bundle);
+    // Run settlement like a fresh launch: catch up missed days, advance the
+    // silence streak, and (crucially) fire the weekly milestone check so a
+    // 24-week-old imported journey triggers the Final Judgement.
+    await runMissedMidnights();
     // Reflect the imported onboarding flag so the navigator lands on the right
     // screen, then reload all derived state from the freshly written DB.
     const onboarding = await getSystemState('onboarding_complete');

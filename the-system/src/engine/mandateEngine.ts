@@ -5,6 +5,7 @@ import {
   getSystemState,
   setSystemState,
   addCosmetic,
+  findCosmetic,
   getEquippedCosmetics,
   equipCosmetic,
 } from '../db/queries';
@@ -105,10 +106,10 @@ export function rollLoot(tier: string): LootResult {
 }
 
 /** Equippable slot types — these auto-equip when their tier beats the current. */
-const EQUIP_SLOTS = ['weapon', 'armor', 'crown', 'accessory'];
+const EQUIP_SLOTS = ['weapon', 'armor', 'crown', 'accessory', 'aura', 'background'];
 
 export interface MappedCosmetic {
-  type: 'weapon' | 'armor' | 'crown' | 'title' | 'background' | 'accessory';
+  type: 'weapon' | 'armor' | 'crown' | 'title' | 'background' | 'accessory' | 'aura';
   tier: number;
   name: string;
 }
@@ -126,7 +127,7 @@ export function lootToCosmetic(loot: LootResult): MappedCosmetic | null {
     case 'accessory':
       return { type: 'accessory', tier: 1, name: loot.name };
     case 'aura_variant':
-      return { type: 'accessory', tier: 2, name: loot.name };
+      return { type: 'aura', tier: 2, name: loot.name };
     case 'background':
       return { type: 'background', tier: 1, name: loot.name };
     case 'cosmetic_variant':
@@ -146,7 +147,9 @@ async function persistLoot(loot: LootResult): Promise<number> {
   const mapped = lootToCosmetic(loot);
   if (!mapped) return 0; // flavour-only (scroll)
 
-  const id = await addCosmetic(mapped.type, mapped.tier, mapped.name);
+  // De-dupe: never store the same item twice — reuse the existing row.
+  const existing = await findCosmetic(mapped.type, mapped.name);
+  const id = existing ? existing.id : await addCosmetic(mapped.type, mapped.tier, mapped.name);
 
   if (EQUIP_SLOTS.includes(mapped.type)) {
     const equipped = await getEquippedCosmetics();

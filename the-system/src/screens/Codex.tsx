@@ -136,8 +136,13 @@ export default function Codex() {
                   </Text>
                 </TouchableOpacity>
                 {d.is_custom && (
-                  <TouchableOpacity style={styles.deleteBtn} onPress={() => handleDelete(d)}>
-                    <Glyph name="close" color="#f44336" size={16} />
+                  <TouchableOpacity
+                    style={[styles.deleteBtn, { borderColor: '#f44336' }]}
+                    onPress={() => handleDelete(d)}
+                  >
+                    <CornerBrackets color="#f44336" length={8} />
+                    <Glyph name="close" color="#f44336" size={11} />
+                    <Text style={styles.deleteText}>DEL</Text>
                   </TouchableOpacity>
                 )}
               </View>
@@ -253,11 +258,21 @@ const styles = StyleSheet.create({
   diffText: { fontSize: 11, fontFamily: FONTS.bold },
   xpText: { fontSize: 12, fontFamily: FONTS.body },
   deadlineText: { fontSize: 12, marginTop: 2, fontFamily: FONTS.body },
-  actions: { alignItems: 'center', gap: 4 },
-  toggleBtn: { borderWidth: 1, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 2, position: 'relative' },
+  actions: { alignItems: 'stretch', gap: 6, minWidth: 56 },
+  toggleBtn: { borderWidth: 1, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 2, position: 'relative', alignItems: 'center' },
   toggleText: { fontSize: 12, fontFamily: FONTS.bold },
-  deleteBtn: { padding: 4 },
-  deleteText: { color: '#f44336', fontSize: 16, fontFamily: FONTS.body },
+  deleteBtn: {
+    borderWidth: 1,
+    paddingVertical: 5,
+    borderRadius: 2,
+    position: 'relative',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    backgroundColor: '#f4433615',
+  },
+  deleteText: { color: '#f44336', fontSize: 11, letterSpacing: 0.5, fontFamily: FONTS.bold },
   bottomPadding: { height: 64 },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'flex-end' },
   modalBox: { padding: 24, borderTopWidth: 2 },

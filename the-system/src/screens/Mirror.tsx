@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
-  View, Text, ScrollView, StyleSheet,
+  View, Text, ScrollView, StyleSheet, TouchableOpacity,
 } from 'react-native';
 import Svg, { Polygon, Line, Rect, Circle } from 'react-native-svg';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -99,7 +99,7 @@ const equipStyles = StyleSheet.create({
 
 export default function Mirror() {
   const insets = useSafeAreaInsets();
-  const { hero, todayLogs, disciplines, silenceStreak, cosmetics, currentTheme: theme } = useSystemStore();
+  const { hero, todayLogs, disciplines, silenceStreak, cosmetics, equipCosmetic, currentTheme: theme } = useSystemStore();
   const [allLogs, setAllLogs] = useState<DisciplineLog[]>([]);
 
   // Reload attribute source logs whenever today's logs change (i.e. after the
@@ -130,8 +130,19 @@ export default function Mirror() {
   const completionRate = activeDisciplines > 0 ? completedToday / activeDisciplines : 0;
   const mood = computeMood(completionRate);
 
-  const titles = cosmetics.filter((c) => c.type === 'title' && c.unlocked);
-  const backgrounds = cosmetics.filter((c) => c.type === 'background' && c.unlocked);
+  // Collapse any duplicate-by-name rows so the same item never shows twice
+  // (prefer the equipped copy).
+  const uniqByName = (list: typeof cosmetics) => {
+    const seen = new Map<string, (typeof cosmetics)[number]>();
+    for (const c of list) {
+      const prev = seen.get(c.name);
+      if (!prev || (c.equipped && !prev.equipped)) seen.set(c.name, c);
+    }
+    return Array.from(seen.values());
+  };
+  const titles = uniqByName(cosmetics.filter((c) => c.type === 'title' && c.unlocked));
+  const backgrounds = uniqByName(cosmetics.filter((c) => c.type === 'background' && c.unlocked));
+  const auras = uniqByName(cosmetics.filter((c) => c.type === 'aura' && c.unlocked));
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background, paddingTop: insets.top }]}>
@@ -202,7 +213,7 @@ export default function Mirror() {
         {titles.length > 0 && (
           <>
             <SectionDivider title="Titles" color={theme.accent} />
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.titlesRow}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.titlesRow} contentContainerStyle={styles.chipContent}>
               {titles.map((t) => (
                 <View key={t.id} style={[styles.titleChip, { borderColor: theme.accent + '70', backgroundColor: theme.accent + '10' }]}>
                   <CornerBrackets color={theme.accent + '70'} length={8} />
@@ -213,16 +224,49 @@ export default function Mirror() {
           </>
         )}
 
-        {/* Backgrounds */}
+        {/* Auras (tap to equip — recolors embers + glow) */}
+        {auras.length > 0 && (
+          <>
+            <SectionDivider title="Auras" color={theme.accent} />
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.titlesRow} contentContainerStyle={styles.chipContent}>
+              {auras.map((a) => (
+                <TouchableOpacity
+                  key={a.id}
+                  onPress={() => equipCosmetic(a.id, 'aura')}
+                  style={[styles.titleChip, {
+                    borderColor: theme.accent + (a.equipped ? 'ff' : '70'),
+                    backgroundColor: theme.accent + (a.equipped ? '28' : '10'),
+                  }]}
+                >
+                  <CornerBrackets color={theme.accent + (a.equipped ? 'ff' : '70')} length={8} />
+                  <Text style={[styles.titleTxt, { color: theme.accent }]}>
+                    {a.equipped ? '◈ ' : ''}{a.name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </>
+        )}
+
+        {/* Backgrounds (tap to equip — changes app background) */}
         {backgrounds.length > 0 && (
           <>
             <SectionDivider title="Backgrounds" color={theme.accent} />
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.titlesRow}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.titlesRow} contentContainerStyle={styles.chipContent}>
               {backgrounds.map((b) => (
-                <View key={b.id} style={[styles.titleChip, { borderColor: theme.accent + '70', backgroundColor: theme.accent + '10' }]}>
-                  <CornerBrackets color={theme.accent + '70'} length={8} />
-                  <Text style={[styles.titleTxt, { color: theme.accent }]}>{b.name}</Text>
-                </View>
+                <TouchableOpacity
+                  key={b.id}
+                  onPress={() => equipCosmetic(b.id, 'background')}
+                  style={[styles.titleChip, {
+                    borderColor: theme.accent + (b.equipped ? 'ff' : '70'),
+                    backgroundColor: theme.accent + (b.equipped ? '28' : '10'),
+                  }]}
+                >
+                  <CornerBrackets color={theme.accent + (b.equipped ? 'ff' : '70')} length={8} />
+                  <Text style={[styles.titleTxt, { color: theme.accent }]}>
+                    {b.equipped ? '◈ ' : ''}{b.name}
+                  </Text>
+                </TouchableOpacity>
               ))}
             </ScrollView>
           </>
@@ -281,7 +325,8 @@ const styles = StyleSheet.create({
 
   statsSection: { paddingHorizontal: 16 },
 
-  titlesRow: { paddingLeft: 14 },
+  titlesRow: {},
+  chipContent: { paddingLeft: 14, paddingRight: 14, alignItems: 'center' },
   titleChip: {
     borderWidth: 1,
     paddingHorizontal: 14,

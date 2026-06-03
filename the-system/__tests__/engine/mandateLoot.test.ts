@@ -20,8 +20,8 @@ describe('lootToCosmetic', () => {
     expect(map('equipment_tier', 'Armor Tier Unlock')?.type).toBe('armor');
     expect(map('equipment_tier', 'Crown of Ascension')?.type).toBe('crown');
   });
-  it('maps aura_variant and accessory to accessory', () => {
-    expect(map('aura_variant', 'Frost Aura')?.type).toBe('accessory');
+  it('maps aura_variant to aura, accessory to accessory', () => {
+    expect(map('aura_variant', 'Frost Aura')?.type).toBe('aura');
     expect(map('accessory', 'War Paint')?.type).toBe('accessory');
   });
 });
@@ -48,6 +48,20 @@ describe('openCurrentMandate persists loot', () => {
     );
     expect(mandate?.opened).toBe(1);
     expect(mandate?.loot_id).toBe(cosmetics[0].id); // no longer hard-coded 0
+  });
+
+  it('does not store duplicate loot of the same type+name', async () => {
+    const spy = jest.spyOn(Math, 'random').mockReturnValue(0); // always Weapon Skin: Crimson
+    try {
+      await createMandate('SILVER');
+      await openCurrentMandate();
+      await createMandate('SILVER');
+      await openCurrentMandate();
+    } finally {
+      spy.mockRestore();
+    }
+    const weapons = (await getCosmetics()).filter((c) => c.type === 'weapon' && c.name === 'Weapon Skin: Crimson');
+    expect(weapons).toHaveLength(1);
   });
 
   it('auto-equips the looted weapon over a lower-tier equipped one', async () => {

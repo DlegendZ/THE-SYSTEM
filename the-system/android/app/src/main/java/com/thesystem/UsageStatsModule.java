@@ -1,9 +1,11 @@
 package com.thesystem;
 
+import android.app.AppOpsManager;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Process;
 import android.provider.Settings;
 
 import com.facebook.react.bridge.Promise;
@@ -19,18 +21,12 @@ import java.util.Map;
 public class UsageStatsModule extends ReactContextBaseJavaModule {
 
     private static final List<String> TRACKED_PACKAGES = Arrays.asList(
-        "com.android.chrome",
-        "org.mozilla.firefox",
-        "com.instagram.android",
-        "com.twitter.android",
-        "com.facebook.katana",
-        "com.zhiliaoapp.musically",
-        "com.reddit.frontpage",
-        "com.google.android.youtube",
-        "com.facebook.orca",
-        "com.snapchat.android",
-        "com.pinterest"
+        "com.instagram.android",        // Instagram
+        "com.zhiliaoapp.musically",     // TikTok (global)
+        "com.ss.android.ugc.trill"      // TikTok (alt package, some regions)
     );
+
+    private static final long DAY_MS = 24L * 60L * 60L * 1000L;
 
     private final ReactApplicationContext reactContext;
 
@@ -44,67 +40,78 @@ public class UsageStatsModule extends ReactContextBaseJavaModule {
         return "UsageStatsModule";
     }
 
+    /** Reliable Usage Access check via AppOps (queryUsageStats lies — it returns
+     *  an empty result, not an error, when access is denied). */
+    private boolean hasUsageAccess() {
+        try {
+            AppOpsManager appOps =
+                (AppOpsManager) reactContext.getSystemService(Context.APP_OPS_SERVICE);
+            if (appOps == null) return false;
+            int mode = appOps.checkOpNoThrow(
+                AppOpsManager.OPSTR_GET_USAGE_STATS,
+                Process.myUid(),
+                reactContext.getPackageName()
+            );
+            return mode == AppOpsManager.MODE_ALLOWED;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /** Sum foreground minutes of tracked apps in [start, end]. Uses
+     *  getTotalTimeInForeground, which (unlike event pairing) already excludes
+     *  screen-off / locked time, matching Digital Wellbeing closely. */
+    private double foregroundMinutes(long start, long end) {
+        UsageStatsManager usm =
+            (UsageStatsManager) reactContext.getSystemService(Context.USAGE_STATS_SERVICE);
+        if (usm == null) return -1.0;
+
+        Map<String, UsageStats> map = usm.queryAndAggregateUsageStats(start, end);
+        if (map == null || map.isEmpty()) return 0.0;
+
+        long totalMs = 0;
+        for (String pkg : TRACKED_PACKAGES) {
+            UsageStats s = map.get(pkg);
+            if (s != null) totalMs += s.getTotalTimeInForeground();
+        }
+        return totalMs / 60000.0;
+    }
+
     @ReactMethod
     public void getScrollingTimeToday(Promise promise) {
         try {
-            UsageStatsManager usm =
-                (UsageStatsManager) reactContext.getSystemService(Context.USAGE_STATS_SERVICE);
-
-            if (usm == null) {
-                promise.reject("NO_USM", "UsageStatsManager not available");
-                return;
-            }
-
+            if (!hasUsageAccess()) { promise.resolve(-1.0); return; }
             Calendar cal = Calendar.getInstance();
             cal.set(Calendar.HOUR_OF_DAY, 0);
             cal.set(Calendar.MINUTE, 0);
             cal.set(Calendar.SECOND, 0);
             cal.set(Calendar.MILLISECOND, 0);
             long startOfDay = cal.getTimeInMillis();
-            long now = System.currentTimeMillis();
+            promise.resolve(foregroundMinutes(startOfDay, System.currentTimeMillis()));
+        } catch (Exception ex) {
+            promise.reject("USAGE_ERROR", ex.getMessage());
+        }
+    }
 
-            Map<String, UsageStats> usageStatsMap =
-                usm.queryAndAggregateUsageStats(startOfDay, now);
-
-            if (usageStatsMap == null || usageStatsMap.isEmpty()) {
-                promise.resolve(-1.0);
-                return;
-            }
-
-            long totalMs = 0;
-            for (String pkg : TRACKED_PACKAGES) {
-                UsageStats stats = usageStatsMap.get(pkg);
-                if (stats != null) {
-                    totalMs += stats.getTotalTimeInForeground();
-                }
-            }
-
-            double totalMinutes = totalMs / 60000.0;
-            promise.resolve(totalMinutes);
-        } catch (Exception e) {
-            promise.reject("USAGE_ERROR", e.getMessage());
+    /** Foreground minutes for the calendar day starting at startOfDayMillis.
+     *  Used by the midnight settler to score The Veil for the day it settles
+     *  (not "today"). */
+    @ReactMethod
+    public void getScrollingTimeForDay(double startOfDayMillis, Promise promise) {
+        try {
+            if (!hasUsageAccess()) { promise.resolve(-1.0); return; }
+            long start = (long) startOfDayMillis;
+            long end = Math.min(start + DAY_MS, System.currentTimeMillis());
+            if (end <= start) { promise.resolve(-1.0); return; }
+            promise.resolve(foregroundMinutes(start, end));
+        } catch (Exception ex) {
+            promise.reject("USAGE_ERROR", ex.getMessage());
         }
     }
 
     @ReactMethod
     public void hasPermission(Promise promise) {
-        try {
-            UsageStatsManager usm =
-                (UsageStatsManager) reactContext.getSystemService(Context.USAGE_STATS_SERVICE);
-            if (usm == null) {
-                promise.resolve(false);
-                return;
-            }
-            long now = System.currentTimeMillis();
-            long oneHourAgo = now - 3600000L;
-            Map<String, UsageStats> stats =
-                usm.queryAndAggregateUsageStats(oneHourAgo, now);
-            promise.resolve(stats != null);
-        } catch (SecurityException e) {
-            promise.resolve(false);
-        } catch (Exception e) {
-            promise.resolve(false);
-        }
+        promise.resolve(hasUsageAccess());
     }
 
     @ReactMethod

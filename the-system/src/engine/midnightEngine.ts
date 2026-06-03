@@ -6,6 +6,8 @@ import {
   getHero,
   getSystemState,
   setSystemState,
+  get180DayConsistencyRate,
+  updateHero,
 } from '../db/queries';
 import { failDiscipline, completeDiscipline } from './xpEngine';
 import {
@@ -102,8 +104,10 @@ async function settlePresenceDiscipline(date: string, canCheckPresence: boolean)
   if (log && (log.completed || log.failed)) return;
 
   if (canCheckPresence) {
-    const minutesToday = await UsageStatsModule.getScrollingTimeToday();
-    if (minutesToday >= 0 && minutesToday <= 30) {
+    // Score The Veil against the usage of the DAY being settled, not "today".
+    const startOfDay = parseISO(date).getTime();
+    const minutes = await UsageStatsModule.getScrollingTimeForDay(startOfDay);
+    if (minutes >= 0 && minutes <= 30) {
       // Confirmed under the limit — the trial is passed.
       await completeDiscipline(presence.id, date);
       return;
@@ -141,18 +145,18 @@ async function checkWeeklyMilestone(): Promise<void> {
 
   const startDate = parseISO(hero.journey_start_date);
   const now = new Date();
-  const daysElapsed = differenceInCalendarDays(now, startDate);
-  const weekNumber = Math.floor(daysElapsed / 7) + 1;
+  const dayNumber = differenceInCalendarDays(now, startDate) + 1; // Day 1 = start day
 
-  if (weekNumber > 24) return;
-
-  if (weekNumber === 25 && !hero.journey_complete) {
+  // The journey is a full 180 days — Final Judgement fires on Day 180.
+  if (dayNumber >= 180 && !hero.journey_complete) {
     await checkFinalJudgement();
   }
 }
 
 async function checkFinalJudgement(): Promise<void> {
-  const { get180DayConsistencyRate, updateHero } = await import('../db/queries');
   const rate = await get180DayConsistencyRate();
+  // Stash the rate so the Final Judgement screen can render the verdict, then
+  // mark the journey complete (this also flags the screen to show once).
+  await setSystemState('final_consistency_rate', String(Math.round(rate * 100)));
   await updateHero({ journey_complete: 1 });
 }

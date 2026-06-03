@@ -30,7 +30,8 @@ export type CosmeticType =
   | 'crown'
   | 'title'
   | 'background'
-  | 'accessory';
+  | 'accessory'
+  | 'aura';
 
 export type NotificationCategory =
   | 'SILENCE'

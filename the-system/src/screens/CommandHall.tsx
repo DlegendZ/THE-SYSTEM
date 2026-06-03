@@ -21,6 +21,7 @@ import AvatarOrbit from '../components/avatar/AvatarOrbit';
 import SystemBackground from '../components/fx/SystemBackground';
 import AmbientEmbers from '../components/fx/AmbientEmbers';
 import { getRandomQuote } from '../data/quotes';
+import { getSystemState, setSystemState } from '../db/queries';
 import Glyph from '../components/icons/Glyph';
 import { FONTS } from '../theme/typography';
 
@@ -80,7 +81,21 @@ function PresenceWidget({ theme }: { theme: any }) {
     const id = setInterval(fetch, 5 * 60 * 1000);
     return () => clearInterval(id);
   }, []);
-  if (minutes < 0) return null;
+  if (minutes < 0) {
+    // No UsageStats permission yet — offer to grant it so The Veil can track.
+    return (
+      <TouchableOpacity
+        style={[styles.presenceGrant, { borderColor: theme.accent + '50' }]}
+        onPress={() => { UsageStatsModule.openUsageAccessSettings().catch(() => {}); }}
+        activeOpacity={0.8}
+      >
+        <CornerBrackets color={theme.accent + '50'} length={8} />
+        <Text style={[styles.presenceGrantTxt, { color: theme.accent }]}>
+          Grant social media access — track The Veil
+        </Text>
+      </TouchableOpacity>
+    );
+  }
   return <PresenceBar minutes={minutes} theme={theme} />;
 }
 
@@ -92,7 +107,7 @@ function PresenceBar({ minutes, theme }: { minutes: number; theme: any }) {
   return (
     <View style={styles.presenceWrap}>
       <View style={styles.presenceRow}>
-        <Text style={[styles.presenceLabel, { color: theme.textSecondary }]}>Screen time</Text>
+        <Text style={[styles.presenceLabel, { color: theme.textSecondary }]}>Social media</Text>
         <View style={styles.presenceTimeRow}>
           <Text style={[styles.presenceTime, { color: barColor }]}>{Math.round(minutes)}m</Text>
           <Glyph name={overLimit ? 'up' : 'check'} color={barColor} size={12} />
@@ -148,6 +163,20 @@ export default function CommandHall() {
     glowLoop.start();
     return () => glowLoop.stop();
   }, [glowAnim]);
+
+  // Show the Final Judgement once, when the 24-week journey completes (the
+  // midnight engine sets journey_complete + stashes the consistency rate).
+  React.useEffect(() => {
+    if (hero?.journey_complete !== 1) return;
+    (async () => {
+      const rate = await getSystemState('final_consistency_rate');
+      const seen = await getSystemState('final_judgement_seen');
+      if (rate !== null && seen !== '1') {
+        await setSystemState('final_judgement_seen', '1');
+        navigation.navigate('FinalJudgement');
+      }
+    })();
+  }, [hero?.journey_complete, navigation]);
 
   React.useEffect(() => {
     if (!pendingMandate) return;
@@ -555,6 +584,20 @@ const styles = StyleSheet.create({
   presenceWrap: {
     paddingHorizontal: 14,
     marginBottom: 4,
+  },
+  presenceGrant: {
+    marginHorizontal: 14,
+    marginBottom: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    alignItems: 'center',
+    position: 'relative',
+  },
+  presenceGrantTxt: {
+    fontSize: 10,
+    letterSpacing: 0.5,
+    fontFamily: FONTS.bold,
   },
   presenceRow: {
     flexDirection: 'row',

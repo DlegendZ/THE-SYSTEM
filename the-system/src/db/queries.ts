@@ -188,6 +188,13 @@ export async function getEquippedCosmetics(): Promise<Cosmetic[]> {
   );
 }
 
+export async function findCosmetic(type: string, name: string): Promise<Cosmetic | null> {
+  return getDb().getFirstAsync<Cosmetic>(
+    'SELECT * FROM cosmetics WHERE type = ? AND name = ? LIMIT 1',
+    [type, name]
+  );
+}
+
 export async function addCosmetic(
   type: string,
   tier: number,
@@ -218,10 +225,13 @@ export async function getWeekCompletionRate(
   journeyStartDate: string,
   weekNumber: number
 ): Promise<number> {
+  // 24 nodes span the full 180-day journey → 7.5 days each (rounded per node so
+  // spans tile the days with no gaps/overlap).
+  const SPAN = 180 / 24;
   const start = new Date(journeyStartDate);
-  start.setDate(start.getDate() + (weekNumber - 1) * 7);
-  const end = new Date(start);
-  end.setDate(end.getDate() + 7);
+  start.setDate(start.getDate() + Math.round((weekNumber - 1) * SPAN));
+  const end = new Date(journeyStartDate);
+  end.setDate(end.getDate() + Math.round(weekNumber * SPAN));
 
   const startStr = start.toISOString().slice(0, 10);
   const endStr = end.toISOString().slice(0, 10);

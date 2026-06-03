@@ -11,4 +11,5 @@ export type RootStackParamList = {
   Settings: undefined;
   ShieldOverlay: undefined;
   SRankCutscene: undefined;
+  FinalJudgement: undefined;
 };

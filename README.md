@@ -16,38 +16,54 @@ on the device. No account, no server, no cloud.
 
 ## What it does
 
-- **Disciplines** — Your daily quests across eight life domains (RISE, REST, NOURISH,
-  SILENCE, FORGE, KNOWLEDGE, PRESENCE, RITUAL). Each has a difficulty, an XP gain for
-  completion and an XP loss for failure. You can use the defaults or add custom ones.
-- **XP & Levels** — Completing disciplines grants XP and raises your global level.
-  Missing them costs XP. A **level-up splash** fires when you cross a threshold.
-- **Ranks (E → S)** — Hitting level milestones promotes your hunter rank. Each rank
-  re-themes the whole app (color aura escalates) and triggers a **rank promotion
-  splash**; reaching **S-Rank** plays a full cutscene.
-- **Your star** — At awakening you **select your star**: **Antares** (red supergiant —
-  relentless), **Polaris** (the fixed north — steady), or **Altair** (swift eagle star).
-  Your star is your avatar, and it visibly evolves with your rank: an E-rank star is a
-  dim ember; by S-rank it pulses/spins with a glow halo, ring, orbiting motes, and a
-  full corona. The star also drives your notification banner.
-- **Mandates** — Bronze/Silver/Gold loot chests granted for milestones. Open them to
-  reveal cosmetic loot (weapons, armor, crowns, titles, backgrounds, accessories).
-- **Shield** — A no-admin focus session that locks you into a deep-work overlay with
-  an escalating rank aura. Helps you protect SILENCE/FORGE time.
-- **Midnight engine** — At local midnight the day rolls over: unmet disciplines are
-  scored, streaks update, and the next day's quests reset.
+- **Disciplines (trials)** — Your daily quests across eight life domains (RISE, REST,
+  NOURISH, SILENCE, FORGE, KNOWLEDGE, PRESENCE, RITUAL). Each has a difficulty, an XP
+  gain for completion and an XP loss for failure. Add your own custom ones too.
+  **The Veil** (PRESENCE) is auto-tracked: it scores your **Instagram + TikTok** time
+  for the day (under 30 min passes) via Android Usage Access.
+- **XP & Levels** — Completing trials grants XP and raises your global level; failures
+  cost XP (floored at 0). A **level-up splash** fires when you cross a threshold; a
+  rank ascension is shown on the same splash, and reaching **S-Rank** plays a full
+  cutscene. Daily history shows **net** XP (gains − losses).
+- **Ranks (E → S)** — Level milestones promote your hunter rank; each rank re-themes
+  the whole app (the color aura escalates).
+- **Attributes** — Four attributes (Willpower, Strength, Vitality, Knowledge) level up
+  on their own, earned by completing the trials mapped to each. Derived from your log
+  history, so they always match what you actually did.
+- **Your star** — At awakening you **select your star**: **Antares** (relentless),
+  **Polaris** (steady), or **Altair** (swift). It's your avatar and evolves with your
+  rank — a dim E-rank ember up to an S-rank star with halo, ring, orbiting motes, and a
+  full corona. It also drives your notification banner.
+- **The 180-day journey** — One run is 180 days. The Ascension path maps it as 24
+  stages; on **Day 180** a **Final Judgement** screen delivers your verdict based on
+  your overall consistency.
+- **Mandates** — Bronze/Silver/Gold loot chests, granted on level-up or by **petition**
+  (one free chest a week). Opening one reveals loot that **persists** — weapons, armor,
+  crowns, accessories, titles, **auras** (recolor your embers/glow) and **backgrounds**
+  (recolor the app), equipped from the Mirror. No duplicates.
+- **Silence Protocol & relapse** — SILENCE tracks a "days clean" streak. Breaking it is
+  a hard reset: XP/level/rank zeroed and history wiped (your name + star and the relapse
+  record stay). The fall day is locked ("Fallen") and your fresh **Day 1 starts
+  tomorrow**.
+- **Shield** — A focus session that keeps the screen awake; leaving the app before the
+  timer ends "breaches" the fortress. Accountability for deep-work time.
+- **Settlement engine** — On each app launch, any days elapsed while you were away are
+  settled: unmet trials auto-fail, The Veil is auto-scored against that day's social
+  usage, and the silence streak advances.
 - **Native rich notifications** — Scheduled reminders render as Android BigPicture
-  notifications with your class avatar banner and large icon, plus interactive
-  actions. Exact-alarm scheduling with an Android 14 fallback.
+  notifications with your class avatar banner, plus interactive actions, configurable
+  interval and quiet hours. Exact-alarm scheduling with an Android 14 fallback.
+- **Backup** — Export/Import your whole save as JSON (Settings → Data).
 
 ### Main screens
 
 | Tab | Purpose |
 |-----|---------|
-| **Command** | Today's disciplines — log completions and failures |
-| **Ascend** | Rank/level progression, the path to S-Rank |
-| **Mirror** | Your star avatar, equipped cosmetics, mood state |
-| **Codex** | Lore, discipline reference, unlock catalogue |
-| **Archive** | History and stats of past performance |
+| **Command** | Today's trials — log completions; screen-time widget; mandate chest/petition |
+| **Ascend** | The 24-stage path across the 180-day journey, per-stage completion |
+| **Mirror** | Star avatar + mood, equipment, attributes, titles, auras, backgrounds |
+| **Codex** | Discipline reference — add / enable / disable / delete trials |
+| **Archive** | History, per-trial heatmaps, streaks, net-XP timeline |
 
 ---
 
@@ -58,7 +74,7 @@ on the device. No account, no server, no cloud.
 - **Zustand** state, **expo-sqlite** persistence
 - **react-native-reanimated** + **react-native-svg** for FX (ambient embers, grid
   glow, radial aura, the SVG star avatars and constellation tab icons)
-- Custom native Android modules (rich notifications, usage stats, shield)
+- Custom native Android modules (rich notifications, usage stats)
 - **Lora** serif applied as the single typeface app-wide
 
 ---
@@ -137,6 +153,13 @@ project's debug keystore, so it installs on any phone without extra signing setu
    cd the-system/android
    ./gradlew assembleRelease
    ```
+   Or, with a phone plugged in, build **and** install the same release APK in one
+   command (from the `the-system` folder):
+   ```powershell
+   npx expo run:android --variant release
+   ```
+   Either way produces the **release** variant `app-release.apk` (JS bundled in, runs
+   standalone — no Metro needed).
 2. The APK lands at:
    ```
    the-system/android/app/build/outputs/apk/release/app-release.apk
@@ -198,6 +221,7 @@ data**. Typical recovery flow after updating a buggy build:
 | `POST_NOTIFICATIONS` | Show discipline reminders and milestone alerts |
 | `SCHEDULE_EXACT_ALARM` / `USE_EXACT_ALARM` | Fire reminders at the exact scheduled time |
 | `RECEIVE_BOOT_COMPLETED` | Re-arm scheduled notifications after a reboot |
+| **Usage Access** (`PACKAGE_USAGE_STATS`) | Auto-track Instagram + TikTok time for **The Veil**. Special access — granted from Settings → Permissions (opens the system screen), not a normal runtime prompt. Optional; without it The Veil just fails until done manually. |
 
 ---
 

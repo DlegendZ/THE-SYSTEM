@@ -20,6 +20,7 @@ import LevelUpSplash from '../screens/LevelUpSplash';
 import Settings from '../screens/Settings';
 import ShieldOverlay from '../screens/ShieldOverlay';
 import SRankCutscene from '../screens/SRankCutscene';
+import FinalJudgement from '../screens/FinalJudgement';
 
 const Stack = createStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator();
@@ -152,9 +153,14 @@ function MainTabs() {
       detachInactiveScreens={false}
       screenOptions={{
         headerShown: false,
-        animation: 'fade',
+        // Instant tab switches — screens are pre-mounted (lazy:false), so the
+        // fade transition only added perceived lag.
+        animation: 'none',
         sceneStyle: { backgroundColor: theme.background },
         lazy: false,
+        // Freeze off-screen tabs so their always-on FX loops don't burn CPU in
+        // the background, keeping switches snappy.
+        freezeOnBlur: true,
         tabBarStyle: {
           backgroundColor: theme.primary,
           borderTopColor: theme.accent + '40',
@@ -278,6 +284,11 @@ export default function AppNavigator() {
               name="SRankCutscene"
               component={SRankCutscene}
               options={{ presentation: 'transparentModal', cardStyle: { backgroundColor: '#000000' } }}
+            />
+            <Stack.Screen
+              name="FinalJudgement"
+              component={FinalJudgement}
+              options={{ presentation: 'transparentModal', cardStyle: { backgroundColor: 'transparent' } }}
             />
           </>
         )}
