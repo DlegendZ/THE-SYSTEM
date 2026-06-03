@@ -8,6 +8,7 @@ import {
   getLogsForDate,
   getSilenceStreak,
   getPendingMandate,
+  getCosmetics,
   getSystemState,
   setSystemState,
   importData as dbImportData,
@@ -16,7 +17,6 @@ import {
 import {
   completeDiscipline as xpComplete,
   failDiscipline as xpFail,
-  triggerRelapse as xpRelapse,
 } from '../engine/xpEngine';
 import { openCurrentMandate, requestManualMandate } from '../engine/mandateEngine';
 import { getThemeForRank } from '../theme/rankThemes';
@@ -30,6 +30,7 @@ import type {
   DisciplineLog,
   SilenceStreak,
   Mandate,
+  Cosmetic,
   HeroClass,
   Rank,
 } from '../types';
@@ -43,6 +44,7 @@ interface SystemState {
   disciplines: Discipline[];
   todayLogs: DisciplineLog[];
   silenceStreak: SilenceStreak | null;
+  cosmetics: Cosmetic[];
   currentTheme: RankTheme;
   pendingMandate: Mandate | null;
   onboardingComplete: boolean;
@@ -69,6 +71,7 @@ export const useSystemStore = create<SystemState>((set, get) => ({
   disciplines: [],
   todayLogs: [],
   silenceStreak: null,
+  cosmetics: [],
   currentTheme: getThemeForRank('E'),
   pendingMandate: null,
   onboardingComplete: false,
@@ -103,6 +106,7 @@ export const useSystemStore = create<SystemState>((set, get) => ({
     const todayLogs = await getLogsForDate(today());
     const silenceStreak = await getSilenceStreak();
     const pendingMandate = await getPendingMandate();
+    const cosmetics = await getCosmetics();
 
     set({
       hero,
@@ -110,6 +114,7 @@ export const useSystemStore = create<SystemState>((set, get) => ({
       todayLogs,
       silenceStreak,
       pendingMandate,
+      cosmetics,
       currentTheme: getThemeForRank((hero?.rank as Rank) ?? 'E'),
     });
   },
@@ -141,9 +146,9 @@ export const useSystemStore = create<SystemState>((set, get) => ({
   },
 
   triggerRelapse: async () => {
-    await xpRelapse(today());
-    await get().refresh();
-    await get().syncNotifications();
+    // Breaking the Silence Protocol is total: wipe everything and drop back to
+    // the Awakening flow, exactly like a manual reset. No partial state kept.
+    await get().resetJourney();
   },
 
   openMandate: async () => {
@@ -224,6 +229,7 @@ export const useSystemStore = create<SystemState>((set, get) => ({
       disciplines: [],
       todayLogs: [],
       silenceStreak: null,
+      cosmetics: [],
       pendingMandate: null,
       onboardingComplete: false,
       currentTheme: getThemeForRank('E'),

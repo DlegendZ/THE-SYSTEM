@@ -9,6 +9,8 @@ jest.mock('../../src/store/useSystemStore', () => ({
     },
     todayLogs: [],
     disciplines: [],
+    cosmetics: [],
+    silenceStreak: null,
     currentTheme: {
       background: '#1a1a1a', primary: '#2a2a2a', accent: '#666', text: '#aaa',
       textSecondary: '#777', borderStyle: 'cracked_stone', auraColor: null,

@@ -188,6 +188,19 @@ export async function getEquippedCosmetics(): Promise<Cosmetic[]> {
   );
 }
 
+export async function addCosmetic(
+  type: string,
+  tier: number,
+  name: string
+): Promise<number> {
+  const result = await getDb().runAsync(
+    `INSERT INTO cosmetics (type, tier, name, unlocked, equipped, unlocked_at)
+     VALUES (?, ?, ?, 1, 0, ?)`,
+    [type, tier, name, new Date().toISOString()]
+  );
+  return result.lastInsertRowId;
+}
+
 export async function unlockCosmetic(id: number): Promise<void> {
   await getDb().runAsync(
     'UPDATE cosmetics SET unlocked = 1, unlocked_at = ? WHERE id = ?',

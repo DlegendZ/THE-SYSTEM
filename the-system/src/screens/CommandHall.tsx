@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  View, Text, ScrollView, StyleSheet, TouchableOpacity, Animated, Dimensions,
+  View, Text, ScrollView, StyleSheet, TouchableOpacity, Animated, Dimensions, Alert,
 } from 'react-native';
 import Svg, { Polygon, Line, Rect } from 'react-native-svg';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -112,7 +112,7 @@ export default function CommandHall() {
   const insets = useSafeAreaInsets();
   const {
     hero, disciplines, todayLogs, silenceStreak, pendingMandate, currentTheme: theme,
-    completeDiscipline, failDiscipline, triggerRelapse,
+    completeDiscipline, failDiscipline, triggerRelapse, requestMandate,
   } = useSystemStore();
 
   const floatAnim = React.useRef(new Animated.Value(0)).current;
@@ -171,23 +171,30 @@ export default function CommandHall() {
 
   const handleComplete = async (id: number) => {
     const result = await completeDiscipline(id);
-    if (result.levelUp) {
-      if (result.levelUp.rankChanged && result.levelUp.newRank === 'S') {
-        navigation.navigate('LevelUpSplash', {
-          level: result.levelUp.newLevel,
-          xpGained: result.xpGained,
-          rankChanged: result.levelUp.rankChanged,
-          newRank: result.levelUp.newRank,
-        });
-      } else {
-        navigation.navigate('LevelUpSplash', {
-          level: result.levelUp.newLevel,
-          xpGained: result.xpGained,
-          rankChanged: result.levelUp.rankChanged,
-          newRank: result.levelUp.newRank,
-        });
-      }
+    if (!result.levelUp) return;
+    // Reaching S-Rank plays the full transcendence cutscene; every other
+    // level-up / rank-up shows the level splash.
+    if (result.levelUp.rankChanged && result.levelUp.newRank === 'S') {
+      navigation.navigate('SRankCutscene');
+    } else {
+      navigation.navigate('LevelUpSplash', {
+        level: result.levelUp.newLevel,
+        xpGained: result.xpGained,
+        rankChanged: result.levelUp.rankChanged,
+        newRank: result.levelUp.newRank,
+      });
     }
+  };
+
+  const handlePetition = async () => {
+    const granted = await requestMandate();
+    if (!granted) {
+      Alert.alert(
+        'THE SYSTEM',
+        'No mandate to grant. Petition again 7 days after your last one.'
+      );
+    }
+    // On success the chest appears via the refreshed pendingMandate.
   };
 
   const handleFail = async (id: number, code: string) => {
@@ -287,8 +294,8 @@ export default function CommandHall() {
           </View>
         )}
 
-        {/* Mandate chest */}
-        {pendingMandate && (
+        {/* Mandate chest — pending chest to open, or petition for a new one */}
+        {pendingMandate ? (
           <Animated.View style={[styles.chestFloat, { transform: [{ translateY: floatAnim }] }]}>
             <TouchableOpacity
               onPress={() => navigation.navigate('MandateReveal')}
@@ -299,6 +306,17 @@ export default function CommandHall() {
               <Text style={[styles.chestTier, { color: theme.accent }]}>{pendingMandate.tier}</Text>
             </TouchableOpacity>
           </Animated.View>
+        ) : (
+          <View style={styles.chestFloat}>
+            <TouchableOpacity
+              onPress={handlePetition}
+              style={[styles.chestBtn, { borderColor: theme.accent + '50', backgroundColor: theme.accent + '0d' }]}
+            >
+              <CornerBrackets color={theme.accent + '50'} thickness={1.5} length={8} />
+              <Glyph name="chest" color={theme.accent + '80'} size={28} />
+              <Text style={[styles.chestTier, { color: theme.accent + 'aa' }]}>PETITION</Text>
+            </TouchableOpacity>
+          </View>
         )}
       </View>
 
@@ -372,7 +390,7 @@ export default function CommandHall() {
         visible={silenceConfirm}
         destructive
         title="SILENCE PROTOCOL BROKEN"
-        message="This will reset ALL progress. XP to 0. Level to 1. Rank to E. All streaks reset. There is no undo."
+        message="This wipes EVERYTHING — XP, level, rank, streaks, history, mandates, cosmetics — and returns you to the Awakening. There is no undo."
         cancelText="CANCEL"
         confirmText="I HAVE FALLEN"
         onCancel={() => setSilenceConfirm(false)}

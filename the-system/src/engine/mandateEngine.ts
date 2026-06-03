@@ -4,6 +4,9 @@ import {
   createMandate,
   getSystemState,
   setSystemState,
+  addCosmetic,
+  getEquippedCosmetics,
+  equipCosmetic,
 } from '../db/queries';
 import type { MandateTier } from '../types';
 import { differenceInDays, parseISO } from 'date-fns';
@@ -75,7 +78,7 @@ export const LOOT_TABLES: Record<string, LootEntry[]> = {
     { type: 'title', weight: 0.2, items: TITLES_RARE },
   ],
   GOLD: [
-    { type: 'equipment_tier', weight: 0.4, items: ['Weapon Tier Unlock', 'Armor Tier Unlock'] },
+    { type: 'equipment_tier', weight: 0.4, items: ['Weapon Tier Unlock', 'Armor Tier Unlock', 'Crown of Ascension'] },
     { type: 'aura_variant', weight: 0.4, items: ['Crimson Aura', 'Frost Aura', 'Shadow Aura', 'Divine Aura'] },
     { type: 'title', weight: 0.2, items: TITLES_LEGENDARY },
   ],
@@ -101,11 +104,66 @@ export function rollLoot(tier: string): LootResult {
   };
 }
 
+/** Equippable slot types — these auto-equip when their tier beats the current. */
+const EQUIP_SLOTS = ['weapon', 'armor', 'crown', 'accessory'];
+
+export interface MappedCosmetic {
+  type: 'weapon' | 'armor' | 'crown' | 'title' | 'background' | 'accessory';
+  tier: number;
+  name: string;
+}
+
+/**
+ * Translate a rolled loot result into a persistable cosmetic. Returns null for
+ * purely flavour loot (scrolls are motivational quotes, nothing to keep).
+ */
+export function lootToCosmetic(loot: LootResult): MappedCosmetic | null {
+  switch (loot.type) {
+    case 'scroll':
+      return null;
+    case 'title':
+      return { type: 'title', tier: 1, name: loot.name };
+    case 'accessory':
+      return { type: 'accessory', tier: 1, name: loot.name };
+    case 'aura_variant':
+      return { type: 'accessory', tier: 2, name: loot.name };
+    case 'background':
+      return { type: 'background', tier: 1, name: loot.name };
+    case 'cosmetic_variant':
+      if (loot.name.startsWith('Armor')) return { type: 'armor', tier: 2, name: loot.name };
+      return { type: 'weapon', tier: 2, name: loot.name };
+    case 'equipment_tier':
+      if (loot.name.startsWith('Armor')) return { type: 'armor', tier: 3, name: loot.name };
+      if (loot.name.startsWith('Crown')) return { type: 'crown', tier: 3, name: loot.name };
+      return { type: 'weapon', tier: 3, name: loot.name };
+    default:
+      return { type: 'accessory', tier: 1, name: loot.name };
+  }
+}
+
+/** Persist a rolled loot as an unlocked cosmetic, auto-equipping slot items. */
+async function persistLoot(loot: LootResult): Promise<number> {
+  const mapped = lootToCosmetic(loot);
+  if (!mapped) return 0; // flavour-only (scroll)
+
+  const id = await addCosmetic(mapped.type, mapped.tier, mapped.name);
+
+  if (EQUIP_SLOTS.includes(mapped.type)) {
+    const equipped = await getEquippedCosmetics();
+    const current = equipped.find((c) => c.type === mapped.type);
+    if (!current || mapped.tier >= current.tier) {
+      await equipCosmetic(id, mapped.type);
+    }
+  }
+  return id;
+}
+
 export async function openCurrentMandate(): Promise<LootResult | null> {
   const mandate = await getPendingMandate();
   if (!mandate) return null;
   const loot = rollLoot(mandate.tier);
-  await openMandateQuery(mandate.id, loot.type, 0);
+  const lootId = await persistLoot(loot);
+  await openMandateQuery(mandate.id, loot.type, lootId);
   return loot;
 }
 

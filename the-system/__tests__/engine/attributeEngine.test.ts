@@ -64,10 +64,17 @@ describe('computeAttributes', () => {
     expect(attrs.Knowledge.xp).toBe(0);
   });
 
-  it('ignores losses (negative/zero deltas)', () => {
+  it('nets gains against losses', () => {
     const logs = [log(1, 60), log(1, -35), log(1, 0)];
     const attrs = computeAttributes(logs, disciplines);
-    expect(attrs.Strength.xp).toBe(60);
+    expect(attrs.Strength.xp).toBe(25); // 60 - 35
+  });
+
+  it('floors an attribute at 0 when losses exceed gains', () => {
+    const logs = [log(3, 25), log(3, -15), log(3, -15)]; // KNOWLEDGE: 25-30 = -5
+    const attrs = computeAttributes(logs, disciplines);
+    expect(attrs.Knowledge.xp).toBe(0);
+    expect(attrs.Knowledge.level).toBe(1);
   });
 
   it('routes custom disciplines to Willpower', () => {

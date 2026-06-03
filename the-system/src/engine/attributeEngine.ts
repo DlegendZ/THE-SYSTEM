@@ -7,9 +7,9 @@ import type { DisciplineLog, Discipline } from '../types';
  * a single source of truth (the same logs that drive global XP and history).
  * This avoids the desync class of bug that plagued the global counters.
  *
- * Each attribute accumulates the POSITIVE xp_delta of every completed log whose
- * discipline maps to it. Losses do not lower an attribute (attributes only ever
- * climb); the global XP pool still absorbs the penalty.
+ * Each attribute accumulates the NET xp_delta (gains minus losses) of every log
+ * whose discipline maps to it, floored at 0 so an attribute never goes negative.
+ * Failing a trial therefore drags its attribute back down, same as the global pool.
  */
 
 export type Attribute = 'Willpower' | 'Strength' | 'Vitality' | 'Knowledge';
@@ -78,10 +78,10 @@ export function computeAttributes(
   };
 
   for (const log of logs) {
-    if (log.xp_delta <= 0) continue; // gains only
+    if (!log.xp_delta) continue; // skip no-ops
     const code = codeById.get(log.discipline_id);
     if (!code) continue;
-    xpByAttr[attributeForCode(code)] += log.xp_delta;
+    xpByAttr[attributeForCode(code)] += log.xp_delta; // net: gains and losses
   }
 
   return {

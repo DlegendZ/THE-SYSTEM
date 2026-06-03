@@ -5,12 +5,12 @@ import {
 import Svg, { Polygon, Line, Rect, Circle } from 'react-native-svg';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSystemStore } from '../store/useSystemStore';
-import { getCosmetics, getAllLogs } from '../db/queries';
+import { getAllLogs } from '../db/queries';
 import { RANK_TITLES } from '../engine/xpConstants';
 import {
   computeAttributes, ATTRIBUTES, type Attribute, type AttributeProgress,
 } from '../engine/attributeEngine';
-import type { Cosmetic, Rank, HeroClass as HeroClassType, DisciplineLog } from '../types';
+import type { Rank, HeroClass as HeroClassType, DisciplineLog } from '../types';
 import { STAR_LABELS } from '../types';
 import AvatarDisplay from '../components/avatar/AvatarDisplay';
 import SectionDivider from '../components/ui/SectionDivider';
@@ -99,13 +99,8 @@ const equipStyles = StyleSheet.create({
 
 export default function Mirror() {
   const insets = useSafeAreaInsets();
-  const { hero, todayLogs, disciplines, silenceStreak, currentTheme: theme } = useSystemStore();
-  const [cosmetics, setCosmetics] = useState<Cosmetic[]>([]);
+  const { hero, todayLogs, disciplines, silenceStreak, cosmetics, currentTheme: theme } = useSystemStore();
   const [allLogs, setAllLogs] = useState<DisciplineLog[]>([]);
-
-  useEffect(() => {
-    getCosmetics().then(setCosmetics);
-  }, []);
 
   // Reload attribute source logs whenever today's logs change (i.e. after the
   // user completes/fails a trial and the store refreshes).
@@ -127,6 +122,7 @@ export default function Mirror() {
   const equippedWeapon = cosmetics.find((c) => c.type === 'weapon' && c.equipped);
   const equippedArmor = cosmetics.find((c) => c.type === 'armor' && c.equipped);
   const equippedCrown = cosmetics.find((c) => c.type === 'crown' && c.equipped);
+  const equippedAccessory = cosmetics.find((c) => c.type === 'accessory' && c.equipped);
   const weaponTier = (equippedWeapon?.tier ?? 1) as 1 | 2 | 3 | 4 | 5;
 
   const completedToday = todayLogs.filter((l) => l.completed).length;
@@ -135,6 +131,7 @@ export default function Mirror() {
   const mood = computeMood(completionRate);
 
   const titles = cosmetics.filter((c) => c.type === 'title' && c.unlocked);
+  const backgrounds = cosmetics.filter((c) => c.type === 'background' && c.unlocked);
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background, paddingTop: insets.top }]}>
@@ -184,6 +181,7 @@ export default function Mirror() {
           <EquipSlot label="Weapon" name={equippedWeapon?.name ?? 'None'} tier={equippedWeapon?.tier ?? 1} color={theme.accent} />
           <EquipSlot label="Armor" name={equippedArmor?.name ?? 'None'} tier={equippedArmor?.tier ?? 1} color={theme.accent} />
           <EquipSlot label="Crown" name={equippedCrown?.name ?? 'None'} tier={equippedCrown?.tier ?? 1} color={theme.accent} />
+          <EquipSlot label="Charm" name={equippedAccessory?.name ?? 'None'} tier={equippedAccessory?.tier ?? 1} color={theme.accent} />
         </View>
 
         {/* Stats */}
@@ -209,6 +207,21 @@ export default function Mirror() {
                 <View key={t.id} style={[styles.titleChip, { borderColor: theme.accent + '70', backgroundColor: theme.accent + '10' }]}>
                   <CornerBrackets color={theme.accent + '70'} length={8} />
                   <Text style={[styles.titleTxt, { color: theme.accent }]}>{t.name}</Text>
+                </View>
+              ))}
+            </ScrollView>
+          </>
+        )}
+
+        {/* Backgrounds */}
+        {backgrounds.length > 0 && (
+          <>
+            <SectionDivider title="Backgrounds" color={theme.accent} />
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.titlesRow}>
+              {backgrounds.map((b) => (
+                <View key={b.id} style={[styles.titleChip, { borderColor: theme.accent + '70', backgroundColor: theme.accent + '10' }]}>
+                  <CornerBrackets color={theme.accent + '70'} length={8} />
+                  <Text style={[styles.titleTxt, { color: theme.accent }]}>{b.name}</Text>
                 </View>
               ))}
             </ScrollView>

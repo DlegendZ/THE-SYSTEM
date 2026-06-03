@@ -1,0 +1,75 @@
+import { initDatabase, getDb } from '../../src/db/database';
+import { lootToCosmetic, openCurrentMandate, type LootResult } from '../../src/engine/mandateEngine';
+import { createMandate, getCosmetics, getEquippedCosmetics, addCosmetic, equipCosmetic } from '../../src/db/queries';
+
+describe('lootToCosmetic', () => {
+  const map = (type: string, name: string) => lootToCosmetic({ type, name } as LootResult);
+
+  it('drops scrolls (flavour only)', () => {
+    expect(map('scroll', 'Some quote')).toBeNull();
+  });
+  it('maps titles', () => {
+    expect(map('title', 'Iron Will')).toEqual({ type: 'title', tier: 1, name: 'Iron Will' });
+  });
+  it('maps weapon vs armor skins from cosmetic_variant', () => {
+    expect(map('cosmetic_variant', 'Weapon Skin: Crimson')).toEqual({ type: 'weapon', tier: 2, name: 'Weapon Skin: Crimson' });
+    expect(map('cosmetic_variant', 'Armor Skin: Shadow')).toEqual({ type: 'armor', tier: 2, name: 'Armor Skin: Shadow' });
+  });
+  it('maps equipment_tier to tier 3 weapon/armor/crown', () => {
+    expect(map('equipment_tier', 'Weapon Tier Unlock')?.tier).toBe(3);
+    expect(map('equipment_tier', 'Armor Tier Unlock')?.type).toBe('armor');
+    expect(map('equipment_tier', 'Crown of Ascension')?.type).toBe('crown');
+  });
+  it('maps aura_variant and accessory to accessory', () => {
+    expect(map('aura_variant', 'Frost Aura')?.type).toBe('accessory');
+    expect(map('accessory', 'War Paint')?.type).toBe('accessory');
+  });
+});
+
+describe('openCurrentMandate persists loot', () => {
+  beforeAll(async () => { await initDatabase(); });
+  beforeEach(async () => {
+    const db = getDb();
+    await db.runAsync('DELETE FROM cosmetics');
+    await db.runAsync('DELETE FROM mandates');
+  });
+
+  it('saves an unlocked cosmetic and records its id on the mandate (non-scroll)', async () => {
+    await createMandate('SILVER'); // SILVER never rolls scroll → always persistable
+    const loot = await openCurrentMandate();
+    expect(loot).not.toBeNull();
+
+    const cosmetics = await getCosmetics();
+    expect(cosmetics.length).toBe(1);
+    expect(cosmetics[0].unlocked).toBe(1);
+
+    const mandate = await getDb().getFirstAsync<{ loot_id: number; opened: number }>(
+      'SELECT loot_id, opened FROM mandates LIMIT 1'
+    );
+    expect(mandate?.opened).toBe(1);
+    expect(mandate?.loot_id).toBe(cosmetics[0].id); // no longer hard-coded 0
+  });
+
+  it('auto-equips the looted weapon over a lower-tier equipped one', async () => {
+    // pre-equip a tier-1 weapon
+    const lowId = await addCosmetic('weapon', 1, 'Rusty Blade');
+    await equipCosmetic(lowId, 'weapon');
+
+    // Force SILVER → cosmetic_variant (weight 0.5, first entry) → item index 0
+    // = 'Weapon Skin: Crimson' → weapon tier 2.
+    const spy = jest.spyOn(Math, 'random').mockReturnValue(0);
+    try {
+      await createMandate('SILVER');
+      await openCurrentMandate();
+    } finally {
+      spy.mockRestore();
+    }
+
+    const equipped = await getEquippedCosmetics();
+    const weapon = equipped.find((c) => c.type === 'weapon');
+    expect(weapon?.tier).toBe(2);
+    expect(weapon?.name).toBe('Weapon Skin: Crimson');
+    // only one weapon may be equipped at a time
+    expect(equipped.filter((c) => c.type === 'weapon')).toHaveLength(1);
+  });
+});
